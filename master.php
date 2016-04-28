@@ -46,7 +46,7 @@
         </style>
         <!--show-->
     </head>
-    <body onload="connect()">
+    <body onload="setTimeout('connect()',4000)">
             <div id="main">
                 <!-- Main Content -->
                 <h1>Projet-X : server</h1>
@@ -57,8 +57,9 @@
                         <button id="hangupButton" disabled="disabled" onclick="hangup()">Fin Connection</button>
                         <div id="iam">Not yet connected...</div>
                         <br />
-	                <strong>Connected users:</strong>
-                        <div id="ConnectedClients"></div>		
+	                <strong>Connected user :</strong>
+                        <div id="ConnectedClients"></div>
+                        <br>
                         <strong>Waiting users:</strong>
                         <div id="otherClients"></div>
                     </div>
@@ -72,7 +73,12 @@
                         </div>
                     </div>
                 </div>
-
+                <!--                   
+                <div id="receiveMessageArea">
+                   Received Messages:
+                   <div id="conversation"></div>
+                </div>
+                --!>
             </div>
        <!--show-->
     </body>

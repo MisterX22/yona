@@ -68,7 +68,13 @@ else
                   Disabling(enableId2)
               }
       }
-      window.onload = function () {toggleValue("demoContainer", "name", "name", "submitname");};
+      window.onload = function () {
+          toggleValue("demoContainer", "name", "name", "submitname");
+          //var nb = Math.floor(Math.random() * 51);
+          //setTimeout("location.reload(true);", 5000);
+          //connect("ProjectIonaRobot") ; 
+          //window.alert(nb);
+      };
     </script>
 
     <script type="text/javascript">
@@ -85,7 +91,7 @@ else
             position:relative;
           }
           #connectControls {
-            float:left;
+            /*float:left;*/
             width:500px;
             text-align:center;
             border: 2px solid black;
@@ -123,12 +129,12 @@ else
           }
           #callAcceptButton{
               text-align:center;
-              font-size: 250%;
+              font-size: 100%;
               border: 2px solid black;
           }
           #callRejectButton{
               text-align:center;
-              font-size: 250%;
+              font-size: 100%;
               border: 2px solid black;
           }
     </style>
@@ -149,34 +155,47 @@ else
            <div id="iam">Not yet connected...</div>
            <br>
            <h2 id="nbClients"></h2>
+           <h2 id="conversation"></h2>
            <button id="disconnectButton" onclick="disconnect()">I have finished</button>              
+        </div>
+        <br>
+<!--
+        <div id="sendQuestions">
+          <form name="question" id="question" method="post"/>Your Question:<br>
+            <textarea name="yourquestion" id="yourquestion"></textarea>
+            <input name="submitquestion" id="submitquestion" type="submit" value="Send">
+          </form>
+        </div>
+--!>
+        <br>
+        <div id="connectedUsers">
+          <form name="byebye" id="byebye" method="post" action="index.php?action=D&name=<?php echo $name?>">
+             <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect"
+                           onClick="document.getElementById("name").value='';">
+          </form>
+<!--
+          <h2> Connected Users</h2>
+          <?php
+            $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
+            mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
+            $sql = "SELECT Name FROM Demo WHERE Connected ='1'";   
+            $req = mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+            while($data = mysql_fetch_assoc($req)) 
+            { 
+               echo $data['Name']."<br>" ; 
+            } 
+            mysql_close();
+          ?>
+--!>
         </div>
         <!-- Note... this demo should be updated to remove video references -->
         <div id="videos">
             <video id="callerAudio"></video>
             <div id="acceptCallBox">
                 <div id="acceptCallLabel"></div>
-                <button id="callAcceptButton" >Accept</button> <button id="callRejectButton">Reject</button>
+                <br><br>
+                <button id="callAcceptButton" >Accept</button> or <button id="callRejectButton">Reject</button>
             </div>
-         </div>
-
-         <div id="connectedUsers">
-           <form name="byebye" id="byebye" method="post" action="index.php?action=D&name=<?php echo $name?>">
-              <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect"
-                            onClick="document.getElementById("name").value='';">
-           </form>
-           <h2> Connected Users</h2>
-           <?php
-             $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
-             mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-             $sql = "SELECT Name FROM Demo WHERE Connected ='1'";   
-             $req = mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-             while($data = mysql_fetch_assoc($req)) 
-             { 
-                echo $data['Name']."<br>" ; 
-             } 
-             mysql_close();
-           ?>   
          </div>
     </div>
   </div>

@@ -40,8 +40,10 @@ function connect(name) {
     console.log("Initializing.");    
     easyrtc.enableVideo(false);
     easyrtc.enableVideoReceive(false);
+    easyrtc.enableDataChannels(true);
     easyrtc.setUsername(name);
     easyrtc.setRoomOccupantListener(convertListToButtons);
+    easyrtc.setPeerListener(addToConversation);
     easyrtc.initMediaSource(
         function(){        // success callback
             easyrtc.connect("easyrtc.audioOnly", loginSuccess, loginFailure);
@@ -51,7 +53,6 @@ function connect(name) {
         }  // failure callback
         );
 }
-
 
 function terminatePage() {
     easyrtc.disconnect();
@@ -65,8 +66,8 @@ function hangup() {
 
 function clearConnectList() {
     nbClient = document.getElementById('nbClients');
-    nbClient.innerHTML = "0 Questions";
-
+    nbClient.innerHTML = "";
+    document.getElementById("conversation").innerHTML = "" ;
 }
 
 
@@ -76,14 +77,21 @@ function convertListToButtons (roomName, occupants, isPrimary) {
     var TabName=[] ;
     for(var easyrtcid in occupants) {
         nbCl++;
-	TabName.push(easyrtc.idToName(easyrtcid) + " / " + easyrtc.getConnectionCount() ) ;
+	TabName.push(easyrtc.idToName(easyrtcid)) ;
     }
-    TabName[0]= easyrtc.idToName(selfEasyrtcid) + " / " + easyrtc.getConnectionCount() ;
+    TabName[0]= easyrtc.idToName(selfEasyrtcid) ;
     nbClient = document.getElementById('nbClients');
     nbClient.innerHTML = nbCl.toString() + " Questions<br>";
     for (var i=0;i<nbCl;i++) {
 	nbClient.innerHTML += TabName[i] + "<br>" ;
     }
+}
+
+function addToConversation(who, msgType, content) {
+  // Escape html special characters, then add linefeeds.
+  content = content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  content = content.replace(/\n/g, "<br />");
+  document.getElementById("conversation").innerHTML = content ;
 }
 
 
@@ -124,6 +132,12 @@ function disconnect() {
     clearConnectList();
 }
 
+function sendStuffWS(otherEasyrtcid, message) {
+  if(message.replace(/\s/g, "").length === 0) { // Don"t send just whitespace
+    return;
+  }
+  easyrtc.sendDataWS(otherEasyrtcid, "message", message);
+}
 
 easyrtc.setStreamAcceptor( function(easyrtcid, stream) {
     var audio = document.getElementById('callerAudio');
@@ -142,7 +156,7 @@ easyrtc.setAcceptChecker(function(easyrtcid, callback) {
         document.getElementById('acceptCallLabel').textContent = "Drop current call and accept new from " + easyrtc.idToName(easyrtcid) + " ?";
     }
     else {
-        document.getElementById('acceptCallLabel').textContent = "Accept incoming call from " + easyrtc.idToName(easyrtcid) + " ?";
+	document.getElementById('acceptCallLabel').textContent = "You can now speak !!";
     }
     var acceptTheCall = function(wasAccepted) {
         document.getElementById('acceptCallBox').style.display = "none";
@@ -153,8 +167,10 @@ easyrtc.setAcceptChecker(function(easyrtcid, callback) {
     };
     document.getElementById("callAcceptButton").onclick = function() {
         acceptTheCall(true);
+	document.getElementById("iam").innerHTML = "You are now speaking";
     };
     document.getElementById("callRejectButton").onclick =function() {
         acceptTheCall(false);
+	disconnect();
     };
 } );
