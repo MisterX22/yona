@@ -33,6 +33,17 @@ else
         mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
         mysql_close(); 
     }
+
+// list conference
+$db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
+mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
+$sql = "show tables" ;
+$req = mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+//while($table = mysql_fetch_array($req)) { // go through each row that was returned in $result
+//    echo($table[0] . "<BR>");    // print the table that was returned on that row.
+//}
+
+mysql_close(); 
 ?>
    
 <!DOCTYPE html>
@@ -70,13 +81,10 @@ else
       }
       window.onload = function () {
           toggleValue("demoContainer", "name", "name", "submitname");
-          //var nb = Math.floor(Math.random() * 51);
-          //setTimeout("location.reload(true);", 5000);
-          //connect("ProjectIonaRobot") ; 
-          //window.alert(nb);
       };
     </script>
 
+<!--
     <script type="text/javascript">
       var auto_refresh = setInterval(
         function ()
@@ -84,7 +92,8 @@ else
            $('#ConnectedUsers').load('index.php').fadeIn("slow");
         }, 10000); // rafraichis toutes les 10000 millisecondes
     </script>
-
+--!>
+        
     <!-- Styles used within the demo -->
     <style type="text/css">
           #demoContainer {
