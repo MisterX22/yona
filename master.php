@@ -14,18 +14,24 @@ else
 // Table creation
         $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
         mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-        $sql = "CREATE TABLE $name (
-                    id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY, 
-                    name VARCHAR(30) NOT NULL,
+        $req = "SHOW TABLES LIKE '$name'" ;
+        $res = mysql_query($req) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+        if(mysql_num_rows($res) == 1)
+        {
+        }
+        else
+        {
+        $sql = "CREATE TABLE $name ( 
+                    name VARCHAR(30) NOT NULL PRIMARY KEY,
                     isconnected BOOLEAN,
                     rtcid VARCHAR(30),
                     waitformic BOOLEAN,
                     question VARCHAR(255),
-                    email VARCHAR(50),
-                    login TIMESTAMP,
-                    logout TIMESTAMP
+                    login DATETIME,
+                    logout DATETIME
                 )";   
         mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+        }
         mysql_close();  
     }
 ?>

@@ -1,19 +1,15 @@
 <?php 
 if(isset($_GET['action']))
-    $action=$_GET['action'] ;
-else
-    $action="";
-
-// Gestion de la deconnection
-if ($action=="D")
     {
-        $remove=$_GET['name'] ;
-        $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
-        mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-        $sql = "UPDATE Demo SET Connected='0' WHERE Name='$remove'";   
-        mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-        mysql_close();   
+    $action=$_GET['action'] ;
+    $conflist=$_GET['conflist'];
     }
+else
+    {
+    $action="";
+    $conflist="";
+    }
+    
 
 // Gestion de la connection
 if(isset($_POST['name']))
@@ -21,29 +17,35 @@ if(isset($_POST['name']))
 else
     $name="";
 
-if(empty($name))
+if(isset($_POST['conflist']))
+    $conflist=$_POST['conflist'];
+
+// Gestion de la deconnection
+if ($action=="D")
     {
-//Do nothing echo '<font color="red">Attention, name undefined !</font>';
-    }
-else
-    {
+        $remove=$_GET['name'] ;
         $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
         mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-        $sql = "INSERT INTO Demo(Name, Connected, Speak, Question) VALUES('$name','1','0','') ON DUPLICATE KEY UPDATE Name='$name', Connected='1'";   
+        $sql = "UPDATE ".$conflist." SET isconnected='0' , logout=now() WHERE name='$remove'";   
         mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-        mysql_close(); 
+        mysql_close();
+        $name="";
     }
 
-// list conference
-$db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
-mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-$sql = "show tables" ;
-$req = mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-//while($table = mysql_fetch_array($req)) { // go through each row that was returned in $result
-//    echo($table[0] . "<BR>");    // print the table that was returned on that row.
-//}
-
-mysql_close(); 
+if(empty($name))
+    {
+//Do nothing echo
+    }
+else
+    {        
+        $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
+        mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
+        $sql = "INSERT INTO ".$conflist."(name, isconnected, rtcid, waitformic, question,login, logout) 
+                                     VALUES('$name','1','','','',now(),'') 
+                                     ON DUPLICATE KEY UPDATE name='$name', isconnected='1' , login=now()";   
+        mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+        mysql_close(); 
+    } 
 ?>
    
 <!DOCTYPE html>
@@ -153,7 +155,22 @@ mysql_close();
   <div id="main">
     <h1>Project-X : client</h1>
     <form name="whoami" id="whoami" method="post" action="index.php"/>Name:<br>
-      <input type="text" name="name" id="name" value="<?php if (isset($_POST['name'])){echo $_POST['name'];} ?>"><br><br>
+      <input type="text" name="name" id="name" value="<?php if (isset($_POST['name'])){echo $_POST['name'];} ?>"><br>
+      <select name="conflist" id="conflist">
+<?php
+// list conference
+$db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
+mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
+$sql = "show tables" ;
+$req = mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+while($table = mysql_fetch_array($req)) {
+    //echo($table[0] . "<BR>");
+    echo "<option value='".$table[0]."'>".$table[0]."</option> " ;
+}
+mysql_close();        
+?>
+      </select>
+      <br><br>
       <input name="submitname" id="submitname" type="submit" value="Connect">
     </form>
     <br><br>
@@ -161,7 +178,7 @@ mysql_close();
        <div id="connectControls">
            <button id="connectButton" onclick="connect(document.getElementById('name').value)">Want to speak ?</button>
            <br>
-           <div id="iam">Not yet connected...</div>
+           <div id="iam">Not yet connected...</div><div id="rtcid"></div>
            <br>
            <h2 id="nbClients"></h2>
            <h2 id="conversation"></h2>
@@ -178,24 +195,24 @@ mysql_close();
 --!>
         <br>
         <div id="connectedUsers">
-          <form name="byebye" id="byebye" method="post" action="index.php?action=D&name=<?php echo $name?>">
+          <form name="byebye" id="byebye" method="post" action="index.php?action=D&name=<?php echo $name?>&conflist=<?php echo $conflist?>">
              <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect"
                            onClick="document.getElementById("name").value='';">
           </form>
-<!--
+
           <h2> Connected Users</h2>
           <?php
             $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
             mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-            $sql = "SELECT Name FROM Demo WHERE Connected ='1'";   
+            $sql = "SELECT name FROM ".$conflist." WHERE isconnected ='1'";   
             $req = mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
             while($data = mysql_fetch_assoc($req)) 
             { 
-               echo $data['Name']."<br>" ; 
+               echo $data['name']."<br>" ; 
             } 
             mysql_close();
           ?>
---!>
+
         </div>
         <!-- Note... this demo should be updated to remove video references -->
         <div id="videos">

@@ -115,6 +115,7 @@ function loginSuccess(easyrtcid) {
     enable("disconnectButton");
     selfEasyrtcid = easyrtcid;
     document.getElementById("iam").innerHTML = "Connected as "  + easyrtc.idToName(easyrtcid);
+    document.getElementById("rtcid").innerHTML = easyrtcid ;
 }
 
 
@@ -125,6 +126,7 @@ function loginFailure(errorCode, message) {
 
 function disconnect() {
     document.getElementById("iam").innerHTML = "logged out";
+    document.getElementById("rtcid").innerHTML = "" ;
     easyrtc.disconnect();
     console.log("disconnecting from server");
     enable("connectButton");
@@ -168,6 +170,7 @@ easyrtc.setAcceptChecker(function(easyrtcid, callback) {
     document.getElementById("callAcceptButton").onclick = function() {
         acceptTheCall(true);
 	document.getElementById("iam").innerHTML = "You are now speaking";
+	document.getElementById("rtcid").innerHTML = selfEasyrtcid ;	
     };
     document.getElementById("callRejectButton").onclick =function() {
         acceptTheCall(false);
