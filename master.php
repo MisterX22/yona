@@ -2,8 +2,8 @@
 // Gestion de la connection
 if(isset($_POST['name']))
     $name=$_POST['name'];
-else
-    $name="";
+//else
+//    $name=$_GET['name'];
 
 if(empty($name))
     {
@@ -18,6 +18,11 @@ else
         $res = mysql_query($req) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
         if(mysql_num_rows($res) == 1)
         {
+            if (isset($_POST['resetconf']))
+            {
+            $sql = "DELETE FROM `$name`";   
+            mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+            }
         }
         else
         {
@@ -34,6 +39,7 @@ else
         }
         mysql_close();  
     }
+
 ?>
 
 <!DOCTYPE html>
@@ -59,14 +65,14 @@ else
              if (document.getElementById(testId).value == "")
                 {
                     Hide(anId);
-                    Enabling(enableId1) ;
-                    Enabling(enableId2) ;
+                    //Enabling(enableId1) ;
+                    //Enabling(enableId2) ;
                 }
             else
                 {
                     Show(anId);
-                    Disabling(enableId1);
-                    Disabling(enableId2)
+                    //Disabling(enableId1);
+                    //Disabling(enableId2)
                 }
           }
           window.onload = function () {
@@ -81,13 +87,13 @@ else
             }
             #connectControls {
                 float:left;
-                width:250px;
-                text-align:center;
+                width:400px;
+                /*text-align:center;*/
                 border: 2px solid black;
             }
             #otherClients {
                 height:200px;
-                overflow-y:scroll;
+                overflow-y:auto;
             }
             #callerAudio {
                 /* display:none; */
@@ -111,21 +117,24 @@ else
     <body onload="setTimeout('connect()',4000)">
             <div id="main">
                 <!-- Main Content -->
-                <h1>Projet-X : server</h1>
+                <h1>Projet Yona <img src="micro.jpg" style ="float:left"> </h1>
                 <form name="createconf" id="createconf" method="post" action="master.php"/>Conf Name:<br>
-                <input type="text" name="name" id="name" value="<?php if (isset($_POST['name'])){echo $_POST['name'];} ?>"><br><br>
+                <!--<input type="text" name="name" id="name" value="<?php if (isset($_POST['name'])){echo $_POST['name'];} ?>"><br><br>-->
+                <input type="text" name="name" id="name" value="<?php echo $name;?>"><br><br>
                 <input name="submitname" id="submitname" type="submit" value="Connect">
+                <input name="resetconf" id="resetconf" type="submit" value="ResetConf">
                 </form>
                 <!--show-->
                 <div id="demoContainer">
                     <div id="connectControls">
-                        <button id="hangupButton" disabled="disabled" onclick="hangup()">Fin Connection</button>
-                        <div id="iam">Not yet connected...</div>
-                        <br />
-	                <strong>Connected user :</strong>
-                        <div id="ConnectedClients"></div>
+                        <center><button id="hangupButton" disabled="disabled" onclick="hangup()">Fin Connection</button></center>
+                        <center><div id="iam">Not yet connected...</div></center>
                         <br>
-                        <strong>Waiting users:</strong>
+                        <iframe frameborder=0 style="overflow: hidden; height: 400px; width: 400px;" SCROLLING=auto src="connected.php?conflist=<?php echo $name?>">
+                        </iframe>
+                        <br>
+                        <strong> <u>Waiting for Mic : </u></strong>
+                        <div id="ConnectedClients"></div>           
                         <div id="otherClients"></div>
                     </div>
 

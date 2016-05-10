@@ -46,7 +46,7 @@ function connect() {
     easyrtc.enableDataChannels(true);
     easyrtc.setRoomOccupantListener(convertListToButtons);
     easyrtc.setPeerListener(addToConversation);
-    easyrtc.setUsername("ProjectX");
+    easyrtc.setUsername("Yona");
     easyrtc.connect("easyrtc.audioOnly", loginSuccess, loginFailure);
 //    easyrtc.initMediaSource(
 //        function(){        // success callback
