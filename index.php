@@ -26,9 +26,11 @@ if(isset($_POST['submitquestion']))
     $yourquestion=$_POST['yourquestion'];
     $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
     mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
+    $thequestion=mysql_real_escape_string($yourquestion) ;
     $sql = "INSERT INTO ".$conflist."(name, isconnected, rtcid, waitformic, question,login, logout) 
-                                     VALUES('$name','1','','','$yourquestion',now(),'') 
-                                     ON DUPLICATE KEY UPDATE name='$name', isconnected='1' , question='$yourquestion' , login=now()";   
+                                     VALUES('$name','1','','','$thequestion', now(),'') 
+                                     ON DUPLICATE KEY UPDATE name='$name', isconnected='1' , 
+                                                             question='$thequestion' , login=now()";   
     mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
     mysql_close(); 
     }

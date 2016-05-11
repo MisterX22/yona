@@ -5,6 +5,9 @@ if(isset($_POST['name']))
 //else
 //    $name=$_GET['name'];
 
+if(isset($_POST['conflist']))
+    $name=$_POST['conflist'];
+
 if(empty($name))
     {
 //Do nothing echo '<font color="red">Attention, name undefined !</font>';
@@ -20,9 +23,19 @@ else
         {
             if (isset($_POST['resetconf']))
             {
-            $sql = "DELETE FROM `$name`";   
-            mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+              if(isset($_POST['conflist']))
+                 $conflist=$_POST['conflist'];
+              $sql = "DELETE FROM `$conflist`";   
+              mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
             }
+            if (isset($_POST['deleteconf']))
+            {
+              if(isset($_POST['conflist']))
+                 $conflist=$_POST['conflist'];
+              $sql = "DROP TABLE `$conflist`";   
+              mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+              $name = "";
+            } 
         }
         else
         {
@@ -118,19 +131,39 @@ else
             <div id="main">
                 <!-- Main Content -->
                 <h1>Projet Yona <img src="micro.jpg" style ="float:left"> </h1>
-                <form name="createconf" id="createconf" method="post" action="master.php"/>Conf Name:<br>
-                <!--<input type="text" name="name" id="name" value="<?php if (isset($_POST['name'])){echo $_POST['name'];} ?>"><br><br>-->
-                <input type="text" name="name" id="name" value="<?php echo $name;?>"><br><br>
-                <input name="submitname" id="submitname" type="submit" value="Connect">
-                <input name="resetconf" id="resetconf" type="submit" value="ResetConf">
+                <form name="conf" id="conf" method="post" action="master.php"/>
+                  <strong>Existing Conference : </strong><br>
+                  <select name="conflist" id="conflist">
+<?php
+// list conference
+$db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
+mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
+$sql = "show tables" ;
+$req = mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+while($table = mysql_fetch_array($req)) {
+    echo "<option value='".$table[0]."'>".$table[0]."</option> " ;
+}
+mysql_close();        
+?>
+                  </select>
+                  <input name="connectconf" id="connectconf" type="submit" value="ConnectConf">
+                  <input name="resetconf" id="resetconf" type="submit" value="ResetConf">
+                  <input name="deleteconf" id="deleteconf" type="submit" value="DeleteConf">
                 </form>
+                <form name="createconf" id="createconf" method="post" action="master.php"/>Conf Name:<br>
+                  <!--<input type="text" name="name" id="name" value="<?php if (isset($_POST['name'])){echo $_POST['name'];} ?>"><br><br>-->
+                  <input type="text" name="name" id="name" value="<?php echo $name;?>">
+                  <input name="submitname" id="submitname" type="submit" value="Create">
+                </form>
+                <br>
                 <!--show-->
                 <div id="demoContainer">
                     <div id="connectControls">
                         <center><button id="hangupButton" disabled="disabled" onclick="hangup()">Fin Connection</button></center>
                         <center><div id="iam">Not yet connected...</div></center>
                         <br>
-                        <iframe frameborder=0 style="overflow: hidden; height: 400px; width: 400px;" SCROLLING=auto src="connected.php?conflist=<?php echo $name?>">
+                        <iframe frameborder=0 style="overflow: hidden; height: 400px; width: 400px;"
+                                          SCROLLING=auto src="connected.php?conflist=<?php echo $name?>">
                         </iframe>
                         <br>
                         <strong> <u>Waiting for Mic : </u></strong>

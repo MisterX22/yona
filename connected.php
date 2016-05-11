@@ -23,6 +23,7 @@
       } 
       mysql_close();
     ?>
+   <br>
    <strong><u> Questions :</u></strong><br>
    <?php
       $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
