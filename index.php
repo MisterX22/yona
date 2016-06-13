@@ -16,7 +16,7 @@ if (isset($_POST['resetquestion']))
         $remove=$_GET['name'] ;
         $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
         mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-        $sql = "UPDATE ".$conflist." SET question='' WHERE name='$remove'";   
+        $sql = "UPDATE ".$conflist." SET question='', SET votenum=0 WHERE name='$remove'";   
         mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
         mysql_close();
     }
@@ -27,8 +27,8 @@ if(isset($_POST['submitquestion']))
     $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
     mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
     $thequestion=mysql_real_escape_string($yourquestion) ;
-    $sql = "INSERT INTO ".$conflist."(name, isconnected, rtcid, waitformic, question,login, logout) 
-                                     VALUES('$name','1','','','$thequestion', now(),'') 
+    $sql = "INSERT INTO ".$conflist."(name, isconnected, rtcid, waitformic, question,votefor,votenum,login, logout) 
+                                     VALUES('$name','1','','','$thequestion', '', '0',  now(),'') 
                                      ON DUPLICATE KEY UPDATE name='$name', isconnected='1' , 
                                                              question='$thequestion' , login=now()";   
     mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
@@ -71,8 +71,9 @@ else
     {        
         $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
         mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
+        $thename=mysql_real_escape_string($name) ;
         $sql = "INSERT INTO ".$conflist."(name, isconnected, rtcid, waitformic, question,login, logout) 
-                                     VALUES('$name','1','','','',now(),'') 
+                                     VALUES('$thename','1','','','',now(),'') 
                                      ON DUPLICATE KEY UPDATE name='$name', isconnected='1' , login=now()";   
         mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
         mysql_close(); 
@@ -98,7 +99,7 @@ else
       function Show (addr) {document.getElementById(addr).style.visibility = "visible";}
       function Disabling (addr) {document.getElementById(addr).disabled = "disabled"}
       function Enabling (addr) {document.getElementById(addr).disabled = ""}
-function toggleValue(anId, testId, enableId1, enableId2, enableId3) {
+      function toggleValue(anId, testId, enableId1, enableId2, enableId3) {
           if (document.getElementById(testId).value == "")
               {
                   Hide(anId);
@@ -183,8 +184,8 @@ function toggleValue(anId, testId, enableId1, enableId2, enableId3) {
     <form name="whoami" id="whoami" method="post" action="index.php"/>
       <strong>Configuration : </strong><br>
       Name: <?php echo "$name" ?>
-      <input type="text" name="name" id="name" value="<?php echo $name; ?>">
-      Conference : <?php echo "$conflist" ?>
+      <input type="text" name="name" id="name" maxlength="15" value="<?php echo $name; ?>">
+      <br>Conference : <?php echo "$conflist" ?>
       <select name="conflist" id="conflist">
 <?php
 // list conference
@@ -200,23 +201,12 @@ mysql_close();
       </select>
       <input name="submitname" id="submitname" type="submit" value="Connect">
     </form>
-    <br>
     <div id="demoContainer">
        <form name="byebye" id="byebye" method="post" action="index.php?action=D&name=<?php echo $name?>&conflist=<?php echo $conflist?>">
           <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect"
                         onClick="document.getElementById("name").value='';">
        </form>
        <br>
-       <div id="connectControls">
-           <button id="connectButton" onclick="connect(document.getElementById('name').value)">Want to speak ?</button>
-           <br>
-           <div id="iam">Not yet connected...</div><div id="rtcid"></div>
-           <br>
-           <h2 id="nbClients"></h2>
-           <h2 id="conversation"></h2>
-           <button id="disconnectButton" onclick="disconnect()">I have finished</button>              
-        </div>
-        <br>
         <div id="sendQuestions">
           <form name="question" id="question" method="post"  action="index.php?name=<?php echo $name?>&conflist=<?php echo $conflist?>" />Your Question:<br>
             <textarea rows="4" cols="50" name="yourquestion" id="yourquestion"><?php echo $yourquestion ;?></textarea><br>
@@ -224,9 +214,15 @@ mysql_close();
             <input name="resetquestion" id="resetquestion" type="submit"  value="Reset">
           </form>
         </div>
-        <br>
+       <div id="connectControls">
+           <button id="connectButton" onclick="connect(document.getElementById('name').value)">Micro request</button>
+           <div id="iam">Not yet connected...</div><div id="rtcid"></div>
+           <div id="nbClients"></div>
+           <div id="conversation"></div>
+           <button id="disconnectButton" onclick="disconnect()">Micro release</button>              
+        </div>
         <div id="connectedUsers">
-          <iframe style="overflow: hidden; height: 400px; width: 400px;" SCROLLING=auto src="connected.php?conflist=<?php echo $conflist?>">
+          <iframe style="overflow: hidden; height: 400px; width: 400px;" SCROLLING=auto src="connected.php?name=<?php echo $name?>&conflist=<?php echo $conflist?>">
           </iframe>
         </div>
         <!-- Note... this demo should be updated to remove video references -->

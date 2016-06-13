@@ -52,6 +52,8 @@ function connect(name) {
             easyrtc.showError(errorCode, errmesg);
         }  // failure callback
         );
+    connectButton = document.getElementById('connectButton');
+    connectButton.innerHTML = "Waiting for connection";
 }
 
 function terminatePage() {
@@ -81,7 +83,7 @@ function convertListToButtons (roomName, occupants, isPrimary) {
     }
     TabName[0]= easyrtc.idToName(selfEasyrtcid) ;
     nbClient = document.getElementById('nbClients');
-    nbClient.innerHTML = nbCl.toString() + " Questions<br>";
+    nbClient.innerHTML = nbCl.toString() + " pending request<br>";
     for (var i=0;i<nbCl;i++) {
 	nbClient.innerHTML += TabName[i] + "<br>" ;
     }
@@ -115,7 +117,9 @@ function loginSuccess(easyrtcid) {
     enable("disconnectButton");
     selfEasyrtcid = easyrtcid;
     document.getElementById("iam").innerHTML = "Connected as "  + easyrtc.idToName(easyrtcid);
-    document.getElementById("rtcid").innerHTML = easyrtcid ;
+    //document.getElementById("rtcid").innerHTML = easyrtcid ;
+    connectButton = document.getElementById('connectButton');
+    connectButton.innerHTML = "Connected";
 }
 
 
@@ -132,6 +136,8 @@ function disconnect() {
     enable("connectButton");
     disable("disconnectButton");
     clearConnectList();
+    connectButton = document.getElementById('connectButton');
+    connectButton.innerHTML = "Micro Request";
 }
 
 function sendStuffWS(otherEasyrtcid, message) {
@@ -170,7 +176,7 @@ easyrtc.setAcceptChecker(function(easyrtcid, callback) {
     document.getElementById("callAcceptButton").onclick = function() {
         acceptTheCall(true);
 	document.getElementById("iam").innerHTML = "You are now speaking";
-	document.getElementById("rtcid").innerHTML = selfEasyrtcid ;	
+	//document.getElementById("rtcid").innerHTML = selfEasyrtcid ;	
     };
     document.getElementById("callRejectButton").onclick =function() {
         acceptTheCall(false);

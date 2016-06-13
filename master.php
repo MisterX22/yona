@@ -45,6 +45,8 @@ else
                     rtcid VARCHAR(30),
                     waitformic BOOLEAN,
                     question VARCHAR(255),
+                    votefor VARCHAR(30),
+                    votenum INT,
                     login DATETIME,
                     logout DATETIME
                 )";   
@@ -105,7 +107,7 @@ else
                 border: 2px solid black;
             }
             #otherClients {
-                height:200px;
+                height:50px;
                 overflow-y:auto;
             }
             #callerAudio {
@@ -162,13 +164,12 @@ mysql_close();
                         <center><button id="hangupButton" disabled="disabled" onclick="hangup()">Fin Connection</button></center>
                         <center><div id="iam">Not yet connected...</div></center>
                         <br>
-                        <iframe frameborder=0 style="overflow: hidden; height: 400px; width: 400px;"
-                                          SCROLLING=auto src="connected.php?conflist=<?php echo $name?>">
-                        </iframe>
-                        <br>
                         <strong> <u>Waiting for Mic : </u></strong>
                         <div id="ConnectedClients"></div>           
                         <div id="otherClients"></div>
+                        <iframe frameborder=0 style="overflow: hidden; height: 400px; width: 400px;"
+                                          SCROLLING=auto src="connected.php?conflist=<?php echo $name?>">
+                        </iframe>
                     </div>
 
                     <!-- Note... this demo should be updated to remove video references -->
