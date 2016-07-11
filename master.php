@@ -15,34 +15,35 @@ if(empty($name))
 else
     {
 // Table creation
-        $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
-        mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
+        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
         $req = "SHOW TABLES LIKE '$name'" ;
-        $res = mysql_query($req) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-        if(mysql_num_rows($res) == 1)
+        $res = mysqli_query($db,$req) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+        if(mysqli_num_rows($res) == 1)
         {
             if (isset($_POST['resetconf']))
             {
               if(isset($_POST['conflist']))
                  $conflist=$_POST['conflist'];
               $sql = "DELETE FROM `$conflist`";   
-              mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+              mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
             }
             if (isset($_POST['deleteconf']))
             {
               if(isset($_POST['conflist']))
                  $conflist=$_POST['conflist'];
               $sql = "DROP TABLE `$conflist`";   
-              mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+              mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
               $name = "";
             } 
         }
         else
         {
         $sql = "CREATE TABLE $name ( 
-                    name VARCHAR(30) NOT NULL PRIMARY KEY,
+                    name VARCHAR(30),
                     isconnected BOOLEAN,
                     rtcid VARCHAR(30),
+                    macAddr VARCHAR(30) NOT NULL PRIMARY KEY,
                     waitformic BOOLEAN,
                     question VARCHAR(255),
                     votefor VARCHAR(30),
@@ -50,9 +51,9 @@ else
                     login DATETIME,
                     logout DATETIME
                 )";   
-        mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
+        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
         }
-        mysql_close();  
+        mysqli_close($db);  
     }
 
 ?>
@@ -138,14 +139,14 @@ else
                   <select name="conflist" id="conflist">
 <?php
 // list conference
-$db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
-mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
+$db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
 $sql = "show tables" ;
-$req = mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-while($table = mysql_fetch_array($req)) {
+$req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+while($table = mysqli_fetch_array($req)) {
     echo "<option value='".$table[0]."'>".$table[0]."</option> " ;
 }
-mysql_close();        
+mysqli_close($db);        
 ?>
                   </select>
                   <input name="connectconf" id="connectconf" type="submit" value="ConnectConf">
@@ -168,7 +169,7 @@ mysql_close();
                         <div id="ConnectedClients"></div>           
                         <div id="otherClients"></div>
                         <iframe frameborder=0 style="overflow: hidden; height: 400px; width: 400px;"
-                                          SCROLLING=auto src="connected.php?conflist=<?php echo $name?>">
+                                          SCROLLING=auto src="connected_master.php?conflist=<?php echo $name?>">
                         </iframe>
                     </div>
 

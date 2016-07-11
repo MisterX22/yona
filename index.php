@@ -4,6 +4,12 @@ $action=$_GET['action'] ;
 $conflist=$_GET['conflist'];
 $name=$_GET['name'];
 
+$ipclient=$_SERVER['REMOTE_ADDR'];
+$macAddr=false;
+$arp=`arp -a $ipclient`;
+$lines=explode(" ", $arp);
+$macAddr=$lines[3];
+
 // Gestion de la connection
 if(isset($_POST['name']))
     $name=$_POST['name'];
@@ -13,52 +19,52 @@ if(isset($_POST['conflist']))
 
 if (isset($_POST['resetquestion']))
     {
-        $remove=$_GET['name'] ;
-        $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
-        mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-        $sql = "UPDATE ".$conflist." SET question='', SET votenum=0 WHERE name='$remove'";   
-        mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-        mysql_close();
+        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+        $sql = "UPDATE ".$conflist." SET question='', votenum=0 WHERE macAddr='$macAddr'";   
+        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+        mysqli_close($db);
     }
 
 if(isset($_POST['submitquestion']))    
     {
     $yourquestion=$_POST['yourquestion'];
-    $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
-    mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-    $thequestion=mysql_real_escape_string($yourquestion) ;
-    $sql = "INSERT INTO ".$conflist."(name, isconnected, rtcid, waitformic, question,votefor,votenum,login, logout) 
-                                     VALUES('$name','1','','','$thequestion', '', '0',  now(),'') 
+    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+    $thequestion=mysqli_real_escape_string($db,$yourquestion) ;
+    $sql = "INSERT INTO ".$conflist."(name, isconnected, rtcid, macAddr, waitformic, question,votefor,votenum,login, logout) 
+                                     VALUES('$name','1','','$macAddr','','$thequestion', '', '0',  now(),'') 
                                      ON DUPLICATE KEY UPDATE name='$name', isconnected='1' , 
                                                              question='$thequestion' , login=now()";   
-    mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-    mysql_close(); 
+    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+    mysqli_close($db); 
     }
 else
     {
         if (isset($name) AND isset($conflist))
         {
-        $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
-        mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-        $sql = "SELECT question FROM ".$conflist." WHERE name ='$name'";   
-        $req = mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-        while($madata = mysql_fetch_assoc($req)) 
+        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+        $sql = "SELECT question FROM ".$conflist." WHERE macAddr = '$macAddr'";   
+        $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+        while($madata = mysqli_fetch_assoc($req)) 
             { 
             $yourquestion = $madata['question'];
             }
-        mysql_close();
+        mysqli_close($db);
         }
     }
 
 // Gestion de la deconnection
 if ($action=="D")
     {
-        $remove=$_GET['name'] ;
-        $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
-        mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-        $sql = "UPDATE ".$conflist." SET isconnected='0' , logout=now() WHERE name='$remove'";   
-        mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-        mysql_close();
+        //$remove=$_GET['name'];
+        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+        $sql = "UPDATE ".$conflist." SET isconnected='0' , logout=now() WHERE macAddr='$macAddr'";   
+        //$sql = "UPDATE ".$conflist." SET isconnected='0' , logout=now() WHERE name='$remove'";   
+        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+        mysqli_close($db);
         $name="";
     }
 
@@ -69,14 +75,14 @@ if(empty($name))
     }
 else
     {        
-        $db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
-        mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-        $thename=mysql_real_escape_string($name) ;
-        $sql = "INSERT INTO ".$conflist."(name, isconnected, rtcid, waitformic, question,login, logout) 
-                                     VALUES('$thename','1','','','',now(),'') 
+        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+        $thename=mysqli_real_escape_string($db,$name) ;
+        $sql = "INSERT INTO ".$conflist."(name, isconnected, rtcid, macAddr,waitformic, question,login, logout) 
+                                     VALUES('$thename','1','','$macAddr','','',now(),'') 
                                      ON DUPLICATE KEY UPDATE name='$name', isconnected='1' , login=now()";   
-        mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-        mysql_close(); 
+        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+        mysqli_close($db); 
     } 
 ?>
    
@@ -187,17 +193,17 @@ else
       <input type="text" name="name" id="name" maxlength="15" value="<?php echo $name; ?>">
       <br>Conference : <?php echo "$conflist" ?>
       <select name="conflist" id="conflist">
-<?php
-// list conference
-$db = mysql_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysql_error());
-mysql_select_db('projectX',$db)  or die('Erreur de selection '.mysql_error());
-$sql = "show tables" ;
-$req = mysql_query($sql) or die('Erreur SQL !'.$sql.'<br>'.mysql_error());
-while($table = mysql_fetch_array($req)) {
-    echo "<option value='".$table[0]."'>".$table[0]."</option> " ;
-}
-mysql_close();        
-?>
+      <?php
+         // list conference
+         $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+         mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+         $sql = "show tables" ;
+         $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+         while($table = mysqli_fetch_array($req)) {
+             echo "<option value='".$table[0]."'>".$table[0]."</option> " ;
+         }
+         mysqli_close($db);        
+      ?>
       </select>
       <input name="submitname" id="submitname" type="submit" value="Connect">
     </form>
