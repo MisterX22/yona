@@ -1,42 +1,58 @@
 <?php 
-  $conflist=$_GET['conflist'];
 
-  $ipclient=$_SERVER['REMOTE_ADDR'];
-  $macAddr=false;
-  $arp=`arp -a $ipclient`;
-  $lines=explode(" ", $arp);
-  $macAddr=$lines[3];
+// Retrieving required inputs
+$conflist=$_GET['conflist'];
+
+$ipclient=$_SERVER['REMOTE_ADDR'];
+$macAddr=false;
+$arp=`arp -a $ipclient`;
+$lines=explode(" ", $arp);
+$macAddr=$lines[3];
 
 
+// Retrieving vote
 if(isset($_GET['votefor']))
-{
+  {
     $votefor=$_GET['votefor'];
     $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
     mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-    $sql = "INSERT INTO ".$conflist."(name,votefor)
-                                     VALUES('$name','$votefor')
-                                     ON DUPLICATE KEY UPDATE name='$name', votefor='$votefor'";
-
+    $sql = "UPDATE ".$conflist." SET votefor='$votefor' WHERE macAddr='$macAddr'";
     mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
     mysqli_close($db);
-}
+  }
 
-if(isset($_GET['name']))
-{
-    $name=$_GET['name'];
-    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-    $sql = "UPDATE ".$conflist." SET isconnected='1' WHERE macAddr='$macAddr'";
-    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-    mysqli_close($db);
-}
-else
+// Updating connection status list
+if(isset($_GET['action']))
+{ 
+$action=$_GET['action'];
+if ( $action == "D")
 {
     $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
     mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
     $sql = "UPDATE ".$conflist." SET isconnected='0' WHERE macAddr='$macAddr'";
     mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
     mysqli_close($db);
+}
+}
+else
+{
+if(isset($_GET['name']))
+  {
+    $name=$_GET['name'];
+    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+    $sql = "UPDATE ".$conflist." SET isconnected='1' WHERE macAddr='$macAddr'";
+    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+    mysqli_close($db);
+  }
+else
+  {
+    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+    $sql = "UPDATE ".$conflist." SET isconnected='0' WHERE macAddr='$macAddr'";
+    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+    mysqli_close($db);
+  }
 }
 ?>
 
@@ -64,11 +80,11 @@ else
    <?php
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT votefor FROM ".$conflist." WHERE macAddr = '$macAddr'";   
+      $sql = "SELECT votefor, macAddr FROM ".$conflist." WHERE macAddr = '$macAddr'";   
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-      while($data = mysqli_fetch_assoc($req)) 
+      while($madata = mysqli_fetch_assoc($req)) 
       { 
-        $myvote = $data['votefor'] ;
+        $myvote = $madata['votefor'] ;
       } 
       mysqli_close($db);
    ?>
@@ -86,15 +102,13 @@ else
         if ( $myvote == $macAddr2 ) {
            echo "<strong>";
         }
-        echo "<a href='connected.php?conflist=".$conflist."&votefor=".$macAddr2."&name=".$name."'>".$data['question']."(".$macAddr2 ; 
+        echo "<a href='connected.php?conflist=".$conflist."&votefor=".$macAddr2."&name=".$name."'>".$data['question']."(".$data['name'] ; 
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE votefor = '".$macAddr2."'";
         $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
         $row = mysqli_fetch_array($req2);
         $count = $row[0];
         echo ",".$count." votes)</a><br>";
-        $sql3 = "INSERT INTO ".$conflist."(votenum)
-                                     VALUES('$count')
-                                     ON DUPLICATE KEY UPDATE votenum='$count'";
+        $sql3 = "UPDATE ".$conflist." SET votenum='$count' WHERE macAddr='$macAddr2'";
         mysqli_query($db,$sql3) or die('Erreur SQL !'.$sql3.'<br>'.mysqli_error($db));
         if ( $myvote == $macAddr2 ) {
            echo "</strong>";
