@@ -1,61 +1,57 @@
 <?php 
-// Gestion de la connection
+// Retrieving all required inputs
 if(isset($_POST['name']))
-    $name=$_POST['name'];
-//else
-//    $name=$_GET['name'];
+  $name=$_POST['name'];
 
 if(isset($_POST['conflist']))
-    $name=$_POST['conflist'];
+  $name=$_POST['conflist'];
 
+// Managing table if required
 if(empty($name))
-    {
-//Do nothing echo '<font color="red">Attention, name undefined !</font>';
-    }
+  {
+  }
 else
-    {
-// Table creation
-        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-        $req = "SHOW TABLES LIKE '$name'" ;
-        $res = mysqli_query($db,$req) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-        if(mysqli_num_rows($res) == 1)
-        {
-            if (isset($_POST['resetconf']))
-            {
-              if(isset($_POST['conflist']))
-                 $conflist=$_POST['conflist'];
-              $sql = "DELETE FROM `$conflist`";   
-              mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-            }
-            if (isset($_POST['deleteconf']))
-            {
-              if(isset($_POST['conflist']))
-                 $conflist=$_POST['conflist'];
-              $sql = "DROP TABLE `$conflist`";   
-              mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-              $name = "";
-            } 
-        }
-        else
-        {
+  {
+    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+    $req = "SHOW TABLES LIKE '$name'" ;
+    $res = mysqli_query($db,$req) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+    if(mysqli_num_rows($res) == 1)
+      {
+        if (isset($_POST['resetconf']))
+          {
+            if(isset($_POST['conflist']))
+              $conflist=$_POST['conflist'];
+            $sql = "DELETE FROM `$conflist`";   
+            mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+          }
+        if (isset($_POST['deleteconf']))
+          {
+            if(isset($_POST['conflist']))
+               $conflist=$_POST['conflist'];
+            $sql = "DROP TABLE `$conflist`";   
+            mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+            $name = "";
+          } 
+      }
+    else
+      {
         $sql = "CREATE TABLE $name ( 
-                    name VARCHAR(30),
-                    isconnected BOOLEAN,
-                    rtcid VARCHAR(30),
-                    macAddr VARCHAR(30) NOT NULL PRIMARY KEY,
-                    waitformic BOOLEAN,
-                    question VARCHAR(255),
-                    votefor VARCHAR(30),
-                    votenum INT,
-                    login DATETIME,
-                    logout DATETIME
-                )";   
+                  name VARCHAR(30),
+                  isconnected BOOLEAN,
+                  rtcid VARCHAR(30),
+                  macAddr VARCHAR(30) NOT NULL PRIMARY KEY,
+                  waitformic BOOLEAN,
+                  question VARCHAR(255),
+                  votefor VARCHAR(30),
+                  votenum INT,
+                  login DATETIME,
+                  logout DATETIME
+              )";   
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-        }
-        mysqli_close($db);  
+      }
+      mysqli_close($db);  
     }
-
 ?>
 
 <!DOCTYPE html>
@@ -155,7 +151,7 @@ mysqli_close($db);
                 </form>
                 <form name="createconf" id="createconf" method="post" action="master.php"/>Conf Name:<br>
                   <!--<input type="text" name="name" id="name" value="<?php if (isset($_POST['name'])){echo $_POST['name'];} ?>"><br><br>-->
-                  <input type="text" name="name" id="name" value="<?php echo $name;?>">
+                  <input type="text" name="name" id="name" value="<?php if (isset($name)) echo $name;?>">
                   <input name="submitname" id="submitname" type="submit" value="Create">
                 </form>
                 <br>
@@ -169,7 +165,7 @@ mysqli_close($db);
                         <div id="ConnectedClients"></div>           
                         <div id="otherClients"></div>
                         <iframe frameborder=0 style="overflow: hidden; height: 400px; width: 400px;"
-                                          SCROLLING=auto src="connected_master.php?conflist=<?php echo $name?>">
+                                          SCROLLING=auto src="connected_master.php?conflist=<?php if (isset($name)) echo $name?>">
                         </iframe>
                     </div>
 

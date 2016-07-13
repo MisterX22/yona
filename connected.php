@@ -23,35 +23,36 @@ if(isset($_GET['votefor']))
 
 // Updating connection status list
 if(isset($_GET['action']))
-{ 
-$action=$_GET['action'];
-if ( $action == "D")
-{
-    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-    $sql = "UPDATE ".$conflist." SET isconnected='0' WHERE macAddr='$macAddr'";
-    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-    mysqli_close($db);
-}
-}
-else
-{
-if(isset($_GET['name']))
-  {
-    $name=$_GET['name'];
-    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-    $sql = "UPDATE ".$conflist." SET isconnected='1' WHERE macAddr='$macAddr'";
-    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-    mysqli_close($db);
-  }
-else
-  {
-    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-    $sql = "UPDATE ".$conflist." SET isconnected='0' WHERE macAddr='$macAddr'";
-    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-    mysqli_close($db);
+  { 
+    $action=$_GET['action'];
+    if(isset($_GET['name']))  $name=$_GET['name'];
+    if ( $action == "D")
+      {
+        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+        $sql = "UPDATE ".$conflist." SET isconnected='0' WHERE macAddr='$macAddr'";
+        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+        mysqli_close($db);
+      }
+    else
+    {
+      if(isset($_GET['name']))
+      {
+        $name=$_GET['name'];
+        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+        $sql = "UPDATE ".$conflist." SET isconnected='1' WHERE macAddr='$macAddr'";
+        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+        mysqli_close($db);
+      }
+    else
+      {
+        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+        $sql = "UPDATE ".$conflist." SET isconnected='0' WHERE macAddr='$macAddr'";
+        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+        mysqli_close($db);
+      }
   }
 }
 ?>
@@ -102,7 +103,7 @@ else
         if ( $myvote == $macAddr2 ) {
            echo "<strong>";
         }
-        echo "<a href='connected.php?conflist=".$conflist."&votefor=".$macAddr2."&name=".$name."'>".$data['question']."(".$data['name'] ; 
+        echo "<a href='connected.php?conflist=".$conflist."&votefor=".$macAddr2."&name=".$name."&action='>".$data['question']."(".$data['name'] ; 
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE votefor = '".$macAddr2."'";
         $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
         $row = mysqli_fetch_array($req2);
