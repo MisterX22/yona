@@ -28,7 +28,7 @@ if (isset($_POST['resetquestion']))
   {
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "UPDATE ".$conflist." SET question='', votenum=0 WHERE macAddr='$macAddr'";   
+      $sql = "UPDATE ".$conflist." SET question='', votenum=0, questime=curtime()  WHERE macAddr='$macAddr'";   
       mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       mysqli_close($db);
   }
@@ -40,7 +40,7 @@ if(isset($_POST['submitquestion']))
     $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
     mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
     $thequestion=mysqli_real_escape_string($db,$yourquestion) ;
-    $sql = "UPDATE ".$conflist." SET question='$thequestion', votenum=0 WHERE macAddr='$macAddr'";
+    $sql = "UPDATE ".$conflist." SET question='$thequestion', votenum=0, questime=curtime() WHERE macAddr='$macAddr'";
     mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
     mysqli_close($db); 
   }
@@ -100,30 +100,117 @@ if(isset($_POST['name']))
     <script type="text/javascript" src="js/client.js"></script>
 
     <script type="text/javascript">
-      function Hide (addr){document.getElementById(addr).style.visibility = "hidden";}
-      function Show (addr) {document.getElementById(addr).style.visibility = "visible";}
+      function Hide (addr)
+      	{
+          document.getElementById(addr).style.visibility = "hidden";
+          document.getElementById(addr).style.zIndex = "0";
+        }
+      function Show (addr) 
+        {
+          document.getElementById(addr).style.visibility = "visible";
+          document.getElementById(addr).style.zIndex = "1";
+        }
       function Disabling (addr) {document.getElementById(addr).disabled = "disabled"}
       function Enabling (addr) {document.getElementById(addr).disabled = ""}
-      function toggleValue(anId, testId, enableId1, enableId2, enableId3) {
-          if (document.getElementById(testId).value == "")
-              {
-                  Hide(anId);
-                  Enabling(enableId1) ;
-                  Enabling(enableId2) ;
-                  Enabling(enableId3) ;
-              }
+      function toggleValue() {
+          if (document.getElementById("name").value == "")
+            {
+               Show("whoami");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("sendQuestions");
+               Hide("connectControls");
+               Hide("questionList");
+               Disabling("unsubmitname");
+            }
           else
-              {
-                  Show(anId);
-                  //Disabling(enableId1);
-                  //Disabling(enableId2) ;
-                  Hide (enableId3) ;
-                  Hide (enableId2) ;
-                  Hide (enableId1) ;
-              }
+            {
+               Hide("whoami");
+               showUsers();
+            }
+      }
+      function showUsers() {
+         if (document.getElementById("name").value == "")
+           {
+               Show("whoami");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("sendQuestions");
+               Hide("connectControls");
+               Hide("questionList");
+           }
+         else
+           {
+               Hide("whoami");
+               Hide("demoContainer");
+               Show("connectedUsers");
+               Hide("sendQuestions");
+               Hide("connectControls");
+               Hide("questionList");
+           }
+      }
+      function showSendQuestion() {
+        if (document.getElementById("name").value == "")
+           {
+               Show("whoami");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("sendQuestions");
+               Hide("connectControls");
+               Hide("questionList");
+           }
+         else
+           {
+               Hide("whoami");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Show("sendQuestions");
+               Hide("connectControls");
+               Hide("questionList");
+           }
+      }
+      function showConnectControls() {
+        if (document.getElementById("name").value == "")
+           {
+               Show("whoami");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("sendQuestions");
+               Hide("connectControls");
+               Hide("questionList");
+           }
+         else
+           {
+               Hide("whoami");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("sendQuestions");
+               Show("connectControls");
+               Hide("questionList");
+           }
+      }
+      function showQuestions() {
+        if (document.getElementById("name").value == "")
+           {
+               Show("whoami");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("sendQuestions");
+               Hide("connectControls");
+               Hide("questionList");
+           }
+         else
+           {
+               Hide("whoami");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("sendQuestions");
+               Hide("connectControls");
+               Show("questionList");
+           }
       }
       window.onload = function () {
-          toggleValue("demoContainer", "name", "name", "submitname", "conflist");
+          toggleValue();
       };
     </script>
         
@@ -142,12 +229,9 @@ if(isset($_POST['name']))
             /*width:400px;*/
             text-align:center;
             font-size: 150%;
-	        border-radius: 10px;
-	        background-color:#e7e7e7;
+	    border-radius: 10px;
+	    background-color:#e7e7e7;
           }
-          #whoami, #name, #submitname, #byebye, #unsubmitname {
-            font-size: 100%;
-	      }
           #otherClients {
              height:200px;
              overflow-y:scroll;
@@ -162,7 +246,7 @@ if(isset($_POST['name']))
              display:none;
              z-index:2;
              position:absolute;
-             top:0px;
+             top:40px;
              left:0px;
              border:red solid 2px;
              background-color:pink;
@@ -179,19 +263,97 @@ if(isset($_POST['name']))
               font-size: 100%;
               border: 2px solid black;
           }
+
+#menutop {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        width: 100%;
+        height: 30px;
+        background-color : #183693;
+        border-top: solid black 1px;
+        padding: 5px;
+        padding-left: 5px;
+        padding-top: 0px;
+        color: white;
+}
+#menutop td {
+        padding-left: 20px;
+        padding-top: 0px;
+}
+body>#menutop {position:fixed}
+#menutop td {
+        padding-left: 20px;
+        padding-top: 0px;
+}
+
+#menubottom {
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        width: 100%;
+        height: 30px;
+        background-color : #183693;
+        border-top: solid black 1px;
+        padding: 5px;
+        padding-left: 5px;
+        padding-top: 0px;
+        color: white;
+}
+#menubottom td {
+        padding-left: 20px;
+        padding-top: 0px;
+}
+body>#menubottom {position:fixed}
+#menubottom td {
+        padding-left: 20px;
+        padding-top: 0px;
+}
+
+#whoami, #sendQuestions, #connectedUsers, #connectControls, #questionList {
+        position: absolute;
+        top: 40px;
+        left: 0px;
+}
+
     </style>
 
 </head>
 
 <body>
-  <div id="main">
-    <h1>Projet Yona <img src="micro.jpg" style ="float:left"> </h1> 
+
+<div name="menutop" id="menutop">
+<table width="100%">
+<tr>
+<td>Yona</td>
+<td><?php if (isset($name)) echo "$name" ?></td>
+<td>NOKIA</td>
+<td>
+  <form name="byebye" id="byebye" method="post" 
+    action="index.php?action=D&name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>">
+     <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect"
+                   onClick="document.getElementById("name").value='';">
+  </form>
+</td>
+</tr>
+</table>
+</div>
+
+  <div name="main" id="main">
+
     <form name="whoami" id="whoami" method="post" action="index.php"/>
-      <strong>Configuration : </strong><br>
-      Name: <?php if (isset($name)) echo "$name" ?>
-      <input type="text" name="name" id="name" maxlength="15" value="<?php if (isset($name)) echo $name; ?>">
-      <br>Conference : <?php if (isset($conflist)) echo "$conflist" ?>
-      <select name="conflist" id="conflist">
+      <table>
+      <tr>
+      <td>Name : <?php if (isset($name)) echo "$name" ?></td>
+      <td><input type="text" name="name" id="name" maxlength="20" style="width:200px" 
+                                      value="<?php if (isset($name)) echo $name; ?>"></td>
+      </tr>
+      </tr>
+      <tr>
+      <td>Conference : <?php if (isset($conflist)) echo "$conflist" ?></td>
+      <td><select name="conflist" id="conflist" style="background-color:white;width:200px">
       <?php
          // list conference
          $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
@@ -203,23 +365,23 @@ if(isset($_POST['name']))
          }
          mysqli_close($db);        
       ?>
-      </select>
-      <input name="submitname" id="submitname" type="submit" value="Connect">
+      </select></td>
+      </tr>
+      </table>
+      <center><input name="submitname" id="submitname" type="submit" value="Register" 
+                                   style="color:white;background-color:#183693;" ></center>
     </form>
+
     <div id="demoContainer">
-       <form name="byebye" id="byebye" method="post" action="index.php?action=D&name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>">
-          <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect"
-                        onClick="document.getElementById("name").value='';">
-       </form>
-       <br>
         <div id="sendQuestions">
-          <form name="question" id="question" method="post"  action="index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />Your Question:<br>
-            <textarea rows="4" cols="50" name="yourquestion" id="yourquestion"><?php if (isset($question)) echo $yourquestion ;?></textarea><br>
+          <form name="question" id="question" method="post"  
+            action="index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />Your Question:<br>
+            <textarea rows="4" cols="50" name="yourquestion" id="yourquestion"><?php if (isset($yourquestion)) echo $yourquestion ;?></textarea><br>
             <input name="submitquestion" id="submitquestion" type="submit" value="Send">
             <input name="resetquestion" id="resetquestion" type="submit"  value="Reset">
           </form>
         </div>
-       <div id="connectControls">
+        <div id="connectControls">
            <button id="connectButton" onclick="connect(document.getElementById('name').value)">Micro request</button>
            <div id="iam">Not yet connected...</div><div id="rtcid"></div>
            <div id="nbClients"></div>
@@ -227,7 +389,13 @@ if(isset($_POST['name']))
            <button id="disconnectButton" onclick="disconnect()">Micro release</button>              
         </div>
         <div id="connectedUsers">
-          <iframe style="overflow: hidden; height: 400px; width: 400px;" SCROLLING=auto src="connected.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+          <iframe style="border: none; overflow: hidden; height: auto; width: auto;" 
+                  SCROLLING=auto src="connected.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+          </iframe>
+        </div>
+        <div id="questionList">
+          <iframe style="border: none; overflow: hidden; height: auto; width: 400px;" 
+                  SCROLLING=auto src="questions.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
         <!-- Note... this demo should be updated to remove video references -->
@@ -241,6 +409,18 @@ if(isset($_POST['name']))
          </div>
     </div>
   </div>              
+
+<div name="menubottom" id="menubottom">
+<table width="100%">
+<tr>
+<td><img src="group.png" height="30px"   onclick="showUsers()"></td>
+<td><img src="plumier.png" height="30px" onclick="showSendQuestion()"></td>
+<td><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
+<td><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>
+</tr>
+</table>
+</div>
+
 </body>
 
 </html>

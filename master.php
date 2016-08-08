@@ -43,6 +43,7 @@ else
                   macAddr VARCHAR(30) NOT NULL PRIMARY KEY,
                   waitformic BOOLEAN,
                   question VARCHAR(255),
+                  questime TIME,
                   votefor VARCHAR(30),
                   votenum INT,
                   login DATETIME,
