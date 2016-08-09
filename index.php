@@ -100,6 +100,14 @@ if(isset($_POST['name']))
     <script type="text/javascript" src="js/client.js"></script>
 
     <script type="text/javascript">
+      function ResizeIframe(iframe)
+        {
+          //var iframeBody = (iframe.contentDocument) ? iframe.contentDocument.body : iframe.contentWindow.document.body; 
+          //var height = (iframeBody.scrollHeight < iframeBody.offsetHeight) ? iframeBody.scrollHeight : iframeBody.offsetHeight;
+          //height = height + 10;
+          //$(iframe).height(height);
+        }
+
       function Hide (addr)
       	{
           document.getElementById(addr).style.visibility = "hidden";
@@ -182,7 +190,7 @@ if(isset($_POST['name']))
          else
            {
                Hide("whoami");
-               Hide("demoContainer");
+               Show("demoContainer");
                Hide("connectedUsers");
                Hide("sendQuestions");
                Show("connectControls");
@@ -218,10 +226,11 @@ if(isset($_POST['name']))
     <style type="text/css">
           #demoContainer {
             position:relative;
+            width: 100%;
           }
           #connectControls {
             /*float:left;*/
-            width:400px;
+            /*width:400px;*/
             text-align:center;
             border: 2px solid black;
           }
@@ -244,7 +253,7 @@ if(isset($_POST['name']))
           }
           #acceptCallBox {
              display:none;
-             z-index:2;
+             z-index:6;
              position:absolute;
              top:40px;
              left:0px;
@@ -316,6 +325,8 @@ body>#menubottom {position:fixed}
         position: absolute;
         top: 40px;
         left: 0px;
+        width: 100%;
+        height: 100%;
 }
 
     </style>
@@ -389,13 +400,15 @@ body>#menubottom {position:fixed}
            <button id="disconnectButton" onclick="disconnect()">Micro release</button>              
         </div>
         <div id="connectedUsers">
-          <iframe style="border: none; overflow: hidden; height: auto; width: auto;" 
-                  SCROLLING=auto src="connected.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+          <iframe style="border: none; height: 800px; width: 100%;" SCROLLING=auto 
+             onload="javascript:ResizeIframe(this);"
+             src="connected.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
         <div id="questionList">
-          <iframe style="border: none; overflow: hidden; height: auto; width: 400px;" 
-                  SCROLLING=auto src="questions.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+          <iframe style="border: none; overflow: visible; height: 100%; width: 100%;" SCROLLING=auto 
+             onload="javascript:ResizeIframe(this);"
+             src="questions.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
         <!-- Note... this demo should be updated to remove video references -->
@@ -406,7 +419,7 @@ body>#menubottom {position:fixed}
                 <br><br>
                 <button id="callAcceptButton" >Accept</button> or <button id="callRejectButton">Reject</button>
             </div>
-         </div>
+        </div>
     </div>
   </div>              
 

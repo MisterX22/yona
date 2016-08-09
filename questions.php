@@ -64,14 +64,10 @@ if(isset($_GET['action']))
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="refresh" content="10">
-    <title>Connected users</title>
+    <title>Questions</title>
     <style type="text/css">
        #questions {
-          height:200px;
-          overflow-y:auto;
-       }
-       #users {
-          height:100px;
+          height:100%;
           overflow-y:auto;
        }
     </style>

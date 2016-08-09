@@ -12,7 +12,7 @@ $conflist=$_GET['conflist'];
     <title>Connected users</title>
     <style type="text/css">
        #users {
-          height:100px;
+          height:100%;
           overflow-y:auto;
        }
     </style>
