@@ -67,8 +67,14 @@ if(isset($_GET['action']))
     <title>Questions</title>
     <style type="text/css">
        #questions {
-          height:100%;
-          overflow-y:auto;
+          /*height:100%;
+          overflow-y:auto;*/
+       }
+       input[type=button] {
+        -webkit-appearance: none;
+        background-color: #183693 ;
+        color: white ;
+        border-radius: 5px;
        }
     </style>
 
@@ -110,7 +116,7 @@ if(isset($_GET['action']))
         $count = $row[0];
         //echo "".$count." votes)</a><br>";
         echo "".$count." votes)<br>";
-        echo "<input type='button' value='Need to know' style='color: white; background-color : #183693' onclick=\location.href='questions.php?conflist=".$conflist."&votefor=".$macAddr2."&name=".$name."&action='\">";
+        echo "<input type='button' value='Need to know' onclick=\"location.href='questions.php?conflist=".$conflist."&votefor=".$macAddr2."&name=".$name."&action='\">";
         echo "<br><br>";
         $sql3 = "UPDATE ".$conflist." SET votenum='$count' WHERE macAddr='$macAddr2'";
         mysqli_query($db,$sql3) or die('Erreur SQL !'.$sql3.'<br>'.mysqli_error($db));
