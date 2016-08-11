@@ -20,50 +20,13 @@ if(isset($_GET['votefor']))
     mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
     mysqli_close($db);
   }
-
-// Updating connection status list
-if(isset($_GET['action']))
-  { 
-    $action=$_GET['action'];
-    if(isset($_GET['name']))  $name=$_GET['name'];
-    if ( $action == "D")
-      {
-        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-        //$sql = "UPDATE ".$conflist." SET isconnected='0' WHERE macAddr='$macAddr'";
-        $sql = "UPDATE ".$conflist." SET isconnected='1' WHERE macAddr='$macAddr'";
-        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-        mysqli_close($db);
-      }
-    else
-    {
-      if(isset($_GET['name']))
-      {
-        $name=$_GET['name'];
-        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-        $sql = "UPDATE ".$conflist." SET isconnected='1' WHERE macAddr='$macAddr'";
-        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-        mysqli_close($db);
-      }
-    else
-      {
-        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-        //$sql = "UPDATE ".$conflist." SET isconnected='0' WHERE macAddr='$macAddr'";
-        $sql = "UPDATE ".$conflist." SET isconnected='1' WHERE macAddr='$macAddr'";
-        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-        mysqli_close($db);
-      }
-  }
-}
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="refresh" content="10">
+    <meta http-equiv="refresh" content="10, URL='questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>'" />
     <title>Questions</title>
     <style type="text/css">
        #questions {
@@ -77,6 +40,9 @@ if(isset($_GET['action']))
         border-radius: 5px;
        }
     </style>
+    <script>
+       //window.onload = alert(window.location.href) ;
+    </script>
 
 </head>
 
@@ -96,16 +62,25 @@ if(isset($_GET['action']))
 
    <div id="questions">
      <strong><u> Questions :</u></strong><br>
+     <i>Rules: <ul style="margin-top: 0px;"><li>Each user can vote for one question (just click on "Need to know")</li><li>Vote can be changed at any time</li><li>Questions are ordered by number of votes</li><li>Questions already answered will be striked</ul></i>
      <?php
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT question , name, macAddr, questime FROM ".$conflist." WHERE question !='' ORDER BY votenum DESC";   
+      $sql = "SELECT question , name, macAddr, questime, questove FROM ".$conflist." WHERE question !='' ORDER BY questove ASC, votenum DESC";   
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       while($data = mysqli_fetch_assoc($req)) 
       { 
         $macAddr2 = $data['macAddr'];
         if ( $myvote == $macAddr2 ) {
            echo "<strong>";
+        }
+        if ($data['questove'] == '1')
+        {
+          echo "<strike>" ;
+          $Buttontext="'Done'";
+        }
+        else {
+          $Buttontext="'Need to known'";
         }
         echo "".$data['name']." at ".$data['questime']."<br>";
         //echo "<a href='questions.php?conflist=".$conflist."&votefor=".$macAddr2."&name=".$name."&action='>".$data['question']."(" ; 
@@ -116,12 +91,19 @@ if(isset($_GET['action']))
         $count = $row[0];
         //echo "".$count." votes)</a><br>";
         echo "".$count." votes)<br>";
-        echo "<input type='button' value='Need to know' onclick=\"location.href='questions.php?conflist=".$conflist."&votefor=".$macAddr2."&name=".$name."&action='\">";
+        if ($data['questove'] != '1')
+        {
+          echo "<input type='button' value=".$Buttontext." onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$macAddr2."&name=".$name."&action='\">";
+        }
         echo "<br><br>";
         $sql3 = "UPDATE ".$conflist." SET votenum='$count' WHERE macAddr='$macAddr2'";
         mysqli_query($db,$sql3) or die('Erreur SQL !'.$sql3.'<br>'.mysqli_error($db));
         if ( $myvote == $macAddr2 ) {
            echo "</strong>";
+        }
+        if ($data['questove'] == '1')
+        {
+          echo "</strike>" ;
         }
       } 
       mysqli_close($db);

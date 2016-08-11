@@ -5,7 +5,7 @@
 if(isset($_GET['action']))
   $action=$_GET['action'] ;
 else
-  $action="" ;
+  $action="N" ;
 
 if(isset($_GET['conflist']))
   $conflist=$_GET['conflist'];
@@ -28,8 +28,11 @@ if (isset($_POST['resetquestion']))
   {
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "UPDATE ".$conflist." SET question='', votenum=0, questime=curtime()  WHERE macAddr='$macAddr'";   
+      $sql = "UPDATE ".$conflist." SET question='', votenum = '0', questime=curtime(), questove = '0'  WHERE macAddr='$macAddr'";   
       mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+      // remove all votes
+      $sql2 = "UPDATE ".$conflist." SET votefor = '' WHERE votefor='$macAddr'";
+      mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
       mysqli_close($db);
   }
 
@@ -40,8 +43,11 @@ if(isset($_POST['submitquestion']))
     $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
     mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
     $thequestion=mysqli_real_escape_string($db,$yourquestion) ;
-    $sql = "UPDATE ".$conflist." SET question='$thequestion', votenum=0, questime=curtime() WHERE macAddr='$macAddr'";
+    $sql = "UPDATE ".$conflist." SET question='$thequestion', votenum = '0', questime=curtime(), questove = '0' WHERE macAddr='$macAddr'";
     mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+    // remove all votes
+    $sql2 = "UPDATE ".$conflist." SET votefor = '' WHERE votefor='$macAddr'";
+    mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
     mysqli_close($db); 
   }
 else
@@ -65,7 +71,7 @@ if ($action=="D")
   {
     $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
     mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-    $sql = "UPDATE ".$conflist." SET isconnected='0' , logout=now() WHERE macAddr='$macAddr'";   
+    $sql = "UPDATE ".$conflist." SET isconnected = 0 , logout=now() WHERE macAddr='$macAddr'";   
     mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
     mysqli_close($db);
     $name="";
@@ -78,8 +84,8 @@ if(isset($_POST['name']))
      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
      $thename=mysqli_real_escape_string($db,$name) ;
      $sql = "INSERT INTO ".$conflist."(name, isconnected, rtcid, macAddr,waitformic, question,login, logout) 
-                                   VALUES('$thename','1','','$macAddr','','',now(),'') 
-                                   ON DUPLICATE KEY UPDATE name='$name', isconnected='1' , login=now()";   
+                                   VALUES('$thename','2','','$macAddr','','',now(),'') 
+                                   ON DUPLICATE KEY UPDATE name='$name', isconnected='2' , login=now()";   
       mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       mysqli_close($db); 
   }
@@ -102,45 +108,9 @@ if(isset($_POST['name']))
     <script type="text/javascript">
       function ResizeIframe(iframe)
         {
-          //var iframeBody = (iframe.contentDocument) ? iframe.contentDocument.body : iframe.contentWindow.document.body; 
-          //var height = (iframeBody.scrollHeight < iframeBody.offsetHeight) ? iframeBody.scrollHeight : iframeBody.offsetHeight;
-          //height = height + 10;
-          //$(iframe).height(height);
           var height = screen.height - 80 ;
-          //alert(height) ;
           iframe.style.height = height + 'px' ;
         }
-
-      function AdjustIframeHeightOnLoad()
-        {
-          var screenHeight = $(window).height();
-          var iframeContentHeight;
-          var iframeContentwidth;
-
-          iframeContentHeight = document.getElementById("iframe_ObjectLink").contentWindow.document.body.scrollHeight;
-
-          iframeContentwidth = document.getElementById("iframe_ObjectLink").contentWindow.document.body.scrollWidth;
-
-
-          if (iframeContentHeight > (screenHeight - 47))
-            {
-              document.getElementById("objectionMenuContentContainer_div").style.height = (screenHeight - 27) + "px";
-              document.getElementById("iframe_ObjectLink").height = (screenHeight - 47);
-              document.getElementById("iframe_ObjectLink").contentWindow.document.documentElement.style.overflowY = "scroll";
-            }
-          else
-            {
-              document.getElementById("objectionMenuContentContainer_div").style.height = iframeContentHeight + "px";
-              document.getElementById("iframe_ObjectLink").height = (iframeContentHeight - 25);
-              document.getElementById("iframe_ObjectLink").contentWindow.document.documentElement.style.overflowY = "hidden";
-            }
-
-          if (iframeContentwidth > 883)
-            document.getElementById("iframe_ObjectLink").contentWindow.document.documentElement.style.overflowX = "scroll";
-          else
-            document.getElementById("iframe_ObjectLink").contentWindow.document.documentElement.style.overflowX = "hidden";
-        }
-
 
       function Hide (addr)
       	{
@@ -168,7 +138,10 @@ if(isset($_POST['name']))
           else
             {
                Hide("whoami");
-               showUsers();
+               if (document.getElementById("yourquestion").value == "")
+                 showSendQuestion();
+               else
+                 showQuestions();
             }
       }
       function showUsers() {
@@ -253,7 +226,10 @@ if(isset($_POST['name']))
       }
       window.onload = function () {
           toggleValue();
-      };
+      }
+      //window.addEventListener("orientationchange", function() {
+        //document.location.reload(true);}, false) ;
+        //alert(screen.orientation) ;}, false) ;
     </script>
         
     <!-- Styles used within the demo -->
@@ -289,6 +265,17 @@ if(isset($_POST['name']))
              text-align:center;
              /*margin-left:10px;*/
           }
+          #easyrtcErrorDialog {
+             z-index:2;
+             position:absolute;
+             top:40px;
+             margin: 0 auto ;
+             width: 300px  ;
+             border:red solid 2px;
+             background-color:pink;
+             padding:15px;
+             font-size: 100%;
+          }
           #acceptCallBox {
              display:none;
              z-index:2;
@@ -317,26 +304,29 @@ if(isset($_POST['name']))
               top: 0px;
               left: 0px;
               right: 0px;
-              width: 100%;
+              /*width: 100%;*/
               height: 30px;
               background-color : #183693;
               border-top: solid black 1px;
-              padding: 5px;
-              padding-left: 5px;
+              /*padding: 5px;*/
+              padding-left: 0px;
+              padding-right: 0px;
               padding-top: 0px;
+              padding-bottom: 10px;
+              margin-left: 0px;
+              margin-right: 0px;
+              margin-top: 0px;
+              margin-bottom: 0px;
               color: white;
               font-size: 150%;
               z-index:3;
          }
          #menutop td {
-              padding-left: 20px;
+              padding-left: 10px;
               padding-top: 0px;
+              text-align: center;
          }
          body>#menutop {position:fixed}
-         #menutop td {
-              padding-left: 20px;
-              padding-top: 0px;
-         }
 
          #menubottom {
               position: absolute;
@@ -345,7 +335,7 @@ if(isset($_POST['name']))
               right: 0px;
               width: 100%;
               height: 30px;
-              background-color : #183693;
+              background-color : #F2F2F2;
               border-top: solid black 1px;
               padding: 5px;
               padding-left: 5px;
@@ -354,14 +344,11 @@ if(isset($_POST['name']))
               z-index:3;
          }
          #menubottom td {
-              padding-left: 20px;
+              padding-left: 10px;
               padding-top: 0px;
+              text-align: center;
          }
          body>#menubottom {position:fixed}
-         #menubottom td {
-              padding-left: 20px;
-              padding-top: 0px;
-         }
 
          #whoami, #sendQuestions, #connectedUsers, #connectControls, #questionList {
               visibility: hidden;
@@ -379,11 +366,19 @@ if(isset($_POST['name']))
               border-radius : 5px;
               font-size: 150%;
          }
-         input[type=textarea] {
+         textarea {
               background-color : white ;
               color : black ;
               border-radius : 5px;
+              font-family: "Times New Roman";
               font-size: 150%;
+         }
+         body {
+             /*margin: 0 0 5px 5px;
+             padding: 0 0 5px 5px;*/
+         }
+         table {
+             width: 100% ;
          }
 
     </style>
@@ -393,13 +388,13 @@ if(isset($_POST['name']))
 <body>
 
 <div name="menutop" id="menutop">
-<table width="100%">
+<table>
 <tr>
 <td>Yona</td>
 <td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "NOKIA"; ?></td>
 <td>
   <form name="byebye" id="byebye" method="post" 
-    action="index.php?action=D&name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>">
+    action="index.php?action=D&conflist=<?php if (isset($conflist)) echo $conflist?>">
      <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect" style="font-size: 50%;"
                    onClick="document.getElementById("name").value='';">
   </form>
@@ -409,7 +404,7 @@ if(isset($_POST['name']))
 </div>
 
   <div name="main" id="main">
-
+    <center>
     <form name="whoami" id="whoami" method="post" action="index.php"/>
       <table>
       <tr>
@@ -435,21 +430,28 @@ if(isset($_POST['name']))
       </select></td>
       </tr>
       </table>
-      <center><input name="submitname" id="submitname" type="submit" value="Register" 
-                                   style="color:white;background-color:#183693;font-size: 150%;" ></center>
-      <br><center><big><strong>Welcome to Yona<br>Please Register</strong></big></center>
+      <input name="submitname" id="submitname" type="submit" value="Register" 
+                                   style="color:white;background-color:#183693;font-size: 150%;" >
+      <br><big><strong>Welcome to Yona<br>Please Register</strong></big>
     </form>
+    </center>
 
     <div id="demoContainer">
         <div id="sendQuestions">
+          <strong>Send your question by filling this form</strong><br>
+          <i>Rules: <ul style="margin-top: 0px;"><li>One question per user</li><li>Can be changed or reset at any time</li></ul></i>
           <form name="question" id="question" method="post"  
             action="index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />
-            <textarea style="width: 100%;height: auto;font-size: 100%;" rows="10" cols="50" placeholder="Your question" name="yourquestion" id="yourquestion"><?php if (isset($yourquestion)) echo $yourquestion ;?></textarea><br>
+            <textarea style="width: 100%;height: auto;font-size: 100%;" maxlength="255" rows="10" placeholder="Your question" name="yourquestion" id="yourquestion"><?php if (isset($yourquestion)) echo $yourquestion ;?></textarea><br>
             <input name="submitquestion" id="submitquestion" type="submit" value="Send">
             <input name="resetquestion" id="resetquestion" type="submit" value="Reset">
           </form>
         </div>
         <div id="connectControls">
+           <div style="text-align: left;">
+           <strong>Ask for the micro by clicking the button</strong><br>
+           <i>Rules: <ul style="margin-top: 0px;"><li>You will be asked for a confirmation before you can speak</li><li>Request can be removed at any time</li></ul></i>
+           </div>
            <button id="connectButton" style='color: white; background-color : #183693' onclick="connect(document.getElementById('name').value)">Ask Micro</button>
            <br><br>
            <button id="disconnectButton" style='color: white; background-color : #183693' onclick="disconnect()">Release Micro</button>              
@@ -468,7 +470,7 @@ if(isset($_POST['name']))
            </div>
         </div>
         <div id="connectedUsers">
-          <iframe style="border: none; height: 800px; width: 100%;" SCROLLING=auto 
+          <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
              onload="javascript:ResizeIframe(this);"
              src="connected.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
