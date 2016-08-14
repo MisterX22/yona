@@ -1,10 +1,12 @@
 <?php 
 // Retrieving all required inputs
 if(isset($_POST['name']))
+{
   $name=$_POST['name'];
   if ($name == "")
     if(isset($_POST['conflist']))
       $name=$_POST['conflist'];
+}
 else
   if(isset($_POST['conflist']))
     $name=$_POST['conflist'];
@@ -51,18 +53,23 @@ else
     else
       {
         $sql = "CREATE TABLE $name ( 
+                  id INT NOT NULL AUTO_INCREMENT, 
                   name VARCHAR(30),
+                  firstreg BOOLEAN,
                   isconnected INT,
                   rtcid VARCHAR(30),
-                  macAddr VARCHAR(30) NOT NULL PRIMARY KEY,
+                  macAddr VARCHAR(30),
                   waitformic BOOLEAN,
                   question VARCHAR(255),
                   questime TIME,
                   questove BOOLEAN,
-                  votefor VARCHAR(30),
+                  votefor  VARCHAR(30),
+                  votefo1  VARCHAR(30),
+                  votefo2  VARCHAR(30),
                   votenum INT,
                   login DATETIME,
-                  logout DATETIME
+                  logout DATETIME,
+                  PRIMARY KEY (id)
               )";   
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       }
@@ -100,7 +107,17 @@ else
         {
           document.getElementById(addr).style.visibility = "visible";
           document.getElementById(addr).style.zIndex = "1";
+          window.scrollTo(0,0);
         }
+      function ChangeStyle (addr)
+        {
+          document.getElementById(addr).style.borderTop="thick solid grey";
+        }
+      function ResetStyle (addr)
+        {
+          document.getElementById(addr).style.borderTop="";
+        }
+
       function Disabling (addr) {document.getElementById(addr).disabled = "disabled"}
       function Enabling (addr) {document.getElementById(addr).disabled = ""}
       function toggleValue() {
@@ -135,6 +152,10 @@ else
                Show("connectedUsers");
                Hide("connectControls");
                Hide("questionList");
+
+               ChangeStyle("connectedUsers_button") ;
+               ResetStyle("connectControls_button") ;
+               ResetStyle("questionList_button") ;
            }
       }
       function showConnectControls() {
@@ -153,6 +174,10 @@ else
                Hide("connectedUsers");
                Show("connectControls");
                Hide("questionList");
+
+               ResetStyle("connectedUsers_button") ;
+               ChangeStyle("connectControls_button") ;
+               ResetStyle("questionList_button") ;
            }
       }
       function showQuestions() {
@@ -171,6 +196,10 @@ else
                Hide("connectedUsers");
                Hide("connectControls");
                Show("questionList");
+
+               ResetStyle("connectedUsers_button") ;
+               ResetStyle("connectControls_button") ;
+               ChangeStyle("questionList_button") ;
            }
       }
       window.onload = function () {
@@ -429,9 +458,9 @@ else
    <div name="menubottom" id="menubottom">
       <table width="100%">
         <tr>
-          <td><img src="group.png" height="30px"   onclick="showUsers()"></td>
-          <td><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
-          <td><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>
+          <td id="connectedUsers_button" name="connectedUsers_button"><img src="group.png" height="30px"   onclick="showUsers()"></td>
+          <td id="connectControls_button" name="connectControls_button"><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
+          <td id="questionList_button" name="questionList_button"><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>
         </tr>
       </table>
   </div>

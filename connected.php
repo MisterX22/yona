@@ -70,7 +70,7 @@ if(isset($_GET['action']))
      <?php
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT name FROM ".$conflist." WHERE isconnected > 0 ";   
+      $sql = "SELECT name FROM ".$conflist." WHERE isconnected > 0 AND firstreg = '1'";   
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       while($data = mysqli_fetch_assoc($req)) 
       { 
@@ -84,7 +84,7 @@ if(isset($_GET['action']))
      <?php
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT name FROM ".$conflist." WHERE isconnected <= 0 ";   
+      $sql = "SELECT name FROM ".$conflist." WHERE isconnected <= 0 AND firstreg = '1'";   
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       while($data = mysqli_fetch_assoc($req)) 
       { 

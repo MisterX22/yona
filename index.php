@@ -1,6 +1,13 @@
 <?php 
 
 // Retrieving required inputs
+$ipclient=$_SERVER['REMOTE_ADDR'];
+$macAddr=false;
+$arp=`arp -a $ipclient`;
+$lines=explode(" ", $arp);
+$macAddr=$lines[3];
+$numquestion = 0;
+$remaining = 3 - $numquestion ;
 
 if(isset($_GET['action']))
   $action=$_GET['action'] ;
@@ -13,56 +20,84 @@ if(isset($_POST['conflist']))
   $conflist=$_POST['conflist'];
 
 if(isset($_GET['name']))
-  $name=$_GET['name'];
+  $name=htmlspecialchars($_GET['name'],ENT_HTML5);
 if(isset($_POST['name']))
-  $name=$_POST['name'];
-
-$ipclient=$_SERVER['REMOTE_ADDR'];
-$macAddr=false;
-$arp=`arp -a $ipclient`;
-$lines=explode(" ", $arp);
-$macAddr=$lines[3];
-
-// Do we need to reset the question ?
-if (isset($_POST['resetquestion']))
+  $name=htmlspecialchars($_POST['name'],ENT_HTML5);
+else
   {
+    if ( isset($conflist) ) {
+      // trying to recover name
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "UPDATE ".$conflist." SET question='', votenum = '0', questime=curtime(), questove = '0'  WHERE macAddr='$macAddr'";   
-      mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-      // remove all votes
-      $sql2 = "UPDATE ".$conflist." SET votefor = '' WHERE votefor='$macAddr'";
-      mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+      $sql = "SELECT name FROM ".$conflist." WHERE macAddr = '$macAddr'";
+      $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+      while($madata = mysqli_fetch_assoc($req))
+        {
+          $name = $madata['name'] ;
+        }
       mysqli_close($db);
+    }
   }
+
+
+if ( isset($name) ) 
+  {
+    if ( isset($conflist) ) {
+      // trying to recover name
+      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+      $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE macAddr = '$macAddr' AND question != ''";
+      $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+      $row = mysqli_fetch_array($req2);
+      $numquestion = $row[0];
+      $remaining = 3 - $numquestion ;
+      mysqli_close($db);
+    }
+  }
+
+// Do we need to reset the question ?
+//if (isset($_POST['resetquestion']))
+//  {
+//      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+//      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+//      $sql = "UPDATE ".$conflist." SET question='', votenum = '0', questime=curtime(), questove = '0'  WHERE macAddr='$macAddr'";   
+//      mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+//      // remove all votes
+//      $sql2 = "UPDATE ".$conflist." SET votefor = '' WHERE votefor='$macAddr'";
+//      mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+//      mysqli_close($db);
+//  }
 
 // Do we need to register or read a question ?
 if(isset($_POST['submitquestion']))    
   {
-    $yourquestion=$_POST['yourquestion'];
-    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-    $thequestion=mysqli_real_escape_string($db,$yourquestion) ;
-    $sql = "UPDATE ".$conflist." SET question='$thequestion', votenum = '0', questime=curtime(), questove = '0' WHERE macAddr='$macAddr'";
-    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-    // remove all votes
-    $sql2 = "UPDATE ".$conflist." SET votefor = '' WHERE votefor='$macAddr'";
-    mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-    mysqli_close($db); 
-  }
-else
-  {
-    if (isset($name) AND isset($conflist))
+    if ( $remaining <= 0 )
       {
-         $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-         mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-         $sql = "SELECT question FROM ".$conflist." WHERE macAddr = '$macAddr'";   
-         $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-         while($madata = mysqli_fetch_assoc($req)) 
-           { 
-             $yourquestion = $madata['question'];
+
+      }
+    else
+      {
+        $yourquestion=$_POST['yourquestion'];
+        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+        $thequestion=mysqli_real_escape_string($db,$yourquestion) ;
+
+        $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE macAddr = '".$macAddr."' AND question = ''";
+        $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+        $row2 = mysqli_fetch_array($req2);
+        $count = $row2[0];
+        if ( $count == 0 ) 
+           {
+             $sql = "INSERT INTO ".$conflist."(name,question, votenum, questime, macAddr, questove) 
+                                   VALUES('$name','$thequestion','0',curtime(),'$macAddr','0')" ; 
            }
-          mysqli_close($db);
+        else
+           {
+             $sql = "UPDATE ".$conflist." SET question='$thequestion', votenum = '0', questime=curtime(), questove = '0' WHERE macAddr='$macAddr' AND question=''";
+           }
+        $remaining = $remaining - 1 ;
+        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+        mysqli_close($db); 
       }
   }
 
@@ -82,12 +117,24 @@ if(isset($_POST['name']))
   {
      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-     $thename=mysqli_real_escape_string($db,$name) ;
-     $sql = "INSERT INTO ".$conflist."(name, isconnected, rtcid, macAddr,waitformic, question,login, logout) 
-                                   VALUES('$thename','2','','$macAddr','','',now(),'') 
-                                   ON DUPLICATE KEY UPDATE name='$name', isconnected='2' , login=now()";   
-      mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-      mysqli_close($db); 
+     $thename= addcslashes(mysqli_real_escape_string($db,$name), '%_#') ;
+
+     $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE macAddr = '".$macAddr."'";
+     $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+     $row = mysqli_fetch_array($req2);
+     $count = $row[0];
+     if ( $count == 0 ) 
+       {
+         $sql = "INSERT INTO ".$conflist."(name, firstreg, isconnected, rtcid, macAddr,waitformic, question,login, logout) 
+                                   VALUES('$thename', '1', '2','','$macAddr','','',now(),'')" ; 
+       }
+     else
+       {
+          $sql = "UPDATE ".$conflist." SET name = '$thename' , isconnected = '2', login = now() WHERE macAddr='$macAddr'";   
+       }
+
+     mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+     mysqli_close($db); 
   }
 ?>
    
@@ -121,7 +168,17 @@ if(isset($_POST['name']))
         {
           document.getElementById(addr).style.visibility = "visible";
           document.getElementById(addr).style.zIndex = "1";
+          window.scrollTo(0,0);
         }
+      function ChangeStyle (addr)
+        {
+          document.getElementById(addr).style.borderTop="thick solid grey";
+        }
+      function ResetStyle (addr)
+        {
+          document.getElementById(addr).style.borderTop="";
+        }
+
       function Disabling (addr) {document.getElementById(addr).disabled = "disabled"}
       function Enabling (addr) {document.getElementById(addr).disabled = ""}
       function toggleValue() {
@@ -138,9 +195,9 @@ if(isset($_POST['name']))
           else
             {
                Hide("whoami");
-               if (document.getElementById("yourquestion").value == "")
-                 showSendQuestion();
-               else
+               //if (document.getElementById("yourquestion").value == "")
+               //  showSendQuestion();
+               //else
                  showQuestions();
             }
       }
@@ -162,6 +219,11 @@ if(isset($_POST['name']))
                Hide("sendQuestions");
                Hide("connectControls");
                Hide("questionList");
+ 
+               ChangeStyle("connectedUsers_button") ;
+               ResetStyle("sendQuestions_button") ;
+               ResetStyle("connectControls_button") ;
+               ResetStyle("questionList_button") ;
            }
       }
       function showSendQuestion() {
@@ -182,6 +244,11 @@ if(isset($_POST['name']))
                Show("sendQuestions");
                Hide("connectControls");
                Hide("questionList");
+
+               ResetStyle("connectedUsers_button") ;
+               ChangeStyle("sendQuestions_button") ;
+               ResetStyle("connectControls_button") ;
+               ResetStyle("questionList_button") ;
            }
       }
       function showConnectControls() {
@@ -202,6 +269,11 @@ if(isset($_POST['name']))
                Hide("sendQuestions");
                Show("connectControls");
                Hide("questionList");
+
+               ResetStyle("connectedUsers_button") ;
+               ResetStyle("sendQuestions_button") ;
+               ChangeStyle("connectControls_button") ;
+               ResetStyle("questionList_button") ;
            }
       }
       function showQuestions() {
@@ -222,6 +294,11 @@ if(isset($_POST['name']))
                Hide("sendQuestions");
                Hide("connectControls");
                Show("questionList");
+
+               ResetStyle("connectedUsers_button") ;
+               ResetStyle("sendQuestions_button") ;
+               ResetStyle("connectControls_button") ;
+               ChangeStyle("questionList_button") ;
            }
       }
       window.onload = function () {
@@ -405,7 +482,7 @@ if(isset($_POST['name']))
 
   <div name="main" id="main">
     <center>
-    <form name="whoami" id="whoami" method="post" action="index.php"/>
+    <form name="whoami" id="whoami" method="post" action="index.php?conflist=<?php if (isset($conflist)) echo $conflist?>"/>
       <table>
       <tr>
       <td>Name : <?php if (isset($name)) echo "$name" ?></td>
@@ -439,12 +516,11 @@ if(isset($_POST['name']))
     <div id="demoContainer">
         <div id="sendQuestions">
           <strong>Send your question by filling this form</strong><br>
-          <i>Rules: <ul style="margin-top: 0px;"><li>One question per user</li><li>Can be changed or reset at any time</li></ul></i>
+          <i>Rules: <ul style="margin-top: 0px;"><li>Only three questions per user</li><li>Any question can be removed at any time</li></ul></i>
           <form name="question" id="question" method="post"  
             action="index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />
-            <textarea style="width: 100%;height: auto;font-size: 100%;" maxlength="255" rows="10" placeholder="Your question" name="yourquestion" id="yourquestion"><?php if (isset($yourquestion)) echo $yourquestion ;?></textarea><br>
+            <textarea style="width: 100%;height: auto;font-size: 100%;" maxlength="255" rows="5" placeholder="<?php echo $remaining." questions remaining" ?>" name="yourquestion" id="yourquestion"></textarea><br>
             <input name="submitquestion" id="submitquestion" type="submit" value="Send">
-            <input name="resetquestion" id="resetquestion" type="submit" value="Reset">
           </form>
         </div>
         <div id="connectControls">
@@ -472,13 +548,13 @@ if(isset($_POST['name']))
         <div id="connectedUsers">
           <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
              onload="javascript:ResizeIframe(this);"
-             src="connected.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+             src="connected.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
         <div id="questionList">
           <iframe style="border: none; overflow: visible; width: 100%; height: 100%;" SCROLLING=auto 
              onload="javascript:ResizeIframe(this);"
-             src="questions.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+             src="questions.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
     </div>
@@ -487,10 +563,10 @@ if(isset($_POST['name']))
 <div name="menubottom" id="menubottom">
 <table width="100%">
 <tr>
-<td><img src="group.png" height="30px"   onclick="showUsers()"></td>
-<td><img src="plumier.png" height="30px" onclick="showSendQuestion()"></td>
-<td><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
-<td><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>
+<td id="connectedUsers_button" name="connectedUsers_button"><img src="group.png" height="30px"   onclick="showUsers()"></td>
+<td id="sendQuestions_button" name="sendQuestions_button"><img src="plumier.png" height="30px" onclick="showSendQuestion()"></td>
+<td id="connectControls_button" name="connectControls_button"><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
+<td id="questionList_button" name="questionList_button"><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>
 </tr>
 </table>
 </div>
