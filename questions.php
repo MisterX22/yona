@@ -19,8 +19,13 @@ if (isset($_POST['allquestions']))
    $allquestions = $_POST['allquestions'];
 if (isset($_GET['choice']))
    $allquestions = $_GET['choice'];
+if (isset($_POST['refresh_choice']))
+   $refresh_choice = $_POST['refresh_choice'];
+if (isset($_GET['refresh']))
+   $refresh_choice = $_GET['refresh'];
 
 // Retrieving choice
+$checkall='1';
 if (isset($allquestions))
   {
     if ( $allquestions == "only" )
@@ -34,6 +39,21 @@ if (isset($allquestions))
     else
       {
          $checkall='1';
+      }
+  }
+
+$auto='1';
+//echo "refresh : ".$refresh_choice;
+if (isset($refresh_choice))
+  {
+    if ( $refresh_choice == "auto" )
+      {
+         $auto='1';
+      }
+    else if ( $refresh_choice == "manual" )
+      {
+         $manual='1';
+         $auto='0' ;
       }
   }
 
@@ -105,6 +125,10 @@ if(isset($_GET['votefor']))
       mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
       $sql2 = "UPDATE ".$conflist." SET votefo2 = '' WHERE votefo2='$votefor'";
       mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+      $myvote = '' ;
+      $myvot1 = '' ;
+      $myvot2 = '' ;
+      $remaining = 3 ;
     }
     else
     {
@@ -115,16 +139,22 @@ if(isset($_GET['votefor']))
             {
               $sql = "UPDATE ".$conflist." SET votefor='' WHERE macAddr='$macAddr' AND firstreg='1'";
               mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $myvote = '' ;
+              $remaining = $remaining + 1 ;
             }
             elseif ( $myvot1 == $votefor )
             {
               $sql = "UPDATE ".$conflist." SET votefo1='' WHERE macAddr='$macAddr' AND firstreg='1'";
               mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $myvot1 = '' ;
+              $remaining = $remaining + 1 ;
             }
             elseif ( $myvot2 == $votefor )
             {
               $sql = "UPDATE ".$conflist." SET votefo2='' WHERE macAddr='$macAddr' AND firstreg='1'";
               mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $myvot2 = '' ;
+              $remaining = $remaining + 1 ;
             }
         }
       else if ( ( $action == 'P' ) AND ( $remaining != 0 ) ) 
@@ -133,16 +163,22 @@ if(isset($_GET['votefor']))
             {
               $sql = "UPDATE ".$conflist." SET votefor='$votefor' WHERE macAddr='$macAddr' AND firstreg='1'";
               mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $myvote = $votefor ;
+              $remaining = $remaining - 1 ;
             }
           elseif ( $myvot1 == "" )
             {
               $sql = "UPDATE ".$conflist." SET votefo1='$votefor' WHERE macAddr='$macAddr' AND firstreg='1'";
               mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $myvot1 = $votefor ;
+              $remaining = $remaining - 1 ;
             }
           elseif ( $myvote2 == "" )
             {
               $sql = "UPDATE ".$conflist." SET votefo2='$votefor' WHERE macAddr='$macAddr' AND firstreg='1'";
               mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $myvot2 = $votefor ;
+              $remaining = $remaining - 1 ;
             }
         }
     }
@@ -154,7 +190,10 @@ if(isset($_GET['votefor']))
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="refresh" content="<?php echo $refreshTime; ?>, URL='questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>&choice=<?php if (isset($allquestions)) echo $allquestions?>'" />
+    <?php
+    if ( $auto == 1 )
+      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"questions.php?conflist=".$conflist."&choice=".$allquestions."&refresh=".$refresh_choice."\" />" ;
+    ?>
     <title>Questions</title>
     <style type="text/css">
        #questions {
@@ -182,9 +221,14 @@ if(isset($_GET['votefor']))
 
    <div id="questions">
      <strong><u> Questions :</u></strong><br>
-     <i>Rules: <ul style="margin-top: 0px;"><li>you have <?php echo $remaining ; ?> points left,</li><li><?php echo $text ; ?></li></ul></i>
+     <i>Rules: <ul style="margin-top: 0px;"><li>you have <?php echo $remaining ; ?> point(s) left,</li><li><?php echo $text ; ?></li></ul></i>
+     <form name="refresh" id="refresh" method="post" action="questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
+       Refresh mode :
+       <input type="radio" id="refresh_choice" name="refresh_choice" value="auto" onclick="this.form.submit()" <?php if ( isset($auto) ) echo "checked" ;?> >Auto
+       <input type="radio" id="refresh_choice" name="refresh_choice" value="manual" onclick="this.form.submit()" <?php if ( isset($manual) ) echo "checked" ;?> >Manual
+     </form>
      <form name="choice" id="choice" method="post" action="questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
-       Questions list :<br>
+       Questions filter :<br>
        <input type="radio" id="allquestions" name="allquestions" value="all" onclick="this.form.submit()" <?php if ( isset($checkall) ) echo "checked" ;?> >All 
        <input type="radio" id="allquestions" name="allquestions" value="only" onclick="this.form.submit()" <?php if ( isset($checkonly) ) echo "checked" ;?> >My questions
        <input type="radio" id="allquestions" name="allquestions" value="voted" onclick="this.form.submit()" <?php if ( isset($checkvoted) ) echo "checked" ;?> >My points
@@ -229,9 +273,9 @@ if(isset($_GET['votefor']))
           $confirmtext=$confirmtext.$data['question'] ;
         }
         echo "".$data['name']." at ".$data['questime']."";
-        if ( $nbvote == 1 ) echo " * " ;
-        if ( $nbvote == 2 ) echo " * *" ;
-        if ( $nbvote == 3 ) echo " * * *" ;
+        if ( $nbvote >= 1 ) echo "<img src='star.png' height='30px'></img>" ;
+        if ( $nbvote >= 2 ) echo "<img src='star.png' height='30px'></img>" ;
+        if ( $nbvote >= 3 ) echo "<img src='star.png' height='30px'></img>" ;
         echo "<br>";
         echo "".$data['question']."(" ; 
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE (votefor = '".$id."')" ;
@@ -258,8 +302,8 @@ if(isset($_GET['votefor']))
           }
           else
           {
-            echo "<input type='button' value='+1'  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=P'; \">";
-            echo "<input type='button' value='-1'  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=M'; \">";
+            if ($remaining > 0) echo "<input type='image' src=plus1.png  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=P'; \">";
+            if ($thisismyvote == 1)echo "<input type='image' src=moins1.png  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=M'; \">";
           }
         }
         echo "<br><br>";
