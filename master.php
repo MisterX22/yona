@@ -1,4 +1,5 @@
 <?php 
+
 // Retrieving all required inputs
 if(isset($_POST['name']))
 {
@@ -59,6 +60,7 @@ else
                   isconnected INT,
                   rtcid VARCHAR(30),
                   macAddr VARCHAR(30),
+                  hostname VARCHAR(255),
                   waitformic BOOLEAN,
                   question VARCHAR(255),
                   questime TIME,
@@ -419,7 +421,7 @@ else
       <div id="connectControls">
         <div style="text-align: left;">
           <strong>Who wants to speak ?</strong><br>
-          <i>Rules: <ul style="margin-top: 0px;"><li>Users requesting for the micro will appear</li><li>Give micro access by clicking on name</li><li>Micro can be removed at any time by clicking on "Release it"</li></ul></i>
+          <i>Rules: <ul style="margin-top: 0px;"><li>Users requesting for the micro will appear</li><li>Give micro access by clicking on name</li><li>Access can be removed at any time by clicking on "Release it"</li></ul></i>
         </div>
 
         <center><button id="hangupButton" disabled="disabled" onclick="hangup()">Release it</button></center>

@@ -8,6 +8,7 @@ $lines=explode(" ", $arp);
 $macAddr=$lines[3];
 $numquestion = 0;
 $remaining = 3 - $numquestion ;
+$hostname=$lines[0] ;
 
 if(isset($_GET['action']))
   $action=$_GET['action'] ;
@@ -25,7 +26,7 @@ if(isset($_POST['name']))
   $name=htmlspecialchars($_POST['name'],ENT_HTML5);
 else
   {
-    if ( isset($conflist) ) {
+    if ( isset($conflist)and ($conflist != "") ) {
       // trying to recover name
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
@@ -125,8 +126,8 @@ if(isset($_POST['name']))
      $count = $row[0];
      if ( $count == 0 ) 
        {
-         $sql = "INSERT INTO ".$conflist."(name, firstreg, isconnected, rtcid, macAddr,waitformic, question,login, logout) 
-                                   VALUES('$thename', '1', '2','','$macAddr','','',now(),'')" ; 
+         $sql = "INSERT INTO ".$conflist."(name, hostname, firstreg, isconnected, rtcid, macAddr,waitformic, question,login, logout) 
+                                   VALUES('$thename', '$hostname', '1', '2','','$macAddr','','',now(),'')" ; 
        }
      else
        {
@@ -196,8 +197,9 @@ if(isset($_POST['name']))
             {
                Hide("whoami");
                //if (document.getElementById("yourquestion").value == "")
-               //  showSendQuestion();
-               //else
+               if (document.getElementById("yourquestion").placeholder != "0 questions remaining")
+                 showSendQuestion();
+               else
                  showQuestions();
             }
       }
@@ -427,13 +429,33 @@ if(isset($_POST['name']))
          }
          body>#menubottom {position:fixed}
 
-         #whoami, #sendQuestions, #connectedUsers, #connectControls, #questionList {
+         #whoami { 
+              visibility: hidden;
+              position: absolute;
+              top: 40px;
+              left: 0px;
+              width: 400px%;
+              height: 100%;
+         }
+ 
+         #sendQuestions, #connectedUsers, #connectControls, #questionList {
               visibility: hidden;
               position: absolute;
               top: 40px;
               left: 0px;
               width: 100%;
               height: 100%;
+         }
+ 
+         #rules {
+              font-style : italic ;
+              //position: absolute;
+              //top: 200px;
+              //left: 5px;
+              margin-top: 0px;
+              margin-bottom: 0px;
+              padding-top: 0px;
+              padding-bottom: 0px;
          }
 
          input[type=button], input[type=submit], input[type=reset], button {
@@ -481,8 +503,8 @@ if(isset($_POST['name']))
 </div>
 
   <div name="main" id="main">
-    <center>
     <form name="whoami" id="whoami" method="post" action="index.php?conflist=<?php if (isset($conflist)) echo $conflist?>"/>
+    <center>
       <table>
       <tr>
       <td>Name : <?php if (isset($name)) echo "$name" ?></td>
@@ -509,14 +531,23 @@ if(isset($_POST['name']))
       </table>
       <input name="submitname" id="submitname" type="submit" value="Register" 
                                    style="color:white;background-color:#183693;font-size: 150%;" >
-      <br><big><strong>Welcome to Yona<br>Please Register</strong></big>
-    </form>
+      <br><big><strong>Welcome to Yona<br>Please register & let's play</strong></big>
     </center>
+    <br><div id="rules" name="rules" >
+      Rules : <br>&nbsp;&nbsp;&nbsp;Each player can : 
+      <ul style="margin-top: 0px;">
+        <li>post up to 3 questions</li>
+        <li>see all questions</li>
+        <li>vote for up to 3 questions</li>
+        <li>remove owned questions / votes</li>
+     </ul>
+    </div>
+    </form>
 
     <div id="demoContainer">
         <div id="sendQuestions">
           <strong>Send your question by filling this form</strong><br>
-          <i>Rules: <ul style="margin-top: 0px;"><li>Only three questions per user</li><li>Any question can be removed at any time</li></ul></i>
+          <i>Rules: <ul style="margin-top: 0px;"><li>Only three questions per user</li><li>Owned question can be removed (see Q&A tab)</li></ul></i>
           <form name="question" id="question" method="post"  
             action="index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />
             <textarea style="width: 100%;height: auto;font-size: 100%;" maxlength="255" rows="5" placeholder="<?php echo $remaining." questions remaining" ?>" name="yourquestion" id="yourquestion"></textarea><br>

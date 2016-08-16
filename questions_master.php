@@ -54,7 +54,7 @@
 <body>
    <div id="questions">
      <strong><u> Questions :</u></strong><br>
-     <i>Rules: <ul style="margin-top: 0px;"><li>Each user can vote for one question</li><li>Vote can be changed at any time</li><li>Questions are ordered by number of votes</li><li>When a question is done, strike it by clicking on the "Done" Button</li></ul></i>
+     <i>Rules: <ul style="margin-top: 0px;"><li>Questions are sorted by number of votes</li><li>When a question is done, strike it by clicking on the <img src="check.png" height=10px> button</li></ul></i>
      <?php
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));

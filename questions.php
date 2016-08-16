@@ -54,9 +54,15 @@ if ( ( $myvot2 != "" ) )
   $nbvote = $nbvote + 1 ;
 $remaining = $nbvotemax - $nbvote ;
 if ( $remaining == 0 )
+{
   $text = "Click on one question to remove your vote" ;
+  $confirmtext = "Want to remove vote for :" ;
+}
 else
+{
   $text = "Click on one question to add your vote" ;
+  $confirmtext = "Want to vote for :" ;
+}
 
 // Retrieving vote
 if(isset($_GET['votefor']))
@@ -168,10 +174,6 @@ if(isset($_GET['votefor']))
 
 <body>
 
-<?php
-  //echo "Myvote : ".$myvote." / ".$myvot1." / ".$myvot2 ;
-?>
-
    <div id="questions">
      <strong><u> Questions :</u></strong><br>
      <i>Rules: <ul style="margin-top: 0px;"><li>you have <?php echo $remaining ; ?> votes left,</li><li><?php echo $text ; ?></li></ul></i>
@@ -196,17 +198,21 @@ if(isset($_GET['votefor']))
           {
             echo "<strike>" ;
           }
+        $thisismyvote = 0 ;
         if ( ( $myvote == $id ) or ( $myvot1 == $id ) or ( $myvot2 == $id ) )
           {
              echo "<strong>";
+             $thisismyvote = 1 ;
           }
         if ( $macAddr2 == $macAddr )
           {
-          $Buttontext="trash.png";
+          $actionimage="trash.png";
+          $confirmtext="Want to delete :".$data['question'] ;
           echo "<font color='red'>";
           }
         else {
-          $Buttontext="like.png";
+          $actionimage="like.png";
+          $confirmtext=$confirmtext.$data['question'] ;
         }
         echo "".$data['name']." at ".$data['questime']."<br>";
         echo "".$data['question']."(" ; 
@@ -223,9 +229,11 @@ if(isset($_GET['votefor']))
         $row = mysqli_fetch_array($req2);
         $count = $count + $row[0];
         echo "".$count." votes)<br>";
-        if ($data['questove'] != '1')
+        if ($data['questove'] != '1' )
         {
-          echo "<input type='image' src=".$Buttontext."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href = top.frames.location.href;\">";
+          if ( ( $remaining !=0 ) or ( $thisismyvote == 1 ) or ($macAddr2 == $macAddr) )
+          //echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href = top.frames.location.href;\">";
+          echo "<input type='image' src=".$actionimage."  onclick=\"if (window.confirm('".$confirmtext."') == true) window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href = top.frames.location.href;\">";
         }
         echo "<br><br>";
         $sql3 = "UPDATE ".$conflist." SET votenum='$count' WHERE id='$id'";
