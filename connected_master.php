@@ -54,7 +54,8 @@
       {
         echo $data['name'].", " ;
         $name3=$data['name'] ;
-        $sql3 = "UPDATE ".$conflist." SET isconnected='0' WHERE name='$name3'";
+        //$sql3 = "UPDATE ".$conflist." SET isconnected='0' WHERE name='$name3'";
+        $sql3 = "UPDATE ".$conflist." SET isconnected='1' WHERE name='$name3'";
         mysqli_query($db,$sql3) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error());
       }
       mysqli_close($db);
