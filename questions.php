@@ -27,6 +27,10 @@ if (isset($allquestions))
       {
          $checkonly='1';
       }
+    else if ( $allquestions == "voted" )
+      {
+         $checkvoted='1';
+      }
     else
       {
          $checkall='1';
@@ -68,6 +72,7 @@ else
 if(isset($_GET['votefor']))
   {
     $votefor=$_GET['votefor'];
+    $action=$_GET['action'];
     $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
     mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
 
@@ -103,7 +108,8 @@ if(isset($_GET['votefor']))
     }
     else
     {
-      if ( $remaining == 0 )
+      //if ( $remaining == 0 )
+      if ( $action == 'M' )
         {
           if ( $myvote == $votefor )
             {
@@ -121,7 +127,7 @@ if(isset($_GET['votefor']))
               mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
             }
         }
-      else 
+      else if ( ( $action == 'P' ) AND ( $remaining != 0 ) ) 
         {
           if ( $myvote == "" )
             {
@@ -176,16 +182,20 @@ if(isset($_GET['votefor']))
 
    <div id="questions">
      <strong><u> Questions :</u></strong><br>
-     <i>Rules: <ul style="margin-top: 0px;"><li>you have <?php echo $remaining ; ?> votes left,</li><li><?php echo $text ; ?></li></ul></i>
+     <i>Rules: <ul style="margin-top: 0px;"><li>you have <?php echo $remaining ; ?> points left,</li><li><?php echo $text ; ?></li></ul></i>
      <form name="choice" id="choice" method="post" action="questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
-       <input type="radio" id="allquestions" name="allquestions" value="all" onclick="this.form.submit()" <?php if ( isset($checkall) ) echo "checked" ;?> >All questions
-       <input type="radio" id="allquestions" name="allquestions" value="only" onclick="this.form.submit()" <?php if ( isset($checkonly) ) echo "checked" ;?> >Only my questions
+       Questions list :<br>
+       <input type="radio" id="allquestions" name="allquestions" value="all" onclick="this.form.submit()" <?php if ( isset($checkall) ) echo "checked" ;?> >All 
+       <input type="radio" id="allquestions" name="allquestions" value="only" onclick="this.form.submit()" <?php if ( isset($checkonly) ) echo "checked" ;?> >My questions
+       <input type="radio" id="allquestions" name="allquestions" value="voted" onclick="this.form.submit()" <?php if ( isset($checkvoted) ) echo "checked" ;?> >My points
      </form><br>
      <?php
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
       if ( isset($checkonly) ) 
         $sql = "SELECT id, question , name, macAddr, questime, questove FROM ".$conflist." WHERE question !='' AND macAddr='$macAddr' ORDER BY questove ASC, votenum DESC";   
+      else if ( isset($checkvoted) )
+        $sql = "SELECT id, question , name, macAddr, questime, questove FROM ".$conflist." WHERE question !='' AND ( (id = '$myvote') OR (id = '$myvot1') OR (id = '$myvot2') ) ORDER BY questove ASC, votenum DESC";   
       else
         $sql = "SELECT id, question , name, macAddr, questime, questove FROM ".$conflist." WHERE question !='' ORDER BY questove ASC, votenum DESC";   
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
@@ -199,22 +209,30 @@ if(isset($_GET['votefor']))
             echo "<strike>" ;
           }
         $thisismyvote = 0 ;
+        $nbvote = 0 ;
         if ( ( $myvote == $id ) or ( $myvot1 == $id ) or ( $myvot2 == $id ) )
           {
              echo "<strong>";
+             if ( $myvote == $id ) $nbvote = $nbvote + 1 ;
+             if ( $myvot1 == $id ) $nbvote = $nbvote + 1 ;
+             if ( $myvot2 == $id ) $nbvote = $nbvote + 1 ;
              $thisismyvote = 1 ;
           }
         if ( $macAddr2 == $macAddr )
           {
           $actionimage="trash.png";
           $confirmtext="Want to delete :".$data['question'] ;
-          echo "<font color='red'>";
+          echo "<font color='grey'><i>";
           }
         else {
           $actionimage="like.png";
           $confirmtext=$confirmtext.$data['question'] ;
         }
-        echo "".$data['name']." at ".$data['questime']."<br>";
+        echo "".$data['name']." at ".$data['questime']."";
+        if ( $nbvote == 1 ) echo " * " ;
+        if ( $nbvote == 2 ) echo " * *" ;
+        if ( $nbvote == 3 ) echo " * * *" ;
+        echo "<br>";
         echo "".$data['question']."(" ; 
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE (votefor = '".$id."')" ;
         $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
@@ -228,19 +246,28 @@ if(isset($_GET['votefor']))
         $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
         $row = mysqli_fetch_array($req2);
         $count = $count + $row[0];
-        echo "".$count." votes)<br>";
+        echo "".$count." points)<br>";
         if ($data['questove'] != '1' )
         {
           if ( ( $remaining !=0 ) or ( $thisismyvote == 1 ) or ($macAddr2 == $macAddr) )
-          //echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href = top.frames.location.href;\">";
-          echo "<input type='image' src=".$actionimage."  onclick=\"if (window.confirm('".$confirmtext."') == true) window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href = top.frames.location.href;\">";
+          if  ( $macAddr2 == $macAddr )
+          {
+            //echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href='index.php?conflist=".$conflist."' ;\">";
+            echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; \">";
+            //echo "<input type='image' src=".$actionimage."  onclick=\"if (window.confirm('".$confirmtext."') == true) window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href = top.frames.location.href;\">";
+          }
+          else
+          {
+            echo "<input type='button' value='+1'  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=P'; \">";
+            echo "<input type='button' value='-1'  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=M'; \">";
+          }
         }
         echo "<br><br>";
         $sql3 = "UPDATE ".$conflist." SET votenum='$count' WHERE id='$id'";
         mysqli_query($db,$sql3) or die('Erreur SQL !'.$sql3.'<br>'.mysqli_error($db));
         if ( $macAddr2 == $macAddr )
           {
-          echo "</font>";
+          echo "</i></font>";
           }
         if ( ( $myvote == $id ) or ( $myvot1 == $id ) or ( $myvot2 == $id ) ) {
            echo "</strong>";

@@ -18,6 +18,22 @@
     mysqli_close($db);
   }
 
+  if(isset($_GET['trash']))
+  {
+    $trashid=$_GET['trash'];
+    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+    $sql = "DELETE from ".$conflist." WHERE id='$trashid'";
+    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+     // remove all votes
+    $sql2 = "UPDATE ".$conflist." SET votefor = '' WHERE votefor='$trashid'";
+    mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+    $sql2 = "UPDATE ".$conflist." SET votefo1 = '' WHERE votefo1='$trashid'";
+    mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+    $sql2 = "UPDATE ".$conflist." SET votefo2 = '' WHERE votefo2='$trashid'";
+    mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+    mysqli_close($db);
+  }
 ?>
 
 <!DOCTYPE html>
@@ -90,7 +106,10 @@
           echo "</strike>" ;
         }
         echo "<br>" ;
-        echo "<input type='image' src=".$buttontext."  onclick=\"window.location.href='questions_master.php?conflist=".$conflist."&questove=".$id."'\">";
+        echo "<table><tr>";
+        echo "<td><input type='image' src=".$buttontext."  style=\"height: 20px;\" onclick=\"window.location.href='questions_master.php?conflist=".$conflist."&questove=".$id."'\"></td>";
+        echo "<td><input type='image' src=\"trash.png\"  style=\"height: 20px;\" onclick=\"window.location.href='questions_master.php?conflist=".$conflist."&trash=".$id."'\"></td>";
+        echo "</tr></table>";
         echo "<br><br>";
       }
       mysqli_close($db);

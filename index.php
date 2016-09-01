@@ -511,6 +511,8 @@ if(isset($_POST['name']))
       <td><input type="text" placeholder="Name" name="name" id="name" maxlength="20" style="font-size: 100%; width:200px;" 
                                       value="<?php if (isset($name)) echo $name; ?>"></td>
       </tr>
+      <tr>
+      <td style="font-style: italic">Example: </td><td style="font-style: italic">Raymond/MN/CC/CSDM</td>
       </tr>
       <tr>
       <td>Conference : </td>
@@ -538,8 +540,8 @@ if(isset($_POST['name']))
       <ul style="margin-top: 0px;">
         <li>post up to 3 questions</li>
         <li>see all questions</li>
-        <li>vote for up to 3 questions</li>
-        <li>remove owned questions / votes</li>
+        <li>grant up to 3 points</li>
+        <li>remove owned questions / points</li>
      </ul>
     </div>
     </form>
