@@ -433,7 +433,7 @@ else
 		
         <!-- Note... this demo should be updated to remove video references -->
         <div id="videos">
-            <video id="callerAudio"></video>
+            <audio id="callerAudio"></audio>
             <div id="acceptCallBox">
                 <div id="acceptCallLabel"></div>
                 <br><br>

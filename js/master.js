@@ -26,6 +26,65 @@
 var selfEasyrtcid = "";
 var currentCall = "" ;
 
+var audio = null;
+var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+var source = null;
+var scriptNode = audioCtx.createScriptProcessor(512, 1, 1);
+var pMax=0;
+
+var voiceBegLevel=1.0;
+var voiceEndLevel=0.5;
+var pQueue = [0,0,0,0,0,0,0,0,0,0];
+var pAverage=0;
+var nbSamples=10;
+
+var speaking=false;
+
+scriptNode.onaudioprocess = function(audioProcessingEvent){
+    // The input buffer is the song we loaded earlier
+  var inputBuffer = audioProcessingEvent.inputBuffer;
+
+  // The output buffer contains the samples that will be modified and played
+  var outputBuffer = audioProcessingEvent.outputBuffer;
+
+  // Loop through the output channels (in this case there is only one)
+  var inputData = inputBuffer.getChannelData(0);
+  var outputData = outputBuffer.getChannelData(0);
+
+  var p=0;
+  // Loop through the samples
+  for (var sample = 0; sample < inputBuffer.length; sample++) {
+    // make output equal to the same as the input
+    p += inputData[sample]*inputData[sample];
+    outputData[sample] = inputData[sample];
+  }
+  
+  pAverage=pAverage-pQueue.shift()+p/nbSamples;
+  pQueue.push(p/nbSamples);
+  
+  if (speaking==false){
+    if (p>(pAverage+voiceBegLevel)){
+      speaking=true;
+      console.log('speaking : ',speaking);
+      audio.muted = false;
+    }
+  }
+  else
+  {
+    if (p<(pAverage-voiceEndLevel)){
+      speaking=false;
+      console.log('speaking : ',speaking);
+      audio.muted = true;
+    }
+  }
+  
+  
+  
+
+}
+
+
+
 function disable(domId) {
     document.getElementById(domId).disabled = "disabled";
 }
@@ -178,16 +237,26 @@ function disconnect() {
 }
 
 
+
 easyrtc.setStreamAcceptor( function(easyrtcid, stream) {
-    var audio = document.getElementById('callerAudio');
+
+    audio = document.getElementById('callerAudio');
     easyrtc.setVideoObjectSrc(audio,stream);
-    enable("hangupButton");
+    enable("hangupButton");  
+    audio.muted = true;
+    speaking=false;
+    source = audioCtx.createMediaStreamSource(stream);
+    source.connect(scriptNode);
+    scriptNode.connect(audioCtx.destination);
 });
 
 
 easyrtc.setOnStreamClosed( function (easyrtcid) {
     easyrtc.setVideoObjectSrc(document.getElementById('callerAudio'), "");
     disable("hangupButton");
+    source.disconnect(scriptNode);
+    scriptNode.disconnect(audioCtx.destination);
+
 });
 
 
