@@ -1,7 +1,9 @@
 <?php
   $conflist=$_GET['conflist'];
-
-  $load= 0 ;
+  $load[0]=0;
+  if (strncasecmp(PHP_OS, 'WIN', 3) != 0) {
+    $load= sys_getloadavg() ;
+  }
   if ( $load[0] > 60 )
     $refreshTime=20 ;
   else

@@ -32,13 +32,18 @@ var source = null;
 var scriptNode = audioCtx.createScriptProcessor(512, 1, 1);
 var pMax=0;
 
-var voiceBegLevel=1.0;
-var voiceEndLevel=0.5;
-var pQueue = [0,0,0,0,0,0,0,0,0,0];
+var voiceBegLevel=0.5;
+var voiceEndLevel=0.1;
+var silenceLevel=0;
+var pQueue = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,];
 var pAverage=0;
-var nbSamples=10;
+var nbSamples=20;
 
 var speaking=false;
+
+var speakingDiv=null;
+
+
 
 scriptNode.onaudioprocess = function(audioProcessingEvent){
     // The input buffer is the song we loaded earlier
@@ -56,10 +61,13 @@ scriptNode.onaudioprocess = function(audioProcessingEvent){
   for (var sample = 0; sample < inputBuffer.length; sample++) {
     // make output equal to the same as the input
     p += inputData[sample]*inputData[sample];
-    outputData[sample] = inputData[sample];
+    outputData[sample] = inputData[sample];   
+    outputData[sample] = 0;
   }
-  
   pAverage=pAverage-pQueue.shift()+p/nbSamples;
+
+
+
   pQueue.push(p/nbSamples);
   
   if (speaking==false){
@@ -67,14 +75,17 @@ scriptNode.onaudioprocess = function(audioProcessingEvent){
       speaking=true;
       console.log('speaking : ',speaking);
       audio.muted = false;
+      speakingDiv.innerHTML="speaking";
+      if (silenceLevel==0) silenceLevel=pAverage
     }
   }
   else
   {
-    if (p<(pAverage-voiceEndLevel)){
+    if (pAverage<(silenceLevel+voiceEndLevel)){
       speaking=false;
       console.log('speaking : ',speaking);
       audio.muted = true;
+      speakingDiv.innerHTML="silence";
     }
   }
   
@@ -241,10 +252,13 @@ function disconnect() {
 easyrtc.setStreamAcceptor( function(easyrtcid, stream) {
 
     audio = document.getElementById('callerAudio');
+    speakingDiv= document.getElementById('speaking');
+
     easyrtc.setVideoObjectSrc(audio,stream);
     enable("hangupButton");  
     audio.muted = true;
     speaking=false;
+    speakingDiv.innerHTML="silence";
     source = audioCtx.createMediaStreamSource(stream);
     source.connect(scriptNode);
     scriptNode.connect(audioCtx.destination);
@@ -256,6 +270,8 @@ easyrtc.setOnStreamClosed( function (easyrtcid) {
     disable("hangupButton");
     source.disconnect(scriptNode);
     scriptNode.disconnect(audioCtx.destination);
+    speakingDiv.innerHTML="unknown";
+
 
 });
 

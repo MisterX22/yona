@@ -430,6 +430,7 @@ else
         <strong> <u>Waiting for Mic : </u></strong>
         <div id="ConnectedClients"></div>           
         <div id="otherClients"></div>
+        <div id="speaking">unknown</div>
 		
         <!-- Note... this demo should be updated to remove video references -->
         <div id="videos">
