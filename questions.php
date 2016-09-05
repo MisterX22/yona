@@ -223,9 +223,14 @@ if(isset($_GET['votefor']))
      <strong><u> Questions :</u></strong><br>
      <i>Rules: <ul style="margin-top: 0px;"><li>you have <?php echo $remaining ; ?> point(s) left,</li><li><?php echo $text ; ?></li></ul></i>
      <form name="refresh" id="refresh" method="post" action="questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
-       Refresh mode :
-       <input type="radio" id="refresh_choice" name="refresh_choice" value="auto" onclick="this.form.submit()" <?php if ( isset($auto) ) echo "checked" ;?> >Auto
-       <input type="radio" id="refresh_choice" name="refresh_choice" value="manual" onclick="this.form.submit()" <?php if ( isset($manual) ) echo "checked" ;?> >Manual
+       <table><tr>
+       <td>Refresh mode :</td>
+       <td><input type="radio" id="refresh_choice" name="refresh_choice" value="auto" onclick="this.form.submit()" <?php if ( isset($auto) ) echo "checked" ;?> >Auto</td>
+       <td><input type="radio" id="refresh_choice" name="refresh_choice" value="manual" onclick="this.form.submit()" <?php if ( isset($manual) ) echo "checked" ;?> >Manual</td>
+     <?php if ( isset($manual) )
+       echo "<td><input type='button' value='Refresh' onclick='this.form.submit()'></td>" ;
+     ?>
+       </tr></table>
      </form>
      <form name="choice" id="choice" method="post" action="questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
        Questions filter :<br>
@@ -297,7 +302,8 @@ if(isset($_GET['votefor']))
           if  ( $macAddr2 == $macAddr )
           {
             //echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href='index.php?conflist=".$conflist."' ;\">";
-            echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; \">";
+            echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href='index.php?conflist=".$conflist."' ; \">";
+            //echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; \">";
             //echo "<input type='image' src=".$actionimage."  onclick=\"if (window.confirm('".$confirmtext."') == true) window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href = top.frames.location.href;\">";
           }
           else

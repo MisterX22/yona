@@ -9,6 +9,12 @@ $arp=`arp -a $ipclient`;
 $lines=explode(" ", $arp);
 $macAddr=$lines[3];
 
+$load= sys_getloadavg() ;
+if ( $load[0] > 60 )
+  $refreshTime=20 ;
+else
+  $refreshTime=10 ;
+
 // Updating connection status list
 if(isset($_GET['action']))
   {
@@ -50,7 +56,9 @@ if(isset($_GET['action']))
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="refresh" content="10" URL="connected.php" />
+    <?php
+      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"connected.php?conflist=".$conflist."\" />" ;
+    ?>
     <title>Connected users</title>
     <style type="text/css">
        #users {
