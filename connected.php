@@ -39,14 +39,6 @@ if(isset($_GET['action']))
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
         mysqli_close($db);
       }
-    //else
-    //  {
-    //    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-    //    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-    //    $sql = "UPDATE ".$conflist." SET isconnected = (isconnected - 1) WHERE macAddr='$macAddr'";
-    //    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-    //    mysqli_close($db);
-    //  }
   }
 }
 
@@ -79,9 +71,9 @@ if(isset($_GET['action']))
       $sql = "SELECT name FROM ".$conflist." WHERE isconnected > 0 AND firstreg = '1'";   
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       while($data = mysqli_fetch_assoc($req)) 
-      { 
-        echo $data['name']."<br>" ; 
-      } 
+        { 
+          echo $data['name']."<br>" ; 
+        } 
       mysqli_close($db);
       ?>
 
@@ -93,9 +85,9 @@ if(isset($_GET['action']))
       $sql = "SELECT name FROM ".$conflist." WHERE isconnected <= 0 AND firstreg = '1'";   
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       while($data = mysqli_fetch_assoc($req)) 
-      { 
-        echo $data['name']."<br>" ; 
-      } 
+        { 
+          echo $data['name']."<br>" ; 
+        } 
       mysqli_close($db);
       ?>
 

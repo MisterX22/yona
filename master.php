@@ -2,12 +2,12 @@
 
 // Retrieving all required inputs
 if(isset($_POST['name']))
-{
-  $name=$_POST['name'];
-  if ($name == "")
-    if(isset($_POST['conflist']))
-      $name=$_POST['conflist'];
-}
+  {
+    $name=$_POST['name'];
+    if ($name == "")
+      if(isset($_POST['conflist']))
+        $name=$_POST['conflist'];
+  }
 else
   if(isset($_POST['conflist']))
     $name=$_POST['conflist'];
@@ -26,6 +26,7 @@ if ($action=="D")
 // Managing table if required
 if(empty($name))
   {
+    // do nothing
   }
 else
   {

@@ -10,16 +10,19 @@ $numquestion = 0;
 $remaining = 3 - $numquestion ;
 $hostname=$lines[0] ;
 
+// What action ?
 if(isset($_GET['action']))
   $action=$_GET['action'] ;
 else
   $action="N" ;
 
+// Which conference ?
 if(isset($_GET['conflist']))
   $conflist=$_GET['conflist'];
 if(isset($_POST['conflist']))
   $conflist=$_POST['conflist'];
 
+// Which name ?
 if(isset($_GET['name']))
   $name=htmlspecialchars($_GET['name'],ENT_HTML5);
 if(isset($_POST['name']))
@@ -31,7 +34,8 @@ else
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
       $sql = "SELECT name FROM ".$conflist." WHERE macAddr = '$macAddr'";
-      $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+      //$req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db)) ;
+      $req = mysqli_query($db,$sql) or header("Refresh:0; url=index.php");
       while($madata = mysqli_fetch_assoc($req))
         {
           $name = $madata['name'] ;
@@ -40,7 +44,7 @@ else
     }
   }
 
-
+// How many remaining questions ?
 if ( isset($name) ) 
   {
     if ( isset($conflist) ) {
@@ -56,25 +60,12 @@ if ( isset($name) )
     }
   }
 
-// Do we need to reset the question ?
-//if (isset($_POST['resetquestion']))
-//  {
-//      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-//      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-//      $sql = "UPDATE ".$conflist." SET question='', votenum = '0', questime=curtime(), questove = '0'  WHERE macAddr='$macAddr'";   
-//      mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-//      // remove all votes
-//      $sql2 = "UPDATE ".$conflist." SET votefor = '' WHERE votefor='$macAddr'";
-//      mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-//      mysqli_close($db);
-//  }
-
 // Do we need to register or read a question ?
 if(isset($_POST['submitquestion']))    
   {
     if ( $remaining <= 0 )
       {
-
+         // Do nothing
       }
     else
       {
@@ -99,6 +90,9 @@ if(isset($_POST['submitquestion']))
         $remaining = $remaining - 1 ;
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
         mysqli_close($db); 
+        // we want to avoid double post on reload
+        header('Location: index.php?conflist='.$conflist.'&name='.$name);
+        exit;
       }
   }
 
@@ -173,7 +167,8 @@ if(isset($_POST['name']))
         }
       function ChangeStyle (addr)
         {
-          document.getElementById(addr).style.borderTop="thick solid grey";
+          //document.getElementById(addr).style.borderTop="thick solid grey";
+          document.getElementById(addr).style.borderTop="solid 1px grey";
         }
       function ResetStyle (addr)
         {
@@ -306,9 +301,6 @@ if(isset($_POST['name']))
       window.onload = function () {
           toggleValue();
       }
-      //window.addEventListener("orientationchange", function() {
-        //document.location.reload(true);}, false) ;
-        //alert(screen.orientation) ;}, false) ;
     </script>
         
     <!-- Styles used within the demo -->
@@ -486,21 +478,22 @@ if(isset($_POST['name']))
 
 <body>
 
-<div name="menutop" id="menutop">
-<table>
-<tr>
-<td>Yona</td>
-<td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "NOKIA"; ?></td>
-<td>
-  <form name="byebye" id="byebye" method="post" 
-    action="index.php?action=D&conflist=<?php if (isset($conflist)) echo $conflist?>">
-     <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect" style="font-size: 50%;"
-                   onClick="document.getElementById("name").value='';">
-  </form>
-</td>
-</tr>
-</table>
-</div>
+  <div name="menutop" id="menutop">
+    <table>
+      <tr>
+        <!--<td>Yona</td>-->
+        <td><img src="yona.png" height="40px"></td>
+        <td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "NOKIA"; ?></td>
+        <td>
+          <form name="byebye" id="byebye" method="post" 
+            action="index.php?action=D&conflist=<?php if (isset($conflist)) echo $conflist?>">
+             <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect" style="font-size: 50%;"
+                           onClick="document.getElementById("name").value='';">
+          </form>
+        </td>
+      </tr>
+    </table>
+  </div>
 
   <div name="main" id="main">
     <form name="whoami" id="whoami" method="post" action="index.php?conflist=<?php if (isset($conflist)) echo $conflist?>"/>
@@ -523,9 +516,10 @@ if(isset($_POST['name']))
          mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
          $sql = "show tables" ;
          $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-         while($table = mysqli_fetch_array($req)) {
+         while($table = mysqli_fetch_array($req))
+           {
              echo "<option value='".$table[0]."'>".$table[0]."</option> " ;
-         }
+           }
          mysqli_close($db);        
       ?>
       </select></td>
@@ -552,14 +546,21 @@ if(isset($_POST['name']))
           <i>Rules: <ul style="margin-top: 0px;"><li>Only three questions per user</li><li>Owned question can be removed (see Q&A tab)</li></ul></i>
           <form name="question" id="question" method="post"  
             action="index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />
-            <textarea style="width: 100%;height: auto;font-size: 100%;" maxlength="255" rows="5" placeholder="<?php echo $remaining." questions remaining" ?>" name="yourquestion" id="yourquestion"></textarea><br>
+            <textarea style="width: 100%;height: auto;font-size: 100%;" maxlength="255" rows="5" 
+                   placeholder="<?php echo $remaining." questions remaining" ?>"
+                   name="yourquestion" id="yourquestion"></textarea><br>
             <input name="submitquestion" id="submitquestion" type="submit" value="Send">
           </form>
         </div>
         <div id="connectControls">
            <div style="text-align: left;">
-           <strong>Ask for the micro by clicking the button</strong><br>
-           <i>Rules: <ul style="margin-top: 0px;"><li>You will be asked for a confirmation before you can speak</li><li>Request can be removed at any time</li></ul></i>
+             <strong>Ask for the micro by clicking the button</strong><br>
+             <i>Rules:  
+             <ul style="margin-top: 0px;">
+               <li>You will be asked for a confirmation before you can speak</li>
+               <li>Request can be removed at any time</li>
+             </ul>
+             </i>
            </div>
            <button id="connectButton" style='color: white; background-color : #183693' onclick="connect(document.getElementById('name').value)">Ask Micro</button>
            <br><br>
@@ -593,16 +594,16 @@ if(isset($_POST['name']))
     </div>
   </div>              
 
-<div name="menubottom" id="menubottom">
-<table width="100%">
-<tr>
-<td id="connectedUsers_button" name="connectedUsers_button"><img src="group.png" height="30px"   onclick="showUsers()"></td>
-<td id="sendQuestions_button" name="sendQuestions_button"><img src="plumier.png" height="30px" onclick="showSendQuestion()"></td>
-<td id="connectControls_button" name="connectControls_button"><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
-<td id="questionList_button" name="questionList_button"><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>
-</tr>
-</table>
-</div>
+  <div name="menubottom" id="menubottom">
+    <table width="100%">
+      <tr>
+        <td id="connectedUsers_button" name="connectedUsers_button"><img src="group.png" height="30px"   onclick="showUsers()"></td>
+        <td id="sendQuestions_button" name="sendQuestions_button"><img src="plumier.png" height="30px" onclick="showSendQuestion()"></td>
+        <td id="connectControls_button" name="connectControls_button"><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
+        <td id="questionList_button" name="questionList_button"><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>
+      </tr>
+    </table>
+  </div>
 
 </body>
 

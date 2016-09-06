@@ -9,12 +9,14 @@ $arp=`arp -a $ipclient`;
 $lines=explode(" ", $arp);
 $macAddr=$lines[3];
 
+// Compute the server load to adjust refresh time
 $load= sys_getloadavg() ;
 if ( $load[0] > 60 )
   $refreshTime=20 ;
 else
   $refreshTime=10 ;
 
+// retrieving post/get data
 if (isset($_POST['allquestions']))
    $allquestions = $_POST['allquestions'];
 if (isset($_GET['choice']))
@@ -23,6 +25,9 @@ if (isset($_POST['refresh_choice']))
    $refresh_choice = $_POST['refresh_choice'];
 if (isset($_GET['refresh']))
    $refresh_choice = $_GET['refresh'];
+
+if (isset($_GET['action']))
+   $action = $_POST['action'];
 
 // Retrieving choice
 $checkall='1';
@@ -43,7 +48,6 @@ if (isset($allquestions))
   }
 
 $auto='1';
-//echo "refresh : ".$refresh_choice;
 if (isset($refresh_choice))
   {
     if ( $refresh_choice == "auto" )
@@ -57,6 +61,7 @@ if (isset($refresh_choice))
       }
   }
 
+// retrieving myvote
 $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
 mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
 $sql = "SELECT votefor, votefo1, votefo2, macAddr FROM ".$conflist." WHERE macAddr = '$macAddr' AND firstreg = '1' ";   
@@ -68,6 +73,8 @@ while($madata = mysqli_fetch_assoc($req))
     $myvot2 = $madata['votefo2'] ;
   } 
 mysqli_close($db);
+
+// How many vote remaining ?
 $nbvote = 0 ;
 $nbvotemax = 3 ;
 if ( ( $myvote != "" ) )
@@ -77,18 +84,20 @@ if ( ( $myvot1 != "" ) )
 if ( ( $myvot2 != "" ) )
   $nbvote = $nbvote + 1 ;
 $remaining = $nbvotemax - $nbvote ;
-if ( $remaining == 0 )
-{
-  $text = "Click on one question to remove your vote" ;
-  $confirmtext = "Want to remove vote for :" ;
-}
-else
-{
-  $text = "Click on one question to add your vote" ;
-  $confirmtext = "Want to vote for :" ;
-}
 
-// Retrieving vote
+// adjust text depending of the remaining vote
+if ( $remaining == 0 )
+  {
+    $text = "Click to remove your vote" ;
+    $confirmtext = "Want to remove vote for :" ;
+  }
+else
+  {
+    $text = "Click to add your vote" ;
+    $confirmtext = "Want to vote for :" ;
+  }
+
+// Retrieving action on vote
 if(isset($_GET['votefor']))
   {
     $votefor=$_GET['votefor'];
@@ -96,12 +105,13 @@ if(isset($_GET['votefor']))
     $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
     mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
 
-    $sql2 = "SELECT macAddr, firstreg FROM ".$conflist." WHERE id = '$votefor'";
+    $sql2 = "SELECT macAddr, firstreg ,name FROM ".$conflist." WHERE id = '$votefor'";
     $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
     while($madata2 = mysqli_fetch_assoc($req2))
       {
         $macSearch = $madata2['macAddr'] ;
         $firstreg = $madata2['firstreg'] ;
+        $name = $madata2['name'] ;
       }
 
 
@@ -132,7 +142,7 @@ if(isset($_GET['votefor']))
     }
     else
     {
-      //if ( $remaining == 0 )
+      // want to add a vote
       if ( $action == 'M' )
         {
           if ( $myvote == $votefor )
@@ -142,14 +152,14 @@ if(isset($_GET['votefor']))
               $myvote = '' ;
               $remaining = $remaining + 1 ;
             }
-            elseif ( $myvot1 == $votefor )
+          elseif ( $myvot1 == $votefor )
             {
               $sql = "UPDATE ".$conflist." SET votefo1='' WHERE macAddr='$macAddr' AND firstreg='1'";
               mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
               $myvot1 = '' ;
               $remaining = $remaining + 1 ;
             }
-            elseif ( $myvot2 == $votefor )
+          elseif ( $myvot2 == $votefor )
             {
               $sql = "UPDATE ".$conflist." SET votefo2='' WHERE macAddr='$macAddr' AND firstreg='1'";
               mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
@@ -157,6 +167,7 @@ if(isset($_GET['votefor']))
               $remaining = $remaining + 1 ;
             }
         }
+      // want to remove a vote
       else if ( ( $action == 'P' ) AND ( $remaining != 0 ) ) 
         {
           if ( $myvote == "" )
@@ -213,6 +224,7 @@ if(isset($_GET['votefor']))
     </style>
     <script>
        //window.onload = alert(window.location.href) ;
+       <?php if ($action == "D") echo "top.frames.location.href='index.php?conflist=".$conflist."'" ; ?>
     </script>
 
 </head>
@@ -301,15 +313,15 @@ if(isset($_GET['votefor']))
           if ( ( $remaining !=0 ) or ( $thisismyvote == 1 ) or ($macAddr2 == $macAddr) )
           if  ( $macAddr2 == $macAddr )
           {
-            //echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href='index.php?conflist=".$conflist."' ;\">";
-            echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href='index.php?conflist=".$conflist."' ; \">";
-            //echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; \">";
-            //echo "<input type='image' src=".$actionimage."  onclick=\"if (window.confirm('".$confirmtext."') == true) window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action='; top.frames.location.href = top.frames.location.href;\">";
+            // this is my question, want to remove it  ?
+            echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=D';\">";
           }
           else
           {
-            if ($remaining > 0) echo "<input type='image' src=plus1.png  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=P'; \">";
-            if ($thisismyvote == 1)echo "<input type='image' src=moins1.png  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=M'; \">";
+            if ($remaining > 0) 
+             echo "<input type='image' src=plus1.png  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=P'; \">";
+            if ($thisismyvote == 1)
+             echo "<input type='image' src=moins1.png  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=M'; \">";
           }
         }
         echo "<br><br>";
@@ -317,15 +329,16 @@ if(isset($_GET['votefor']))
         mysqli_query($db,$sql3) or die('Erreur SQL !'.$sql3.'<br>'.mysqli_error($db));
         if ( $macAddr2 == $macAddr )
           {
-          echo "</i></font>";
+            echo "</i></font>";
           }
-        if ( ( $myvote == $id ) or ( $myvot1 == $id ) or ( $myvot2 == $id ) ) {
-           echo "</strong>";
-        }
+        if ( ( $myvote == $id ) or ( $myvot1 == $id ) or ( $myvot2 == $id ) )
+          {
+             echo "</strong>";
+          }
         if ($data['questove'] == '1')
-        {
-          echo "</strike>" ;
-        }
+          {
+            echo "</strike>" ;
+          }
       } 
       mysqli_close($db);
       ?>
