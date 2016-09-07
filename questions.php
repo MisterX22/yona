@@ -232,24 +232,26 @@ if(isset($_GET['votefor']))
 <body>
 
    <div id="questions">
-     <strong><u> Questions :</u></strong><br>
+     <strong><u> Questions :</u></strong>
+     <form name="choice" id="choice" method="post" action="questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
+       <table><tr>
+       <!--<td><strong><u> Questions :</u></strong></td>-->
+       <td><input type="radio" id="allquestions" name="allquestions" value="all" onclick="this.form.submit()" <?php if ( isset($checkall) ) echo "checked" ;?> >All</td>
+       <td><input type="radio" id="allquestions" name="allquestions" value="only" onclick="this.form.submit()" <?php if ( isset($checkonly) ) echo "checked" ;?> >My questions</td>
+       <td><input type="radio" id="allquestions" name="allquestions" value="voted" onclick="this.form.submit()" <?php if ( isset($checkvoted) ) echo "checked" ;?> >My points</td>
+       </tr></table>
+     </form>
      <i>Rules: <ul style="margin-top: 0px;"><li>you have <?php echo $remaining ; ?> point(s) left,</li><li><?php echo $text ; ?></li></ul></i>
      <form name="refresh" id="refresh" method="post" action="questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
        <table><tr>
        <td>Refresh mode :</td>
        <td><input type="radio" id="refresh_choice" name="refresh_choice" value="auto" onclick="this.form.submit()" <?php if ( isset($auto) ) echo "checked" ;?> >Auto</td>
        <td><input type="radio" id="refresh_choice" name="refresh_choice" value="manual" onclick="this.form.submit()" <?php if ( isset($manual) ) echo "checked" ;?> >Manual</td>
-     <?php if ( isset($manual) )
-       echo "<td><input type='button' value='Refresh' onclick='this.form.submit()'></td>" ;
-     ?>
+       <?php if ( isset($manual) )
+         echo "<td><input type='button' value='Refresh' onclick='this.form.submit()'></td>" ;
+       ?>
        </tr></table>
      </form>
-     <form name="choice" id="choice" method="post" action="questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
-       Questions filter :<br>
-       <input type="radio" id="allquestions" name="allquestions" value="all" onclick="this.form.submit()" <?php if ( isset($checkall) ) echo "checked" ;?> >All 
-       <input type="radio" id="allquestions" name="allquestions" value="only" onclick="this.form.submit()" <?php if ( isset($checkonly) ) echo "checked" ;?> >My questions
-       <input type="radio" id="allquestions" name="allquestions" value="voted" onclick="this.form.submit()" <?php if ( isset($checkvoted) ) echo "checked" ;?> >My points
-     </form><br>
      <?php
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
