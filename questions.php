@@ -229,7 +229,7 @@ if(isset($_GET['votefor']))
 
 </head>
 
-<body>
+<body style="font-family: 'Arial';">
 
    <div id="questions">
      <strong><u> Questions :</u></strong>

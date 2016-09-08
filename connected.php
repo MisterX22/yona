@@ -62,7 +62,7 @@ if(isset($_GET['action']))
 
 </head>
 
-<body>
+<body style="font-family: 'Arial';">
    <div id="users">
      <strong><u>Connected Users :</u></strong><br>
      <?php

@@ -461,7 +461,7 @@ if(isset($_POST['name']))
               background-color : white ;
               color : black ;
               border-radius : 5px;
-              font-family: "Times New Roman";
+              font-family: "Arial";
               font-size: 150%;
          }
          body {
@@ -476,14 +476,14 @@ if(isset($_POST['name']))
 
 </head>
 
-<body>
+<body style="font-family: 'Arial';">
 
   <div name="menutop" id="menutop">
     <table>
       <tr>
         <!--<td>Yona</td>-->
         <td><img src="yona.png" height="40px"></td>
-        <td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "NOKIA"; ?></td>
+        <td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "Welcome"; ?></td>
         <td>
           <form name="byebye" id="byebye" method="post" 
             action="index.php?action=D&conflist=<?php if (isset($conflist)) echo $conflist?>">

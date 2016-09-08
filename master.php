@@ -364,7 +364,7 @@ else
          }
     </style>
   </head>
-  <body onload="setTimeout('connect()',4000)">
+  <body style="font-family: 'Arial';" onload="setTimeout('connect()',4000)">
 	
   <div name="menutop" id="menutop">
     <table width="100%">

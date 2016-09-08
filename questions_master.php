@@ -67,7 +67,7 @@
 
 </head>
 
-<body>
+<body style="font-family: 'Arial';">
    <div id="questions">
      <strong><u> Questions :</u></strong><br>
      <i>Rules: <ul style="margin-top: 0px;"><li>Questions are sorted by number of votes</li><li>When a question is done, strike it by clicking on the <img src="check.png" height=10px> button</li></ul></i>
