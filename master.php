@@ -147,6 +147,7 @@ else
                Hide("connectedUsers");
                Hide("connectControls");
                Hide("questionList");
+               Hide("database");
            }
          else
            {
@@ -155,8 +156,35 @@ else
                Show("connectedUsers");
                Hide("connectControls");
                Hide("questionList");
+               Hide("database");
 
                ChangeStyle("connectedUsers_button") ;
+               ResetStyle("connectControls_button") ;
+               ResetStyle("questionList_button") ;
+               ResetStyle("database_button") ;
+           }
+      }
+      function showDatabase() {
+         if (document.getElementById("name").value == "")
+           {
+               Show("conf");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("connectControls");
+               Hide("questionList");
+               Hide("database");
+           }
+         else
+           {
+               Hide("conf");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("connectControls");
+               Hide("questionList");
+               Show("database");
+
+               ChangeStyle("database_button") ;
+               ResetStyle("connectedUsers_button") ;
                ResetStyle("connectControls_button") ;
                ResetStyle("questionList_button") ;
            }
@@ -169,6 +197,7 @@ else
                Hide("connectedUsers");
                Hide("connectControls");
                Hide("questionList");
+               Hide("database");
            }
          else
            {
@@ -177,10 +206,12 @@ else
                Hide("connectedUsers");
                Show("connectControls");
                Hide("questionList");
+               Hide("database");
 
                ResetStyle("connectedUsers_button") ;
                ChangeStyle("connectControls_button") ;
                ResetStyle("questionList_button") ;
+               ResetStyle("database_button") ;
            }
       }
       function showQuestions() {
@@ -191,6 +222,7 @@ else
                Hide("connectedUsers");
                Hide("connectControls");
                Hide("questionList");
+               Hide("database");
            }
          else
            {
@@ -199,10 +231,12 @@ else
                Hide("connectedUsers");
                Hide("connectControls");
                Show("questionList");
+               Hide("database");
 
                ResetStyle("connectedUsers_button") ;
                ResetStyle("connectControls_button") ;
                ChangeStyle("questionList_button") ;
+               ResetStyle("database_button") ;
            }
       }
       window.onload = function () {
@@ -326,7 +360,7 @@ else
          }
          body>#menubottom {position:fixed}
 
-         #conf, #connectedUsers, #connectControls, #questionList {
+         #conf, #connectedUsers, #connectControls, #questionList, #database {
               visibility: hidden;
               position: absolute;
               top: 40px;
@@ -373,7 +407,7 @@ else
     <td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "NOKIA"; ?></td>
     <td>
       <form name="byebye" id="byebye" method="post" 
-          action="master.php?action=D&name=<?php if (isset($name)) echo $name?>">
+          action="https://192.168.2.1/master.php?action=D&name=<?php if (isset($name)) echo $name?>">
         <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect" style="font-size: 50%;"
             onClick="document.getElementById("name").value='';">
       </form>
@@ -384,7 +418,7 @@ else
   
   <div id="main">
     <!-- Main Content -->
-    <form name="conf" id="conf" method="post" action="master.php"/>
+    <form name="conf" id="conf" method="post" action="https://192.168.2.1/master.php"/>
       <table>
       <tr>
       <td><big><strong>Existing Conference : </strong></big></td>
@@ -407,7 +441,7 @@ else
       </tr>
       <tr>
       <td><big><strong>Conference Name:</strong></big></td>
-      <!--<td><form name="createconf" id="createconf" method="post" action="master.php" style="font-size: 150%"/>!-->
+      <!--<td><form name="createconf" id="createconf" method="post" action="https://192.168.2.1/master.php" style="font-size: 150%"/>!-->
       <td><input type="text" name="name" id="name" value="<?php if (isset($name)) echo $name;?>"></td>
       <td><input name="submitname" id="submitname" type="submit" value="Create"></td>
       <!--</form></td>!-->
@@ -446,14 +480,21 @@ else
 	
    <div id="connectedUsers">
         <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
-            src="connected_master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
+            src="https://192.168.2.1/connected_master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 	
    <div id="questionList">
         <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
             onload="javascript:ResizeIframe(this);"
-            src="questions_master.php?conflist=<?php if (isset($name)) echo $name?>">
+            src="https://192.168.2.1/questions_master.php?conflist=<?php if (isset($name)) echo $name?>">
+        </iframe>
+   </div>
+
+   <div id="database">
+        <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
+            onload="javascript:ResizeIframe(this);"
+            src="https://192.168.2.1/database.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 	
@@ -462,6 +503,7 @@ else
       <table width="100%">
         <tr>
           <td id="connectedUsers_button" name="connectedUsers_button"><img src="group.png" height="30px"   onclick="showUsers()"></td>
+          <td id="database_button" name="database_button"><img src="db.png" height="30px"   onclick="showDatabase()"></td>
           <td id="connectControls_button" name="connectControls_button"><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
           <td id="questionList_button" name="questionList_button"><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>
         </tr>

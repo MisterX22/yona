@@ -35,7 +35,7 @@ else
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
       $sql = "SELECT name FROM ".$conflist." WHERE macAddr = '$macAddr'";
       //$req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db)) ;
-      $req = mysqli_query($db,$sql) or header("Refresh:0; url=index.php");
+      $req = mysqli_query($db,$sql) or header("Refresh:0; url=https://192.168.2.1/index.php");
       while($madata = mysqli_fetch_assoc($req))
         {
           $name = $madata['name'] ;
@@ -91,7 +91,7 @@ if(isset($_POST['submitquestion']))
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
         mysqli_close($db); 
         // we want to avoid double post on reload
-        header('Location: index.php?conflist='.$conflist.'&name='.$name);
+        header('Location: https://192.168.2.1/index.php?conflist='.$conflist.'&name='.$name);
         exit;
       }
   }
@@ -486,7 +486,7 @@ if(isset($_POST['name']))
         <td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "Welcome"; ?></td>
         <td>
           <form name="byebye" id="byebye" method="post" 
-            action="index.php?action=D&conflist=<?php if (isset($conflist)) echo $conflist?>">
+            action="https://192.168.2.1/index.php?action=D&conflist=<?php if (isset($conflist)) echo $conflist?>">
              <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect" style="font-size: 50%;"
                            onClick="document.getElementById("name").value='';">
           </form>
@@ -496,7 +496,7 @@ if(isset($_POST['name']))
   </div>
 
   <div name="main" id="main">
-    <form name="whoami" id="whoami" method="post" action="index.php?conflist=<?php if (isset($conflist)) echo $conflist?>"/>
+    <form name="whoami" id="whoami" method="post" action="https://192.168.2.1/index.php?conflist=<?php if (isset($conflist)) echo $conflist?>"/>
     <center>
       <table>
       <tr>
@@ -505,7 +505,7 @@ if(isset($_POST['name']))
                                       value="<?php if (isset($name)) echo $name; ?>"></td>
       </tr>
       <tr>
-      <td style="font-style: italic">Example: </td><td style="font-style: italic">Raymond/MN/CC/CSDM</td>
+      <td style="font-style: italic">Example: </td><td style="font-style: italic">John/MN/CC/CSDM</td>
       </tr>
       <tr>
       <td>Conference : </td>
@@ -545,7 +545,7 @@ if(isset($_POST['name']))
           <strong>Send your question by filling this form</strong><br>
           <i>Rules: <ul style="margin-top: 0px;"><li>Only three questions per user</li><li>Owned question can be removed (see Q&A tab)</li></ul></i>
           <form name="question" id="question" method="post"  
-            action="index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />
+            action="https://192.168.2.1/index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />
             <textarea style="width: 100%;height: auto;font-size: 100%;" maxlength="255" rows="5" 
                    placeholder="<?php echo $remaining." questions remaining" ?>"
                    name="yourquestion" id="yourquestion"></textarea><br>
@@ -582,13 +582,13 @@ if(isset($_POST['name']))
         <div id="connectedUsers">
           <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
              onload="javascript:ResizeIframe(this);"
-             src="connected.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+             src="https://192.168.2.1/connected.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
         <div id="questionList">
           <iframe style="border: none; overflow: visible; width: 100%; height: 100%;" SCROLLING=auto 
              onload="javascript:ResizeIframe(this);"
-             src="questions.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+             src="https://192.168.2.1/questions.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
     </div>
