@@ -32,20 +32,27 @@ var source = null;
 var scriptNode = audioCtx.createScriptProcessor(512, 1, 1);
 var pMax=0;
 
-var voiceBegLevel=0.5;
+var voiceBegLevel=0.5; // threshold for voice begin
 var voiceEndLevel=0.1;
-var silenceLevel=0;
-var pQueue = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,];
-var pAverage=0;
+var pQueue = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]; // power of long period
+var pAverage=0; // average power of long period
+var maxP=0; //max power during voice period
 var nbSamples=20;
 
 var speaking=false;
 
 var speakingDiv=null;
 
+//------------------------------------------------------------------------------
+//----------------- ECHO CANCELLATION ------------------------------------------
+//------------------------------------------------------------------------------
 
+var echoCancellationEnabled=false
 
 scriptNode.onaudioprocess = function(audioProcessingEvent){
+
+console.log("voiceBegLevel ",voiceBegLevel)
+
     // The input buffer is the song we loaded earlier
   var inputBuffer = audioProcessingEvent.inputBuffer;
 
@@ -61,7 +68,6 @@ scriptNode.onaudioprocess = function(audioProcessingEvent){
   for (var sample = 0; sample < inputBuffer.length; sample++) {
     // make output equal to the same as the input
     p += inputData[sample]*inputData[sample];
-    outputData[sample] = inputData[sample];   
     outputData[sample] = 0;
   }
   pAverage=pAverage-pQueue.shift()+p/nbSamples;
@@ -73,26 +79,46 @@ scriptNode.onaudioprocess = function(audioProcessingEvent){
   if (speaking==false){
     if (p>(pAverage+voiceBegLevel)){
       speaking=true;
+      maxP=0;
       console.log('speaking : ',speaking);
       audio.muted = false;
-      speakingDiv.innerHTML="speaking";
-      if (silenceLevel==0) silenceLevel=pAverage
+      speakingDiv.innerHTML="Voice status : speaking";
     }
   }
   else
   {
-    if (pAverage<(silenceLevel+voiceEndLevel)){
+    if (pAverage>maxP) maxP=pAverage; 
+    if (pAverage<(maxP*voiceEndLevel)){
       speaking=false;
       console.log('speaking : ',speaking);
       audio.muted = true;
-      speakingDiv.innerHTML="silence";
+      speakingDiv.innerHTML="Voice status : silence";
     }
   }
-  
-  
-  
 
 }
+
+function enableEchoCancellation(event) {
+    if (event) {
+        console.log('echo cancellation enabled');
+        echoCancellationEnabled=true;
+    } else {
+        console.log('echo cancellation disabled');
+        echoCancellationEnabled=false;
+    }
+};
+
+//------------------------------------------------------------------------------
+//-----------------  END ECHO CANCELLATION -------------------------------------
+//------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 
 
@@ -254,23 +280,34 @@ easyrtc.setStreamAcceptor( function(easyrtcid, stream) {
     audio = document.getElementById('callerAudio');
     speakingDiv= document.getElementById('speaking');
 
+    voiceBegLevel=parseFloat(document.getElementById('echo_cancellation_begin_threshold').value);
+    voiceEndLevel=parseFloat(document.getElementById('echo_cancellation_end_threshold').value);
+
     easyrtc.setVideoObjectSrc(audio,stream);
-    enable("hangupButton");  
-    audio.muted = true;
-    speaking=false;
-    speakingDiv.innerHTML="silence";
-    source = audioCtx.createMediaStreamSource(stream);
-    source.connect(scriptNode);
-    scriptNode.connect(audioCtx.destination);
+    enable("hangupButton");
+    
+    if (echoCancellationEnabled){
+        audio.muted = true;
+        speaking=false;
+        speakingDiv.innerHTML="Voice status : silence";
+        source = audioCtx.createMediaStreamSource(stream);
+        source.connect(scriptNode);
+        scriptNode.connect(audioCtx.destination);
+    }
+    else{
+        audio.muted = false;
+    }
 });
 
 
 easyrtc.setOnStreamClosed( function (easyrtcid) {
     easyrtc.setVideoObjectSrc(document.getElementById('callerAudio'), "");
     disable("hangupButton");
-    source.disconnect(scriptNode);
-    scriptNode.disconnect(audioCtx.destination);
-    speakingDiv.innerHTML="unknown";
+    if (source != null){
+        source.disconnect(scriptNode);
+        scriptNode.disconnect(audioCtx.destination);
+        }
+    speakingDiv.innerHTML="Voice status : unknown";
 
 
 });
