@@ -16,6 +16,10 @@ if(isset($_GET['action']))
 else
   $action="N" ;
 
+$page='0';
+if(isset($_GET['P']))
+   $page='1';
+
 // Which conference ?
 if(isset($_GET['conflist']))
   $conflist=$_GET['conflist'];
@@ -125,12 +129,39 @@ if(isset($_POST['name']))
        }
      else
        {
-          $sql = "UPDATE ".$conflist." SET name = '$thename' , isconnected = '2', login = now() WHERE macAddr='$macAddr'";   
+          $sql = "UPDATE ".$conflist." SET hostname = '$hostname', name = '$thename' , isconnected = '2', login = now() WHERE macAddr='$macAddr'";   
        }
 
      mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
      mysqli_close($db); 
   }
+
+$target_path = "upload/".$conflist."/" ;
+$uploadtext="Wants to try ? please dare !<br><br>" ;
+if (isset($_FILES['uploadedimagefile']))
+  {
+    if(is_uploaded_file($_FILES["uploadedimagefile"]["tmp_name"]))
+      {
+        $imagename=basename($_FILES['uploadedimagefile']['name']);
+        $target_path = $target_path.$name."_".$imagename ;
+        if (move_uploaded_file($_FILES["uploadedimagefile"]["tmp_name"], $target_path))
+          {
+            $uploadtext="The file has been uploaded" ;
+            $imagetable=$conflist."_images" ;
+            $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+            mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+            $sql = "INSERT INTO ".$imagetable."(name,path,macAddr,date) 
+                                   VALUES('$name', '$target_path', '$macAddr',now())" ; 
+            mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+            mysqli_close($db); 
+          }
+      }
+  }
+
+
+$file = "configuration.txt" ;
+$sessionopen=file_get_contents($file);
+
 ?>
    
 <!DOCTYPE html>
@@ -183,8 +214,10 @@ if(isset($_POST['name']))
                Show("whoami");
                Hide("demoContainer");
                Hide("connectedUsers");
+               Hide("camera");
                Hide("sendQuestions");
                Hide("connectControls");
+               Hide("sessionnotopen");
                Hide("questionList");
                Disabling("unsubmitname");
             }
@@ -192,10 +225,19 @@ if(isset($_POST['name']))
             {
                Hide("whoami");
                //if (document.getElementById("yourquestion").value == "")
-               if (document.getElementById("yourquestion").placeholder != "0 questions remaining")
-                 showSendQuestion();
-               else
-                 showQuestions();
+               <?php
+                 if ( $page == '1' )
+                   {
+                     echo "showCamera();"; 
+                   }
+                 else 
+                   {
+                     echo "if (document.getElementById('yourquestion').placeholder != '0 questions remaining')";
+                       echo "showSendQuestion();";
+                     echo "else";
+                       echo "showQuestions();";
+                   }
+               ?>
             }
       }
       function showUsers() {
@@ -204,8 +246,10 @@ if(isset($_POST['name']))
                Show("whoami");
                Hide("demoContainer");
                Hide("connectedUsers");
+               Hide("camera");
                Hide("sendQuestions");
                Hide("connectControls");
+               Hide("sessionnotopen");
                Hide("questionList");
            }
          else
@@ -213,11 +257,43 @@ if(isset($_POST['name']))
                Hide("whoami");
                Hide("demoContainer");
                Show("connectedUsers");
+               Hide("camera");
                Hide("sendQuestions");
                Hide("connectControls");
+               Hide("sessionnotopen");
                Hide("questionList");
  
-               ChangeStyle("connectedUsers_button") ;
+               //ChangeStyle("connectedUsers_button") ;
+               ChangeStyle("camera_button") ;
+               ResetStyle("sendQuestions_button") ;
+               ResetStyle("connectControls_button") ;
+               ResetStyle("questionList_button") ;
+           }
+      }
+      function showCamera() {
+         if (document.getElementById("name").value == "")
+           {
+               Show("whoami");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("camera");
+               Hide("sendQuestions");
+               Hide("connectControls");
+               Hide("sessionnotopen");
+               Hide("questionList");
+           }
+         else
+           {
+               Hide("whoami");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Show("camera");
+               Hide("sendQuestions");
+               Hide("connectControls");
+               Hide("sessionnotopen");
+               Hide("questionList");
+ 
+               ChangeStyle("camera_button") ;
                ResetStyle("sendQuestions_button") ;
                ResetStyle("connectControls_button") ;
                ResetStyle("questionList_button") ;
@@ -229,8 +305,10 @@ if(isset($_POST['name']))
                Show("whoami");
                Hide("demoContainer");
                Hide("connectedUsers");
+               Hide("camera");
                Hide("sendQuestions");
                Hide("connectControls");
+               Hide("sessionnotopen");
                Hide("questionList");
            }
          else
@@ -238,11 +316,14 @@ if(isset($_POST['name']))
                Hide("whoami");
                Hide("demoContainer");
                Hide("connectedUsers");
+               Hide("camera");
                Show("sendQuestions");
                Hide("connectControls");
+               Hide("sessionnotopen");
                Hide("questionList");
 
-               ResetStyle("connectedUsers_button") ;
+               //ResetStyle("connectedUsers_button") ;
+               ResetStyle("camera_button") ;
                ChangeStyle("sendQuestions_button") ;
                ResetStyle("connectControls_button") ;
                ResetStyle("questionList_button") ;
@@ -254,8 +335,10 @@ if(isset($_POST['name']))
                Show("whoami");
                Hide("demoContainer");
                Hide("connectedUsers");
+               Hide("camera");
                Hide("sendQuestions");
                Hide("connectControls");
+               Hide("sessionnotopen");
                Hide("questionList");
            }
          else
@@ -263,11 +346,24 @@ if(isset($_POST['name']))
                Hide("whoami");
                Show("demoContainer");
                Hide("connectedUsers");
+               Hide("camera");
                Hide("sendQuestions");
-               Show("connectControls");
+               <?php 
+                 if ( $sessionopen == "Yes" )
+                   {
+                      echo "Show('connectControls');" ;
+                      echo "Hide('sessionnotopen');" ;
+                   }
+                 else
+                   {
+                      echo "Hide('connectControls');" ;
+                      echo "Show('sessionnotopen');" ;
+                   }
+               ?>
                Hide("questionList");
 
-               ResetStyle("connectedUsers_button") ;
+               //ResetStyle("connectedUsers_button") ;
+               ResetStyle("camera_button") ;
                ResetStyle("sendQuestions_button") ;
                ChangeStyle("connectControls_button") ;
                ResetStyle("questionList_button") ;
@@ -279,8 +375,10 @@ if(isset($_POST['name']))
                Show("whoami");
                Hide("demoContainer");
                Hide("connectedUsers");
+               Hide("camera");
                Hide("sendQuestions");
                Hide("connectControls");
+               Hide("sessionnotopen");
                Hide("questionList");
            }
          else
@@ -288,11 +386,14 @@ if(isset($_POST['name']))
                Hide("whoami");
                Hide("demoContainer");
                Hide("connectedUsers");
+               Hide("camera");
                Hide("sendQuestions");
                Hide("connectControls");
+               Hide("sessionnotopen");
                Show("questionList");
 
-               ResetStyle("connectedUsers_button") ;
+               //ResetStyle("connectedUsers_button") ;
+               ResetStyle("camera_button") ;
                ResetStyle("sendQuestions_button") ;
                ResetStyle("connectControls_button") ;
                ChangeStyle("questionList_button") ;
@@ -430,7 +531,7 @@ if(isset($_POST['name']))
               height: 100%;
          }
  
-         #sendQuestions, #connectedUsers, #connectControls, #questionList {
+         #sendQuestions, #connectedUsers, #camera, #connectControls, #questionList, #sessionnotopen {
               visibility: hidden;
               position: absolute;
               top: 40px;
@@ -455,7 +556,7 @@ if(isset($_POST['name']))
               background-color : #183693 ;
               color : white ;
               border-radius : 5px;
-              font-size: 150%;
+              font-size: 100%;
          }
          textarea {
               background-color : white ;
@@ -550,7 +651,10 @@ if(isset($_POST['name']))
                    placeholder="<?php echo $remaining." questions remaining" ?>"
                    name="yourquestion" id="yourquestion"></textarea><br>
             <input name="submitquestion" id="submitquestion" type="submit" value="Send">
-          </form>
+          </form><br><br>
+        </div>
+        <div id="sessionnotopen">
+          <h1>Sorry no micro allowed for this session</h1>
         </div>
         <div id="connectControls">
            <div style="text-align: left;">
@@ -585,6 +689,52 @@ if(isset($_POST['name']))
              src="https://192.168.2.1/connected.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
+        <div id ="camera">
+          <strong>Capture & post your images </strong><br>
+          <i>Rules: <ul style="margin-top: 0px;"><li>Share your visuals !</li><li>Click & upload it</li></ul></i>
+          <?php echo $uploadtext ; ?>
+          <form action="https://192.168.2.1/index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&P=1"  method="post" enctype="multipart/form-data"/>
+            <input type="hidden" name="MAX_FILE_SIZE" value="41943004">
+            <table>
+            <tr>
+            <td>Click it !</td>
+            <td><input type="file" name="uploadedimagefile" maxlength="41943004" accept="image/*" capture="camera" /></td>
+            </tr>
+            <tr>
+            <td><input type="submit" value="Upload" /></td>
+            <td></td> 
+            </tr> 
+            </table>
+          </form>
+          <br><br>
+          <form name="refresh" id="refresh" method="post" 
+                 action="https://192.168.2.1/index.php?conflist=<?php if (isset($conflist)) echo $conflist?>&P=1">
+            <table>
+            <tr><td>No automatic refresh please use button to see new images</td></tr>
+            <tr><td><input type='button' value='Refresh' onclick='this.form.submit()'></td></tr>
+            </table>
+          </form>
+          <?php
+            $nb_fichier = 0;
+            $imagetable=$conflist."_images" ;
+            $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+            mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+            $sql = "SELECT name, path FROM ".$imagetable ;
+            $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+            while($data = mysqli_fetch_assoc($req))
+              {
+                $name=$data['name'] ;
+                $path=$data['path'] ;
+                if (file_exists($path))
+                  {
+                    echo '<a target="_blank" href="'.$path.'"><img height="50px" src="'.$path.'"/></a>&nbsp' ;
+                    $nb_fichier++;
+                  }
+              }
+            echo '<br><strong>' . $nb_fichier .'</strong> files available';
+            mysqli_close($db);
+          ?>
+        </div>
         <div id="questionList">
           <iframe style="border: none; overflow: visible; width: 100%; height: 100%;" SCROLLING=auto 
              onload="javascript:ResizeIframe(this);"
@@ -597,7 +747,8 @@ if(isset($_POST['name']))
   <div name="menubottom" id="menubottom">
     <table width="100%">
       <tr>
-        <td id="connectedUsers_button" name="connectedUsers_button"><img src="group.png" height="30px"   onclick="showUsers()"></td>
+        <!--<td id="connectedUsers_button" name="connectedUsers_button"><img src="group.png" height="30px"   onclick="showUsers()"></td>-->
+        <td id="camera_button" name="camera_button"><img src="camera.png" height="30px"   onclick="showCamera()"></td>
         <td id="sendQuestions_button" name="sendQuestions_button"><img src="plumier.png" height="30px" onclick="showSendQuestion()"></td>
         <td id="connectControls_button" name="connectControls_button"><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
         <td id="questionList_button" name="questionList_button"><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>

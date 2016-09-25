@@ -105,6 +105,43 @@ $conflist?>">
       mysqli_close($db);
       }
      ?>
+     <?php
+      if ( isset($conflist) && ($conflist != "") ) 
+      {
+      $imagetable=$conflist."_images" ;
+      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
+      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+      $sql = "SELECT * FROM ".$imagetable ;
+      $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+      echo "<br><table border='2px'>" ;
+      echo "<tr>" ;
+      echo "<th>id</th>";
+      echo "<th>name</th>";
+      echo "<th>path</th>";
+      echo "<th>macAddr</th>";
+      echo "<th>date</th>";
+      echo "</tr>" ;
+      while($data = mysqli_fetch_assoc($req))
+        {
+           $name=$data['name'] ;
+           $path=$data['path'] ;
+           $macAddr=$data['macAddr'] ;
+           $date=$data['date'] ;
+           $id=$data['id'] ;
+
+           echo "<tr>" ;
+           echo "<td>".$id."</td>";
+           echo "<td>".$name."</td>";
+           echo "<td>".$path."</td>";
+           echo "<td>".$macAddr."</td>";
+           echo "<td>".$date."</td>";
+           echo "</tr>" ;
+
+        }
+      echo "</table>" ;
+      mysqli_close($db);
+      }
+     ?>
 
    </div>
 </body>

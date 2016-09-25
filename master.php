@@ -1,6 +1,11 @@
 <?php 
 
 // Retrieving all required inputs
+//if(isset($_GET['name']))
+//  $name = $_GET['name'] ;
+if(isset($_GET['conflist']))
+  $name = $_GET['conflist'] ;
+
 if(isset($_POST['name']))
   {
     $name=$_POST['name'];
@@ -40,15 +45,21 @@ else
           {
             if(isset($_POST['conflist']))
               $conflist=$_POST['conflist'];
+            $imagetable=$conflist."_images" ;
             $sql = "DELETE FROM `$conflist`";   
             mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+            $sql2 = "DELETE FROM `$imagetable`";   
+            mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
           }
         if (isset($_POST['deleteconf']))
           {
             if(isset($_POST['conflist']))
                $conflist=$_POST['conflist'];
+            $imagetable=$conflist."_images" ;
             $sql = "DROP TABLE `$conflist`";   
             mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+            $sql2 = "DROP TABLE `$imagetable`";   
+            mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
             $name = "";
           } 
       }
@@ -75,9 +86,31 @@ else
                   PRIMARY KEY (id)
               )";   
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+        // creating directory for multimedia
+        $path="upload/".$name."/" ;
+        mkdir($path , 0755) ;
+        $imagetable=$name."_images" ;
+        $sql2 = "CREATE TABLE $imagetable ( 
+                  id INT NOT NULL AUTO_INCREMENT, 
+                  name VARCHAR(30),
+                  path VARCHAR(255),
+                  macAddr VARCHAR(30),
+                  date DATETIME,
+                  PRIMARY KEY (id)
+              )";   
+        mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
       }
       mysqli_close($db);  
     }
+
+$sessionopen="" ;
+if (isset($_POST['sessionopen']))
+  {
+    $sessionopen=$_POST['sessionopen'];
+    $file = "configuration.txt" ;
+    file_put_contents($file, $sessionopen);
+  }
+
 ?>
 
 <!DOCTYPE html>
@@ -123,6 +156,16 @@ else
 
       function Disabling (addr) {document.getElementById(addr).disabled = "disabled"}
       function Enabling (addr) {document.getElementById(addr).disabled = ""}
+      function showconnectControls() {
+        if (document.getElementById("sessionopen").value == "Yes")
+           {
+              Show("connectControls");
+           }
+        else
+           {
+              Hide("connectControls");
+           }
+      }
       function toggleValue() {
           if (document.getElementById("name").value == "")
             {
@@ -204,7 +247,7 @@ else
                Hide("conf");
                Show("demoContainer");
                Hide("connectedUsers");
-               Show("connectControls");
+               showconnectControls() ;
                Hide("questionList");
                Hide("database");
 
@@ -360,7 +403,7 @@ else
          }
          body>#menubottom {position:fixed}
 
-         #conf, #connectedUsers, #connectControls, #questionList, #database {
+         #conf, #connectedUsers, #demoContainer, #questionList, #database {
               visibility: hidden;
               position: absolute;
               top: 40px;
@@ -453,6 +496,15 @@ else
 	
     <!--show-->
     <div id="demoContainer">
+      <br>
+      <form name="openMicro" id ="openMicro" method="post" action="https://192.168.2.1/master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
+        Microphone sessions : 
+        <select name="sessionopen" id="sessionopen" onChange="this.form.submit()">
+            <option value='No' <?php if ($sessionopen == "No") echo "selected='selected';" ?> >No</option>
+            <option value='Yes' <?php if ($sessionopen == "Yes") echo "selected='selected';" ?> >Yes</option>
+        </select>
+      <form>
+      <br><br>
       <div id="connectControls">
         <div style="text-align: left;">
           <strong>Who wants to speak ?</strong><br>
