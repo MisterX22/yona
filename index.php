@@ -135,14 +135,27 @@ if(isset($_POST['name']))
      mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
      mysqli_close($db); 
   }
-
-$target_path = "upload/".$conflist."/" ;
+ 
+if ( isset($conflist) )
+  $target_path = "upload/".$conflist."/" ;
 $uploadtext="Wants to try ? please dare !<br><br>" ;
 if (isset($_FILES['uploadedimagefile']))
   {
+    $files=scandir($target_path,0) ;
+    $nbfile=1;
+    foreach($files as $n)
+      {
+        if(!is_dir($n)) 
+          {
+            $listimage[]=$target_path.$n;
+            $nbfile++ ;
+          }
+      }
     if(is_uploaded_file($_FILES["uploadedimagefile"]["tmp_name"]))
       {
         $imagename=basename($_FILES['uploadedimagefile']['name']);
+        $imageext=pathinfo($imagename, PATHINFO_EXTENSION);
+        $imagename="image_".$nbfile.".".$imageext ;
         $target_path = $target_path.$name."_".$imagename ;
         if (move_uploaded_file($_FILES["uploadedimagefile"]["tmp_name"], $target_path))
           {
@@ -154,12 +167,26 @@ if (isset($_FILES['uploadedimagefile']))
                                    VALUES('$name', '$target_path', '$macAddr',now())" ; 
             mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
             mysqli_close($db); 
+            $listimage[]=$target_path.$imagename;
+          }
+      }
+  }
+else
+  {
+    $files=scandir($target_path,0) ;
+    foreach($files as $n)
+      {
+        if(!is_dir($n)) 
+          {
+            $listimage[]=$target_path.$n;
           }
       }
   }
 
 
-$file = "configuration.txt" ;
+if ( isset($conflist) )
+  $config_path = "configuration/".$conflist."/" ;
+$file = $config_path."configuration.txt" ;
 $sessionopen=file_get_contents($file);
 
 ?>
@@ -183,6 +210,12 @@ $sessionopen=file_get_contents($file);
         {
           var height = screen.height - 80 ;
           iframe.style.height = height + 'px' ;
+        }
+
+      function ResizeDiv(div)
+        {
+          var height = screen.height - 80 ;
+          div.style.height = height + 'px' ;
         }
 
       function Hide (addr)
@@ -219,6 +252,7 @@ $sessionopen=file_get_contents($file);
                Hide("connectControls");
                Hide("sessionnotopen");
                Hide("questionList");
+               Hide("imageView");
                Disabling("unsubmitname");
             }
           else
@@ -251,6 +285,7 @@ $sessionopen=file_get_contents($file);
                Hide("connectControls");
                Hide("sessionnotopen");
                Hide("questionList");
+               Hide("imageView");
            }
          else
            {
@@ -262,6 +297,7 @@ $sessionopen=file_get_contents($file);
                Hide("connectControls");
                Hide("sessionnotopen");
                Hide("questionList");
+               Hide("imageView");
  
                //ChangeStyle("connectedUsers_button") ;
                ChangeStyle("camera_button") ;
@@ -281,6 +317,7 @@ $sessionopen=file_get_contents($file);
                Hide("connectControls");
                Hide("sessionnotopen");
                Hide("questionList");
+               Hide("imageView");
            }
          else
            {
@@ -292,6 +329,7 @@ $sessionopen=file_get_contents($file);
                Hide("connectControls");
                Hide("sessionnotopen");
                Hide("questionList");
+               //Hide("imageView");
  
                ChangeStyle("camera_button") ;
                ResetStyle("sendQuestions_button") ;
@@ -310,6 +348,7 @@ $sessionopen=file_get_contents($file);
                Hide("connectControls");
                Hide("sessionnotopen");
                Hide("questionList");
+               Hide("imageView");
            }
          else
            {
@@ -321,6 +360,7 @@ $sessionopen=file_get_contents($file);
                Hide("connectControls");
                Hide("sessionnotopen");
                Hide("questionList");
+               Hide("imageView");
 
                //ResetStyle("connectedUsers_button") ;
                ResetStyle("camera_button") ;
@@ -340,6 +380,7 @@ $sessionopen=file_get_contents($file);
                Hide("connectControls");
                Hide("sessionnotopen");
                Hide("questionList");
+               Hide("imageView");
            }
          else
            {
@@ -361,6 +402,7 @@ $sessionopen=file_get_contents($file);
                    }
                ?>
                Hide("questionList");
+               Hide("imageView");
 
                //ResetStyle("connectedUsers_button") ;
                ResetStyle("camera_button") ;
@@ -380,6 +422,7 @@ $sessionopen=file_get_contents($file);
                Hide("connectControls");
                Hide("sessionnotopen");
                Hide("questionList");
+               Hide("imageView");
            }
          else
            {
@@ -391,6 +434,7 @@ $sessionopen=file_get_contents($file);
                Hide("connectControls");
                Hide("sessionnotopen");
                Show("questionList");
+               Hide("imageView");
 
                //ResetStyle("connectedUsers_button") ;
                ResetStyle("camera_button") ;
@@ -398,6 +442,54 @@ $sessionopen=file_get_contents($file);
                ResetStyle("connectControls_button") ;
                ChangeStyle("questionList_button") ;
            }
+      }
+      function afficheImage(addr) {
+        Hide("camera");
+        Show("imageView");
+        document.getElementById("imageView").style.zIndex = "5";
+        document.getElementById("imageView").style.backgroundImage = "url("+addr+")";
+        document.getElementById("imageView").style.backgroundSize = "100%";
+        document.getElementById("imageView").style.backgroundRepeat = "no-repeat";
+        document.getElementById("imageView").style.backgroundPosition = "center";
+        document.getElementById("imageView").style.border = "2px solid black" ;
+        document.getElementById("imageView").style.borderRadius = "10px" ;
+        ResizeDiv(document.getElementById("imageView")) ;
+      }
+
+function ImageCollection(images) {
+     this.images = images;
+     this.i = 0;
+     this.next = function(imgId) {
+       var img = document.getElementById(imgId);
+       this.i++;
+       if (this.i == images.length )
+         this.i = 0;
+       afficheImage(images[this.i]) ;
+     }
+     this.prev = function(imgId) {
+       var img = document.getElementById(imgId);
+       this.i--;
+       if (this.i < 0)
+         this.i = images.length -1;
+       afficheImage(images[this.i]) ;
+     }
+ }
+
+tab_java = new Array ;
+
+<?php
+ $a=0 ;
+ foreach($listimage as $n)
+   {
+     echo "tab_java[$a] = '$n';\n" ; 
+     $a++ ;
+   }
+?>
+var ic1 = new ImageCollection(tab_java) ;
+
+      function cacheImage() {
+        Hide("imageView");
+        Show("camera");
       }
       window.onload = function () {
           toggleValue();
@@ -531,7 +623,7 @@ $sessionopen=file_get_contents($file);
               height: 100%;
          }
  
-         #sendQuestions, #connectedUsers, #camera, #connectControls, #questionList, #sessionnotopen {
+         #sendQuestions, #connectedUsers, #camera, #connectControls, #questionList, #sessionnotopen, #imageView {
               visibility: hidden;
               position: absolute;
               top: 40px;
@@ -691,7 +783,7 @@ $sessionopen=file_get_contents($file);
         </div>
         <div id ="camera">
           <strong>Capture & post your images </strong><br>
-          <i>Rules: <ul style="margin-top: 0px;"><li>Share your visuals !</li><li>Click & upload it</li></ul></i>
+          <i>Rules: <ul style="margin-top: 0px;"><li>Share your visuals !</li><li>Click & upload your view</li></ul></i>
           <?php echo $uploadtext ; ?>
           <form action="https://192.168.2.1/index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&P=1"  method="post" enctype="multipart/form-data"/>
             <input type="hidden" name="MAX_FILE_SIZE" value="41943004">
@@ -706,7 +798,7 @@ $sessionopen=file_get_contents($file);
             </tr> 
             </table>
           </form>
-          <br><br>
+          <br><hr><br>
           <form name="refresh" id="refresh" method="post" 
                  action="https://192.168.2.1/index.php?conflist=<?php if (isset($conflist)) echo $conflist?>&P=1">
             <table>
@@ -715,26 +807,43 @@ $sessionopen=file_get_contents($file);
             </table>
           </form>
           <?php
+            if ( isset($conflist) )
+            {
             $nb_fichier = 0;
             $imagetable=$conflist."_images" ;
             $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
             mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
             $sql = "SELECT name, path FROM ".$imagetable ;
             $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+            $index_image=0;
             while($data = mysqli_fetch_assoc($req))
               {
                 $name=$data['name'] ;
                 $path=$data['path'] ;
                 if (file_exists($path))
                   {
-                    echo '<a target="_blank" href="'.$path.'"><img height="50px" src="'.$path.'"/></a>&nbsp' ;
+                    $lepath = $listimage[$nb_fichier]; 
+                    echo '<img height="50px" onClick="afficheImage(\''.$lepath.'\');" src="'.$lepath.'"/>&nbsp' ;
                     $nb_fichier++;
                   }
+                $index_image++;
               }
             echo '<br><strong>' . $nb_fichier .'</strong> files available';
             mysqli_close($db);
+            }
           ?>
         </div>
+
+        <div id="imageView" name="imageView">
+          <table style="width: 100%">
+            <tr>
+            <td><input type='button' value='<-- Prev' onclick='ic1.prev("imageView")' /></td>
+            <td><input type='button' value='Close X' onclick='cacheImage();' /></td>
+            <td><input type='button' value='Next -->' onclick='ic1.next("imageView")' /></td>
+            </tr>
+          </table>
+        </div>
+          
         <div id="questionList">
           <iframe style="border: none; overflow: visible; width: 100%; height: 100%;" SCROLLING=auto 
              onload="javascript:ResizeIframe(this);"

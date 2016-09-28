@@ -60,6 +60,9 @@ else
             mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
             $sql2 = "DROP TABLE `$imagetable`";   
             mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+            $path="upload/".$name."/" ;
+            $trash="trash/";
+            rename($path,$trash) ;
             $name = "";
           } 
       }
@@ -99,6 +102,12 @@ else
                   PRIMARY KEY (id)
               )";   
         mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+        // creating directory for configuration
+        $path="configuration/".$name."/" ;
+        mkdir($path , 0755) ;
+        $sessionopen="No" ;
+        $file = $path."configuration.txt" ;
+        file_put_contents($file, $sessionopen);
       }
       mysqli_close($db);  
     }
@@ -107,7 +116,8 @@ $sessionopen="" ;
 if (isset($_POST['sessionopen']))
   {
     $sessionopen=$_POST['sessionopen'];
-    $file = "configuration.txt" ;
+    $path="configuration/".$name."/" ;
+    $file = $path."configuration.txt" ;
     file_put_contents($file, $sessionopen);
   }
 
