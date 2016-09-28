@@ -108,6 +108,9 @@ else
         $sessionopen="No" ;
         $file = $path."configuration.txt" ;
         file_put_contents($file, $sessionopen);
+        // creating directory for trash
+        $path="trash/".$name."/" ;
+        mkdir($path , 0755) ;
       }
       mysqli_close($db);  
     }

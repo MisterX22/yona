@@ -38,7 +38,6 @@ else
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
       $sql = "SELECT name FROM ".$conflist." WHERE macAddr = '$macAddr'";
-      //$req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db)) ;
       $req = mysqli_query($db,$sql) or header("Refresh:0; url=https://192.168.2.1/index.php");
       while($madata = mysqli_fetch_assoc($req))
         {
@@ -231,7 +230,6 @@ $sessionopen=file_get_contents($file);
         }
       function ChangeStyle (addr)
         {
-          //document.getElementById(addr).style.borderTop="thick solid grey";
           document.getElementById(addr).style.borderTop="solid 1px grey";
         }
       function ResetStyle (addr)
@@ -258,7 +256,6 @@ $sessionopen=file_get_contents($file);
           else
             {
                Hide("whoami");
-               //if (document.getElementById("yourquestion").value == "")
                <?php
                  if ( $page == '1' )
                    {
@@ -268,7 +265,7 @@ $sessionopen=file_get_contents($file);
                    {
                      echo "if (document.getElementById('yourquestion').placeholder != '0 questions remaining')";
                        echo "showSendQuestion();";
-                     echo "else";
+                     echo "else ";
                        echo "showQuestions();";
                    }
                ?>
@@ -329,7 +326,6 @@ $sessionopen=file_get_contents($file);
                Hide("connectControls");
                Hide("sessionnotopen");
                Hide("questionList");
-               //Hide("imageView");
  
                ChangeStyle("camera_button") ;
                ResetStyle("sendQuestions_button") ;
@@ -362,7 +358,6 @@ $sessionopen=file_get_contents($file);
                Hide("questionList");
                Hide("imageView");
 
-               //ResetStyle("connectedUsers_button") ;
                ResetStyle("camera_button") ;
                ChangeStyle("sendQuestions_button") ;
                ResetStyle("connectControls_button") ;
@@ -436,7 +431,6 @@ $sessionopen=file_get_contents($file);
                Show("questionList");
                Hide("imageView");
 
-               //ResetStyle("connectedUsers_button") ;
                ResetStyle("camera_button") ;
                ResetStyle("sendQuestions_button") ;
                ResetStyle("connectControls_button") ;
@@ -456,27 +450,26 @@ $sessionopen=file_get_contents($file);
         ResizeDiv(document.getElementById("imageView")) ;
       }
 
-function ImageCollection(images) {
-     this.images = images;
-     this.i = 0;
-     this.next = function(imgId) {
-       var img = document.getElementById(imgId);
-       this.i++;
-       if (this.i == images.length )
-         this.i = 0;
-       afficheImage(images[this.i]) ;
-     }
-     this.prev = function(imgId) {
-       var img = document.getElementById(imgId);
-       this.i--;
-       if (this.i < 0)
-         this.i = images.length -1;
-       afficheImage(images[this.i]) ;
-     }
- }
+      function ImageCollection(images) {
+        this.images = images;
+        this.i = 0;
+        this.next = function(imgId) {
+          var img = document.getElementById(imgId);
+          this.i++;
+          if (this.i == images.length )
+            this.i = 0;
+          afficheImage(images[this.i]) ;
+        }
+        this.prev = function(imgId) {
+          var img = document.getElementById(imgId);
+          this.i--;
+          if (this.i < 0)
+            this.i = images.length -1;
+          afficheImage(images[this.i]) ;
+        }
+      }
 
-tab_java = new Array ;
-
+      tab_java = new Array ;
 <?php
  $a=0 ;
  foreach($listimage as $n)
@@ -485,15 +478,17 @@ tab_java = new Array ;
      $a++ ;
    }
 ?>
-var ic1 = new ImageCollection(tab_java) ;
+      var ic1 = new ImageCollection(tab_java) ;
 
       function cacheImage() {
         Hide("imageView");
         Show("camera");
       }
+
       window.onload = function () {
           toggleValue();
       }
+
     </script>
         
     <!-- Styles used within the demo -->
@@ -746,7 +741,9 @@ var ic1 = new ImageCollection(tab_java) ;
           </form><br><br>
         </div>
         <div id="sessionnotopen">
-          <h1>Sorry no micro allowed for this session</h1>
+          <h1>Sorry !</h1> 
+          <strong>NO microphone access allowed yet</strong>
+          <h3>Try Later !</h3>
         </div>
         <div id="connectControls">
            <div style="text-align: left;">
@@ -783,16 +780,17 @@ var ic1 = new ImageCollection(tab_java) ;
         </div>
         <div id ="camera">
           <strong>Capture & post your images </strong><br>
-          <i>Rules: <ul style="margin-top: 0px;"><li>Share your visuals !</li><li>Click & upload your view</li></ul></i>
+          <i>Rules: <ul style="margin-top: 0px;"><li>Share your visuals !</li></ul></i>
           <?php echo $uploadtext ; ?>
           <form action="https://192.168.2.1/index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&P=1"  method="post" enctype="multipart/form-data"/>
             <input type="hidden" name="MAX_FILE_SIZE" value="41943004">
-            <table>
+            <table style="width: 100%">
             <tr>
-            <td>Click it !</td>
+            <td>Take your picture !</td>
             <td><input type="file" name="uploadedimagefile" maxlength="41943004" accept="image/*" capture="camera" /></td>
             </tr>
             <tr>
+            <td>And upload it</td>
             <td><input type="submit" value="Upload" /></td>
             <td></td> 
             </tr> 
@@ -802,8 +800,9 @@ var ic1 = new ImageCollection(tab_java) ;
           <form name="refresh" id="refresh" method="post" 
                  action="https://192.168.2.1/index.php?conflist=<?php if (isset($conflist)) echo $conflist?>&P=1">
             <table>
-            <tr><td>No automatic refresh please use button to see new images</td></tr>
+            <tr><td>No automatic refresh<br>Please use button to refresh</td></tr>
             <tr><td><input type='button' value='Refresh' onclick='this.form.submit()'></td></tr>
+            <tr><td>Full size within a click</td></tr>
             </table>
           </form>
           <?php

@@ -109,19 +109,23 @@ if(isset($_GET['votefor']))
     $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
     mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
 
-    $sql2 = "SELECT macAddr, firstreg ,name FROM ".$conflist." WHERE id = '$votefor'";
+    $sql2 = "SELECT macAddr, firstreg ,name, question FROM ".$conflist." WHERE id = '$votefor'";
     $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
     while($madata2 = mysqli_fetch_assoc($req2))
       {
         $macSearch = $madata2['macAddr'] ;
         $firstreg = $madata2['firstreg'] ;
         $name = $madata2['name'] ;
+        $question = $madata2['question'] ;
       }
 
 
     if ( $macSearch == $macAddr )
     {
       // This is my question want to remove it
+      $text=$name." : ".$question."\n";
+      $file = "trash/$conflist/delete_question.txt" ;
+      file_put_contents($file, $text, FILE_APPEND | LOCK_EX);
       if ($firstreg == '1') 
         {
           $sql = "UPDATE ".$conflist." SET question='', votenum = '0', questime=curtime(), questove = '0' WHERE id='$votefor'";
