@@ -26,6 +26,102 @@
 var selfEasyrtcid = "";
 var currentCall = "" ;
 
+var audio = null;
+var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+var source = null;
+var scriptNode = audioCtx.createScriptProcessor(512, 1, 1);
+var pMax=0;
+
+var voiceBegLevel=0.5; // threshold for voice begin
+var voiceEndLevel=0.1;
+var pQueue = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,]; // power of long period
+var pAverage=0; // average power of long period
+var maxP=0; //max power during voice period
+var nbSamples=20;
+
+var speaking=false;
+
+var speakingDiv=null;
+
+//------------------------------------------------------------------------------
+//----------------- ECHO CANCELLATION ------------------------------------------
+//------------------------------------------------------------------------------
+
+var echoCancellationEnabled=false
+
+scriptNode.onaudioprocess = function(audioProcessingEvent){
+
+console.log("voiceBegLevel ",voiceBegLevel)
+
+    // The input buffer is the song we loaded earlier
+  var inputBuffer = audioProcessingEvent.inputBuffer;
+
+  // The output buffer contains the samples that will be modified and played
+  var outputBuffer = audioProcessingEvent.outputBuffer;
+
+  // Loop through the output channels (in this case there is only one)
+  var inputData = inputBuffer.getChannelData(0);
+  var outputData = outputBuffer.getChannelData(0);
+
+  var p=0;
+  // Loop through the samples
+  for (var sample = 0; sample < inputBuffer.length; sample++) {
+    // make output equal to the same as the input
+    p += inputData[sample]*inputData[sample];
+    outputData[sample] = 0;
+  }
+  pAverage=pAverage-pQueue.shift()+p/nbSamples;
+
+
+
+  pQueue.push(p/nbSamples);
+  
+  if (speaking==false){
+    if (p>(pAverage+voiceBegLevel)){
+      speaking=true;
+      maxP=0;
+      console.log('speaking : ',speaking);
+      audio.muted = false;
+      speakingDiv.innerHTML="Voice status : speaking";
+    }
+  }
+  else
+  {
+    if (pAverage>maxP) maxP=pAverage; 
+    if (pAverage<(maxP*voiceEndLevel)){
+      speaking=false;
+      console.log('speaking : ',speaking);
+      audio.muted = true;
+      speakingDiv.innerHTML="Voice status : silence";
+    }
+  }
+
+}
+
+function enableEchoCancellation(event) {
+    if (event) {
+        console.log('echo cancellation enabled');
+        echoCancellationEnabled=true;
+    } else {
+        console.log('echo cancellation disabled');
+        echoCancellationEnabled=false;
+    }
+};
+
+//------------------------------------------------------------------------------
+//-----------------  END ECHO CANCELLATION -------------------------------------
+//------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
 function disable(domId) {
     document.getElementById(domId).disabled = "disabled";
 }
@@ -178,16 +274,42 @@ function disconnect() {
 }
 
 
+
 easyrtc.setStreamAcceptor( function(easyrtcid, stream) {
-    var audio = document.getElementById('callerAudio');
+
+    audio = document.getElementById('callerAudio');
+    speakingDiv= document.getElementById('speaking');
+
+    voiceBegLevel=parseFloat(document.getElementById('echo_cancellation_begin_threshold').value);
+    voiceEndLevel=parseFloat(document.getElementById('echo_cancellation_end_threshold').value);
+
     easyrtc.setVideoObjectSrc(audio,stream);
     enable("hangupButton");
+    
+    if (echoCancellationEnabled){
+        audio.muted = true;
+        speaking=false;
+        speakingDiv.innerHTML="Voice status : silence";
+        source = audioCtx.createMediaStreamSource(stream);
+        source.connect(scriptNode);
+        scriptNode.connect(audioCtx.destination);
+    }
+    else{
+        audio.muted = false;
+    }
 });
 
 
 easyrtc.setOnStreamClosed( function (easyrtcid) {
     easyrtc.setVideoObjectSrc(document.getElementById('callerAudio'), "");
     disable("hangupButton");
+    if (source != null){
+        source.disconnect(scriptNode);
+        scriptNode.disconnect(audioCtx.destination);
+        }
+    speakingDiv.innerHTML="Voice status : unknown";
+
+
 });
 
 

@@ -465,10 +465,17 @@ else
         <strong> <u>Waiting for Mic : </u></strong>
         <div id="ConnectedClients"></div>           
         <div id="otherClients"></div>
+        <div style="text-align: left;" id="echo Cancellation">
+          <h1>Echo Cancellation (voice detection)</h1>
+          <div id="speaking">Voice status : unknown</div>
+          <label><input type="checkbox" id="echo_cancellation_enable" value="echo_enabled" onclick="enableEchoCancellation(this.checked);"> enable echo cancellation</label>
+          <br>begin Threshold : <input type="number" name="nombre" value="0.5" step="0.05" id="echo_cancellation_begin_threshold">
+          <br>end Threshold : <input type="number" name="nombre" value="0.1" step="0.01"id="echo_cancellation_end_threshold">
+       </div>
 		
         <!-- Note... this demo should be updated to remove video references -->
         <div id="videos">
-            <video id="callerAudio"></video>
+            <audio id="callerAudio"></audio>
             <div id="acceptCallBox">
                 <div id="acceptCallLabel"></div>
                 <br><br>
