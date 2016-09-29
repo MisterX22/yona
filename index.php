@@ -158,6 +158,9 @@ if (isset($_FILES['uploadedimagefile']))
         $target_path = $target_path.$name."_".$imagename ;
         if (move_uploaded_file($_FILES["uploadedimagefile"]["tmp_name"], $target_path))
           {
+            //$img = imagecreatefromjpeg($target_path) ;
+            //imagejpeg($img,$target_path,50) ;
+
             $uploadtext="The file has been uploaded" ;
             $imagetable=$conflist."_images" ;
             $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
@@ -166,7 +169,7 @@ if (isset($_FILES['uploadedimagefile']))
                                    VALUES('$name', '$target_path', '$macAddr',now())" ; 
             mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
             mysqli_close($db); 
-            $listimage[]=$target_path.$imagename;
+            $listimage[]=$target_path;
           }
       }
   }
@@ -448,7 +451,7 @@ else
         Hide("camera");
         Show("imageView");
         document.getElementById("imageView").style.zIndex = "5";
-        document.getElementById("imageView").style.backgroundImage = "url("+addr+")";
+        document.getElementById("imageView").style.backgroundImage = "url('"+addr+"')";
         document.getElementById("imageView").style.backgroundSize = "100%";
         document.getElementById("imageView").style.backgroundRepeat = "no-repeat";
         document.getElementById("imageView").style.backgroundPosition = "center";
