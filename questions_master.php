@@ -40,7 +40,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="refresh" content="10, URL='questions_master.php?conflist=<?php if (isset($conflist)) echo $conflist?>'" />
+    <meta http-equiv="refresh" content="10, URL='https://192.168.2.1/questions_master.php?conflist=<?php if (isset($conflist)) echo $conflist?>'" />
     <title>Connected users</title>
     <style type="text/css">
        #questions {
@@ -67,7 +67,7 @@
 
 </head>
 
-<body>
+<body style="font-family: 'Arial';">
    <div id="questions">
      <strong><u> Questions :</u></strong><br>
      <i>Rules: <ul style="margin-top: 0px;"><li>Questions are sorted by number of votes</li><li>When a question is done, strike it by clicking on the <img src="check.png" height=10px> button</li></ul></i>
@@ -107,8 +107,8 @@
         }
         echo "<br>" ;
         echo "<table><tr>";
-        echo "<td><input type='image' src=".$buttontext."  style=\"height: 20px;\" onclick=\"window.location.href='questions_master.php?conflist=".$conflist."&questove=".$id."'\"></td>";
-        echo "<td><input type='image' src=\"trash.png\"  style=\"height: 20px;\" onclick=\"window.location.href='questions_master.php?conflist=".$conflist."&trash=".$id."'\"></td>";
+        echo "<td><input type='image' src=".$buttontext."  style=\"height: 20px;\" onclick=\"window.location.href='https://192.168.2.1/questions_master.php?conflist=".$conflist."&questove=".$id."'\"></td>";
+        echo "<td><input type='image' src=\"trash.png\"  style=\"height: 20px;\" onclick=\"window.location.href='https://192.168.2.1/questions_master.php?conflist=".$conflist."&trash=".$id."'\"></td>";
         echo "</tr></table>";
         echo "<br><br>";
       }

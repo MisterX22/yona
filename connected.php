@@ -11,15 +11,15 @@ $macAddr=$lines[3];
 
 $load= sys_getloadavg() ;
 if ( $load[0] > 60 )
-  $refreshTime=20 ;
+  $refreshTime=120 ;
 else
-  $refreshTime=10 ;
+  $refreshTime=60 ;
 
 // Updating connection status list
 if(isset($_GET['action']))
   {
     $action=$_GET['action'];
-    if(isset($_GET['name']))  $name=$_GET['name'];
+    //if(isset($_GET['name']))  $name=$_GET['name'];
     if ( $action == "D")
       {
         $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
@@ -30,15 +30,15 @@ if(isset($_GET['action']))
       }
     else
     {
-      if(isset($_GET['name']))
-      {
-        $name=$_GET['name'];
+      //if(isset($_GET['name']))
+      //{
+        //$name=$_GET['name'];
         $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
         mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-        $sql = "UPDATE ".$conflist." SET isconnected = 2 WHERE macAddr='$macAddr'";
+        $sql = "UPDATE ".$conflist." SET isconnected = 10 WHERE macAddr='$macAddr'";
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
         mysqli_close($db);
-      }
+      //}
   }
 }
 
@@ -49,7 +49,7 @@ if(isset($_GET['action']))
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <?php
-      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"connected.php?conflist=".$conflist."\" />" ;
+      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"https://192.168.2.1/connected.php?conflist=".$conflist."&action='C'\" />" ;
     ?>
     <title>Connected users</title>
     <style type="text/css">
@@ -62,8 +62,16 @@ if(isset($_GET['action']))
 
 </head>
 
-<body>
+<body style="font-family: 'Arial';">
    <div id="users">
+
+     <form name="refresh" id="refresh" method="post" action="https://192.168.2.1/connected.php?conflist=<?php if (isset($conflist)) echo $conflist?>&action='C'">
+       <table><tr>
+       <td style="text-align: center;">Auto page refresh <?php echo $refreshTime ; ?> seconds</td>
+       <td><input type='button' value='Manual Refresh' onclick='this.form.submit()'></td>
+       </tr></table>
+     </form><br>
+
      <strong><u>Connected Users :</u></strong><br>
      <?php
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());

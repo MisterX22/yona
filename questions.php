@@ -12,9 +12,13 @@ $macAddr=$lines[3];
 // Compute the server load to adjust refresh time
 $load= sys_getloadavg() ;
 if ( $load[0] > 60 )
-  $refreshTime=20 ;
+  $refreshTime=120 ;
 else
-  $refreshTime=10 ;
+  $refreshTime=60 ;
+
+$allquestions = "all";
+$action="";
+$refresh_choice="auto" ;
 
 // retrieving post/get data
 if (isset($_POST['allquestions']))
@@ -27,7 +31,7 @@ if (isset($_GET['refresh']))
    $refresh_choice = $_GET['refresh'];
 
 if (isset($_GET['action']))
-   $action = $_POST['action'];
+   $action = $_GET['action'];
 
 // Retrieving choice
 $checkall='1';
@@ -105,19 +109,23 @@ if(isset($_GET['votefor']))
     $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
     mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
 
-    $sql2 = "SELECT macAddr, firstreg ,name FROM ".$conflist." WHERE id = '$votefor'";
+    $sql2 = "SELECT macAddr, firstreg ,name, question FROM ".$conflist." WHERE id = '$votefor'";
     $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
     while($madata2 = mysqli_fetch_assoc($req2))
       {
         $macSearch = $madata2['macAddr'] ;
         $firstreg = $madata2['firstreg'] ;
         $name = $madata2['name'] ;
+        $question = $madata2['question'] ;
       }
 
 
     if ( $macSearch == $macAddr )
     {
       // This is my question want to remove it
+      $text=$name." : ".$question."\n";
+      $file = "trash/$conflist/delete_question.txt" ;
+      file_put_contents($file, $text, FILE_APPEND | LOCK_EX);
       if ($firstreg == '1') 
         {
           $sql = "UPDATE ".$conflist." SET question='', votenum = '0', questime=curtime(), questove = '0' WHERE id='$votefor'";
@@ -184,7 +192,7 @@ if(isset($_GET['votefor']))
               $myvot1 = $votefor ;
               $remaining = $remaining - 1 ;
             }
-          elseif ( $myvote2 == "" )
+          elseif ( $myvot2 == "" )
             {
               $sql = "UPDATE ".$conflist." SET votefo2='$votefor' WHERE macAddr='$macAddr' AND firstreg='1'";
               mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
@@ -193,6 +201,10 @@ if(isset($_GET['votefor']))
             }
         }
     }
+    // we want to avoid double post on reload
+    header('Location:  https://192.168.2.1/questions.php?conflist='.$conflist.'&choice='.$allquestions.'&refresh='.$refresh_choice);
+    exit;
+ 
     mysqli_close($db);
   }
 ?>
@@ -203,7 +215,7 @@ if(isset($_GET['votefor']))
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <?php
     if ( $auto == 1 )
-      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"questions.php?conflist=".$conflist."&choice=".$allquestions."&refresh=".$refresh_choice."\" />" ;
+      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"https://192.168.2.1/questions.php?conflist=".$conflist."&choice=".$allquestions."&refresh=".$refresh_choice."\" />" ;
     ?>
     <title>Questions</title>
     <style type="text/css">
@@ -224,31 +236,33 @@ if(isset($_GET['votefor']))
     </style>
     <script>
        //window.onload = alert(window.location.href) ;
-       <?php if ($action == "D") echo "top.frames.location.href='index.php?conflist=".$conflist."'" ; ?>
+       //no more working <?php // if ($reloadtopframe == "1") echo "top.frames.location.href='https://192.168.2.1/index.php?conflist=".$conflist."'" ; ?>
     </script>
 
 </head>
 
-<body>
+<body style="font-family: 'Arial';">
 
    <div id="questions">
-     <strong><u> Questions :</u></strong><br>
-     <i>Rules: <ul style="margin-top: 0px;"><li>you have <?php echo $remaining ; ?> point(s) left,</li><li><?php echo $text ; ?></li></ul></i>
-     <form name="refresh" id="refresh" method="post" action="questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
+     <strong><u> Questions :</u></strong>
+     <form name="choice" id="choice" method="post" action="https://192.168.2.1/questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
        <table><tr>
-       <td>Refresh mode :</td>
-       <td><input type="radio" id="refresh_choice" name="refresh_choice" value="auto" onclick="this.form.submit()" <?php if ( isset($auto) ) echo "checked" ;?> >Auto</td>
-       <td><input type="radio" id="refresh_choice" name="refresh_choice" value="manual" onclick="this.form.submit()" <?php if ( isset($manual) ) echo "checked" ;?> >Manual</td>
-     <?php if ( isset($manual) )
-       echo "<td><input type='button' value='Refresh' onclick='this.form.submit()'></td>" ;
-     ?>
+       <!--<td><strong><u> Questions :</u></strong></td>-->
+       <td><input type="radio" id="allquestions" name="allquestions" value="all" onclick="this.form.submit()" <?php if ( isset($checkall) ) echo "checked" ;?> >All</td>
+       <td><input type="radio" id="allquestions" name="allquestions" value="only" onclick="this.form.submit()" <?php if ( isset($checkonly) ) echo "checked" ;?> >My questions</td>
+       <td><input type="radio" id="allquestions" name="allquestions" value="voted" onclick="this.form.submit()" <?php if ( isset($checkvoted) ) echo "checked" ;?> >My points</td>
        </tr></table>
      </form>
-     <form name="choice" id="choice" method="post" action="questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
-       Questions filter :<br>
-       <input type="radio" id="allquestions" name="allquestions" value="all" onclick="this.form.submit()" <?php if ( isset($checkall) ) echo "checked" ;?> >All 
-       <input type="radio" id="allquestions" name="allquestions" value="only" onclick="this.form.submit()" <?php if ( isset($checkonly) ) echo "checked" ;?> >My questions
-       <input type="radio" id="allquestions" name="allquestions" value="voted" onclick="this.form.submit()" <?php if ( isset($checkvoted) ) echo "checked" ;?> >My points
+     <i>Rules: <ul style="margin-top: 0px;"><li>you have <?php echo $remaining ; ?> point(s) left,</li><li><?php echo $text ; ?></li><li>Auto page refresh <?php echo $refreshTime ; ?> seconds</li></ul></i>
+     <form name="refresh" id="refresh" method="post" action="https://192.168.2.1/questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
+       <table><tr>
+       <td style="text-align: center;">Refresh mode :</td>
+       <td><input type="radio" id="refresh_choice" name="refresh_choice" value="auto" onclick="this.form.submit()" <?php if ( isset($auto) ) echo "checked" ;?> >Auto</td>
+       <td><input type="radio" id="refresh_choice" name="refresh_choice" value="manual" onclick="this.form.submit()" <?php if ( isset($manual) ) echo "checked" ;?> >Manual</td>
+       <?php if ( isset($manual) )
+         echo "<td><input type='button' value='Refresh' onclick='this.form.submit()'></td>" ;
+       ?>
+       </tr></table>
      </form><br>
      <?php
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
@@ -314,14 +328,14 @@ if(isset($_GET['votefor']))
           if  ( $macAddr2 == $macAddr )
           {
             // this is my question, want to remove it  ?
-            echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=D';\">";
+            echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='https://192.168.2.1/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=D';\">";
           }
           else
           {
             if ($remaining > 0) 
-             echo "<input type='image' src=plus1.png  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=P'; \">";
+             echo "<input type='image' src=plus1.png  onclick=\"window.location.href='https://192.168.2.1/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=P'; \">";
             if ($thisismyvote == 1)
-             echo "<input type='image' src=moins1.png  onclick=\"window.location.href='questions.php?conflist=".$conflist."&votefor=".$monvote."&action=M'; \">";
+             echo "<input type='image' src=moins1.png  onclick=\"window.location.href='https://192.168.2.1/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=M'; \">";
           }
         }
         echo "<br><br>";

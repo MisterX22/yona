@@ -1,6 +1,11 @@
 <?php 
 
 // Retrieving all required inputs
+//if(isset($_GET['name']))
+//  $name = $_GET['name'] ;
+if(isset($_GET['conflist']))
+  $name = $_GET['conflist'] ;
+
 if(isset($_POST['name']))
   {
     $name=$_POST['name'];
@@ -40,15 +45,24 @@ else
           {
             if(isset($_POST['conflist']))
               $conflist=$_POST['conflist'];
+            $imagetable=$conflist."_images" ;
             $sql = "DELETE FROM `$conflist`";   
             mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+            $sql2 = "DELETE FROM `$imagetable`";   
+            mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
           }
         if (isset($_POST['deleteconf']))
           {
             if(isset($_POST['conflist']))
                $conflist=$_POST['conflist'];
+            $imagetable=$conflist."_images" ;
             $sql = "DROP TABLE `$conflist`";   
             mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+            $sql2 = "DROP TABLE `$imagetable`";   
+            mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+            $path="upload/".$name."/" ;
+            $trash="trash/";
+            rename($path,$trash) ;
             $name = "";
           } 
       }
@@ -75,9 +89,41 @@ else
                   PRIMARY KEY (id)
               )";   
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+        // creating directory for multimedia
+        $path="upload/".$name."/" ;
+        mkdir($path , 0755) ;
+        $imagetable=$name."_images" ;
+        $sql2 = "CREATE TABLE $imagetable ( 
+                  id INT NOT NULL AUTO_INCREMENT, 
+                  name VARCHAR(30),
+                  path VARCHAR(255),
+                  macAddr VARCHAR(30),
+                  date DATETIME,
+                  PRIMARY KEY (id)
+              )";   
+        mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+        // creating directory for configuration
+        $path="configuration/".$name."/" ;
+        mkdir($path , 0755) ;
+        $sessionopen="No" ;
+        $file = $path."configuration.txt" ;
+        file_put_contents($file, $sessionopen);
+        // creating directory for trash
+        $path="trash/".$name."/" ;
+        mkdir($path , 0755) ;
       }
       mysqli_close($db);  
     }
+
+$sessionopen="" ;
+if (isset($_POST['sessionopen']))
+  {
+    $sessionopen=$_POST['sessionopen'];
+    $path="configuration/".$name."/" ;
+    $file = $path."configuration.txt" ;
+    file_put_contents($file, $sessionopen);
+  }
+
 ?>
 
 <!DOCTYPE html>
@@ -123,6 +169,16 @@ else
 
       function Disabling (addr) {document.getElementById(addr).disabled = "disabled"}
       function Enabling (addr) {document.getElementById(addr).disabled = ""}
+      function showconnectControls() {
+        if (document.getElementById("sessionopen").value == "Yes")
+           {
+              Show("connectControls");
+           }
+        else
+           {
+              Hide("connectControls");
+           }
+      }
       function toggleValue() {
           if (document.getElementById("name").value == "")
             {
@@ -147,6 +203,7 @@ else
                Hide("connectedUsers");
                Hide("connectControls");
                Hide("questionList");
+               Hide("database");
            }
          else
            {
@@ -155,8 +212,35 @@ else
                Show("connectedUsers");
                Hide("connectControls");
                Hide("questionList");
+               Hide("database");
 
                ChangeStyle("connectedUsers_button") ;
+               ResetStyle("connectControls_button") ;
+               ResetStyle("questionList_button") ;
+               ResetStyle("database_button") ;
+           }
+      }
+      function showDatabase() {
+         if (document.getElementById("name").value == "")
+           {
+               Show("conf");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("connectControls");
+               Hide("questionList");
+               Hide("database");
+           }
+         else
+           {
+               Hide("conf");
+               Hide("demoContainer");
+               Hide("connectedUsers");
+               Hide("connectControls");
+               Hide("questionList");
+               Show("database");
+
+               ChangeStyle("database_button") ;
+               ResetStyle("connectedUsers_button") ;
                ResetStyle("connectControls_button") ;
                ResetStyle("questionList_button") ;
            }
@@ -169,18 +253,21 @@ else
                Hide("connectedUsers");
                Hide("connectControls");
                Hide("questionList");
+               Hide("database");
            }
          else
            {
                Hide("conf");
                Show("demoContainer");
                Hide("connectedUsers");
-               Show("connectControls");
+               showconnectControls() ;
                Hide("questionList");
+               Hide("database");
 
                ResetStyle("connectedUsers_button") ;
                ChangeStyle("connectControls_button") ;
                ResetStyle("questionList_button") ;
+               ResetStyle("database_button") ;
            }
       }
       function showQuestions() {
@@ -191,6 +278,7 @@ else
                Hide("connectedUsers");
                Hide("connectControls");
                Hide("questionList");
+               Hide("database");
            }
          else
            {
@@ -199,10 +287,12 @@ else
                Hide("connectedUsers");
                Hide("connectControls");
                Show("questionList");
+               Hide("database");
 
                ResetStyle("connectedUsers_button") ;
                ResetStyle("connectControls_button") ;
                ChangeStyle("questionList_button") ;
+               ResetStyle("database_button") ;
            }
       }
       window.onload = function () {
@@ -326,7 +416,7 @@ else
          }
          body>#menubottom {position:fixed}
 
-         #conf, #connectedUsers, #connectControls, #questionList {
+         #conf, #connectedUsers, #demoContainer, #questionList, #database {
               visibility: hidden;
               position: absolute;
               top: 40px;
@@ -364,7 +454,7 @@ else
          }
     </style>
   </head>
-  <body onload="setTimeout('connect()',4000)">
+  <body style="font-family: 'Arial';" onload="setTimeout('connect()',4000)">
 	
   <div name="menutop" id="menutop">
     <table width="100%">
@@ -373,7 +463,7 @@ else
     <td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "NOKIA"; ?></td>
     <td>
       <form name="byebye" id="byebye" method="post" 
-          action="master.php?action=D&name=<?php if (isset($name)) echo $name?>">
+          action="https://192.168.2.1/master.php?action=D&name=<?php if (isset($name)) echo $name?>">
         <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect" style="font-size: 50%;"
             onClick="document.getElementById("name").value='';">
       </form>
@@ -384,7 +474,7 @@ else
   
   <div id="main">
     <!-- Main Content -->
-    <form name="conf" id="conf" method="post" action="master.php"/>
+    <form name="conf" id="conf" method="post" action="https://192.168.2.1/master.php"/>
       <table>
       <tr>
       <td><big><strong>Existing Conference : </strong></big></td>
@@ -407,7 +497,7 @@ else
       </tr>
       <tr>
       <td><big><strong>Conference Name:</strong></big></td>
-      <!--<td><form name="createconf" id="createconf" method="post" action="master.php" style="font-size: 150%"/>!-->
+      <!--<td><form name="createconf" id="createconf" method="post" action="https://192.168.2.1/master.php" style="font-size: 150%"/>!-->
       <td><input type="text" name="name" id="name" value="<?php if (isset($name)) echo $name;?>"></td>
       <td><input name="submitname" id="submitname" type="submit" value="Create"></td>
       <!--</form></td>!-->
@@ -419,6 +509,15 @@ else
 	
     <!--show-->
     <div id="demoContainer">
+      <br>
+      <form name="openMicro" id ="openMicro" method="post" action="https://192.168.2.1/master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
+        Microphone sessions : 
+        <select name="sessionopen" id="sessionopen" onChange="this.form.submit()">
+            <option value='No' <?php if ($sessionopen == "No") echo "selected='selected';" ?> >No</option>
+            <option value='Yes' <?php if ($sessionopen == "Yes") echo "selected='selected';" ?> >Yes</option>
+        </select>
+      <form>
+      <br><br>
       <div id="connectControls">
         <div style="text-align: left;">
           <strong>Who wants to speak ?</strong><br>
@@ -453,14 +552,21 @@ else
 	
    <div id="connectedUsers">
         <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
-            src="connected_master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
+            src="https://192.168.2.1/connected_master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 	
    <div id="questionList">
         <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
             onload="javascript:ResizeIframe(this);"
-            src="questions_master.php?conflist=<?php if (isset($name)) echo $name?>">
+            src="https://192.168.2.1/questions_master.php?conflist=<?php if (isset($name)) echo $name?>">
+        </iframe>
+   </div>
+
+   <div id="database">
+        <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
+            onload="javascript:ResizeIframe(this);"
+            src="https://192.168.2.1/database.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 	
@@ -469,6 +575,7 @@ else
       <table width="100%">
         <tr>
           <td id="connectedUsers_button" name="connectedUsers_button"><img src="group.png" height="30px"   onclick="showUsers()"></td>
+          <td id="database_button" name="database_button"><img src="db.png" height="30px"   onclick="showDatabase()"></td>
           <td id="connectControls_button" name="connectControls_button"><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
           <td id="questionList_button" name="questionList_button"><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>
         </tr>

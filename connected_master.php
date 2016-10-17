@@ -27,7 +27,7 @@
 
 </head>
 
-<body>
+<body style="font-family: 'Arial';">
    <div id="questions">
    Server Load : <?php echo $load[0] ;?>% / Refresh Time : <?php echo $refreshTime ;?><br><br>
    <div id="users">
