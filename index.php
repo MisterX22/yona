@@ -172,21 +172,28 @@ if (isset($_FILES['uploadedimagefile']))
   }
 else
   {
-    $files=scandir($target_path,0) ;
-    foreach($files as $n)
+    if ( isset($conflist) )
       {
-        if(!is_dir($n)) 
+        $files=scandir($target_path,0) ;
+        foreach($files as $n)
           {
-            $listimage[]=$target_path.$n;
+            if(!is_dir($n)) 
+              {
+                $listimage[]=$target_path.$n;
+              }
           }
       }
   }
 
 
 if ( isset($conflist) )
-  $config_path = "configuration/".$conflist."/" ;
-$file = $config_path."configuration.txt" ;
-$sessionopen=file_get_contents($file);
+  {
+    $config_path = "configuration/".$conflist."/" ;
+    $file = $config_path."configuration.txt" ;
+    $sessionopen=file_get_contents($file);
+  }
+else
+  $sessionopen="No" ;
 
 ?>
    
@@ -471,12 +478,15 @@ $sessionopen=file_get_contents($file);
 
       tab_java = new Array ;
 <?php
- $a=0 ;
- foreach($listimage as $n)
-   {
-     echo "tab_java[$a] = '$n';\n" ; 
-     $a++ ;
-   }
+  if (isset($conflist))
+    {
+      $a=0 ;
+      foreach($listimage as $n)
+        {
+          echo "tab_java[$a] = '$n';\n" ; 
+          $a++ ;
+        }
+    }
 ?>
       var ic1 = new ImageCollection(tab_java) ;
 
@@ -822,7 +832,8 @@ $sessionopen=file_get_contents($file);
                 if (file_exists($path))
                   {
                     $lepath = $listimage[$nb_fichier]; 
-                    echo '<img height="50px" onClick="afficheImage(\''.$lepath.'\');" src="'.$lepath.'"/>&nbsp' ;
+                    //echo '<img height="50px" onClick="afficheImage(\''.$lepath.'\');" src="'.$lepath.'" alt="'.$nb_fichier.'" />&nbsp' ;
+                    echo '<img height="50px" onClick="afficheImage(\''.$lepath.'\');" src="" alt="'.$nb_fichier.'" />&nbsp' ;
                     $nb_fichier++;
                   }
                 $index_image++;
