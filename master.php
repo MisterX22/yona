@@ -28,6 +28,13 @@ if ($action=="D")
     $name="";
   }
 
+// Do we want to shutdown ? 
+if ($action=="S")
+  {
+    $name="";
+    $shutdown=`sudo shutdown now`;
+  }
+
 // Managing table if required
 if(empty($name))
   {
@@ -188,6 +195,7 @@ if (isset($_POST['sessionopen']))
                Hide("connectControls");
                Hide("questionList");
                Disabling("unsubmitname");
+               Disabling("shutdown");
             }
           else
             {
@@ -465,6 +473,13 @@ if (isset($_POST['sessionopen']))
       <form name="byebye" id="byebye" method="post" 
           action="https://192.168.2.1/master.php?action=D&name=<?php if (isset($name)) echo $name?>">
         <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect" style="font-size: 50%;"
+            onClick="document.getElementById("name").value='';">
+      </form>
+    </td>
+    <td>
+      <form name="shutdown" id="shutdown" method="post" 
+          action="https://192.168.2.1/master.php?action=S&name=<?php if (isset($name)) echo $name?>">
+        <input name="unsubmitname" id="unsubmitname" type="submit" value="Shutdown" style="font-size: 50%;"
             onClick="document.getElementById("name").value='';">
       </form>
     </td>

@@ -273,8 +273,6 @@ function disconnect() {
     clearConnectList();
 }
 
-
-
 easyrtc.setStreamAcceptor( function(easyrtcid, stream) {
 
     audio = document.getElementById('callerAudio');
