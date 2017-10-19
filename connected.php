@@ -3,11 +3,12 @@
 // Retrieving required inputs
 $conflist=$_GET['conflist'];
 
-$ipclient=$_SERVER['REMOTE_ADDR'];
+$ipclient=$_SERVER['HTTP_X_FORWARDED_FOR'];
 $macAddr=false;
 $arp=`arp -a $ipclient`;
 $lines=explode(" ", $arp);
-$macAddr=$lines[3];
+//$macAddr=$lines[3];
+$macAddr=$ipclient;
 
 $load= sys_getloadavg() ;
 if ( $load[0] > 60 )
@@ -49,7 +50,7 @@ if(isset($_GET['action']))
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <?php
-      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"https://192.168.2.1/connected.php?conflist=".$conflist."&action='C'\" />" ;
+      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"https://yona-misterx22.c9users.io/connected.php?conflist=".$conflist."&action='C'\" />" ;
     ?>
     <title>Connected users</title>
     <style type="text/css">
@@ -65,7 +66,7 @@ if(isset($_GET['action']))
 <body style="font-family: 'Arial';">
    <div id="users">
 
-     <form name="refresh" id="refresh" method="post" action="https://192.168.2.1/connected.php?conflist=<?php if (isset($conflist)) echo $conflist?>&action='C'">
+     <form name="refresh" id="refresh" method="post" action="https://yona-misterx22.c9users.io/connected.php?conflist=<?php if (isset($conflist)) echo $conflist?>&action='C'">
        <table><tr>
        <td style="text-align: center;">Auto page refresh <?php echo $refreshTime ; ?> seconds</td>
        <td><input type='button' value='Manual Refresh' onclick='this.form.submit()'></td>

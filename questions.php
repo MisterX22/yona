@@ -3,11 +3,12 @@
 // Retrieving required inputs
 $conflist=$_GET['conflist'];
 
-$ipclient=$_SERVER['REMOTE_ADDR'];
+$ipclient=$_SERVER['HTTP_X_FORWARDED_FOR'];
 $macAddr=false;
 $arp=`arp -a $ipclient`;
 $lines=explode(" ", $arp);
-$macAddr=$lines[3];
+//$macAddr=$lines[3];
+$macAddr=$ipclient;
 
 // Compute the server load to adjust refresh time
 $load= sys_getloadavg() ;
@@ -202,7 +203,7 @@ if(isset($_GET['votefor']))
         }
     }
     // we want to avoid double post on reload
-    header('Location:  https://192.168.2.1/questions.php?conflist='.$conflist.'&choice='.$allquestions.'&refresh='.$refresh_choice);
+    header('Location:  https://yona-misterx22.c9users.io/questions.php?conflist='.$conflist.'&choice='.$allquestions.'&refresh='.$refresh_choice);
     exit;
  
     mysqli_close($db);
@@ -215,7 +216,7 @@ if(isset($_GET['votefor']))
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <?php
     if ( $auto == 1 )
-      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"https://192.168.2.1/questions.php?conflist=".$conflist."&choice=".$allquestions."&refresh=".$refresh_choice."\" />" ;
+      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"https://yona-misterx22.c9users.io/questions.php?conflist=".$conflist."&choice=".$allquestions."&refresh=".$refresh_choice."\" />" ;
     ?>
     <title>Questions</title>
     <style type="text/css">
@@ -236,7 +237,7 @@ if(isset($_GET['votefor']))
     </style>
     <script>
        //window.onload = alert(window.location.href) ;
-       //no more working <?php // if ($reloadtopframe == "1") echo "top.frames.location.href='https://192.168.2.1/index.php?conflist=".$conflist."'" ; ?>
+       //no more working <?php // if ($reloadtopframe == "1") echo "top.frames.location.href='https://yona-misterx22.c9users.io/index.php?conflist=".$conflist."'" ; ?>
     </script>
 
 </head>
@@ -245,7 +246,7 @@ if(isset($_GET['votefor']))
 
    <div id="questions">
      <strong><u> Questions :</u></strong>
-     <form name="choice" id="choice" method="post" action="https://192.168.2.1/questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
+     <form name="choice" id="choice" method="post" action="https://yona-misterx22.c9users.io/questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
        <table><tr>
        <!--<td><strong><u> Questions :</u></strong></td>-->
        <td><input type="radio" id="allquestions" name="allquestions" value="all" onclick="this.form.submit()" <?php if ( isset($checkall) ) echo "checked" ;?> >All</td>
@@ -254,7 +255,7 @@ if(isset($_GET['votefor']))
        </tr></table>
      </form>
      <i>Rules: <ul style="margin-top: 0px;"><li>you have <?php echo $remaining ; ?> point(s) left,</li><li><?php echo $text ; ?></li><li>Auto page refresh <?php echo $refreshTime ; ?> seconds</li></ul></i>
-     <form name="refresh" id="refresh" method="post" action="https://192.168.2.1/questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
+     <form name="refresh" id="refresh" method="post" action="https://yona-misterx22.c9users.io/questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
        <table><tr>
        <td style="text-align: center;">Refresh mode :</td>
        <td><input type="radio" id="refresh_choice" name="refresh_choice" value="auto" onclick="this.form.submit()" <?php if ( isset($auto) ) echo "checked" ;?> >Auto</td>
@@ -328,14 +329,14 @@ if(isset($_GET['votefor']))
           if  ( $macAddr2 == $macAddr )
           {
             // this is my question, want to remove it  ?
-            echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='https://192.168.2.1/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=D';\">";
+            echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='https://yona-misterx22.c9users.io/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=D';\">";
           }
           else
           {
             if ($remaining > 0) 
-             echo "<input type='image' src=plus1.png  onclick=\"window.location.href='https://192.168.2.1/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=P'; \">";
+             echo "<input type='image' src=plus1.png  onclick=\"window.location.href='https://yona-misterx22.c9users.io/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=P'; \">";
             if ($thisismyvote == 1)
-             echo "<input type='image' src=moins1.png  onclick=\"window.location.href='https://192.168.2.1/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=M'; \">";
+             echo "<input type='image' src=moins1.png  onclick=\"window.location.href='https://yona-misterx22.c9users.io/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=M'; \">";
           }
         }
         echo "<br><br>";

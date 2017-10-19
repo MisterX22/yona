@@ -14,8 +14,10 @@ if(isset($_POST['name']))
         $name=$_POST['conflist'];
   }
 else
-  if(isset($_POST['conflist']))
-    $name=$_POST['conflist'];
+  {
+    if(isset($_POST['conflist']))
+      $name=$_POST['conflist'];
+  }
 
 if(isset($_GET['action']))
   $action=$_GET['action'] ;
@@ -67,8 +69,8 @@ else
             mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
             $sql2 = "DROP TABLE `$imagetable`";   
             mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-            $path="upload/".$name."/" ;
-            $trash="trash/";
+            $path="/home/ubuntu/Project-X/upload/".$name."/" ;
+            $trash="/home/ubuntu/Project-X/trash/";
             rename($path,$trash) ;
             $name = "";
           } 
@@ -97,8 +99,8 @@ else
               )";   
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
         // creating directory for multimedia
-        $path="upload/".$name."/" ;
-        mkdir($path , 0755) ;
+        $path="/home/ubuntu/Project-X/upload/".$name."/" ;
+        mkdir($path , 0755, true) ;
         $imagetable=$name."_images" ;
         $sql2 = "CREATE TABLE $imagetable ( 
                   id INT NOT NULL AUTO_INCREMENT, 
@@ -110,23 +112,29 @@ else
               )";   
         mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
         // creating directory for configuration
-        $path="configuration/".$name."/" ;
-        mkdir($path , 0755) ;
+        $path="/home/ubuntu/Project-X/configuration/".$name."/" ;
+        mkdir($path , 0755, true) ;
         $sessionopen="No" ;
         $file = $path."configuration.txt" ;
         file_put_contents($file, $sessionopen);
         // creating directory for trash
-        $path="trash/".$name."/" ;
-        mkdir($path , 0755) ;
+        $path="/home/ubuntu/Project-X/trash/".$name."/" ;
+        mkdir($path , 0755, true) ;
       }
       mysqli_close($db);  
     }
 
-$sessionopen="" ;
+$sessionopen="";
+if ( $name != "" )
+  {
+    $config_path = "/home/ubuntu/Project-X/configuration/".$name."/" ;
+    $file = $config_path."configuration.txt" ;
+    $sessionopen=file_get_contents($file);
+  }
 if (isset($_POST['sessionopen']))
   {
     $sessionopen=$_POST['sessionopen'];
-    $path="configuration/".$name."/" ;
+    $path="/home/ubuntu/Project-X/configuration/".$name."/" ;
     $file = $path."configuration.txt" ;
     file_put_contents($file, $sessionopen);
   }
@@ -138,13 +146,13 @@ if (isset($_POST['sessionopen']))
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> <!--skip-->
         <title>Audio Demo</title>
-        <link rel="stylesheet" type="text/css" href="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8443/easyrtc/easyrtc.css" />
+        <link rel="stylesheet" type="text/css" href="https://<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/easyrtc/easyrtc.css" />
 
 
         <!--show-->
         <!-- Assumes global locations for socket.io.js and easyrtc.js -->
-        <script src="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8443/socket.io/socket.io.js"></script>
-        <script type="text/javascript" src="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8443/easyrtc/easyrtc.js"></script>
+        <script src="https://<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="https://<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/easyrtc/easyrtc.js"></script>
         <script type="text/javascript" src="js/master.js"></script>
 
     <script type="text/javascript">
@@ -462,7 +470,8 @@ if (isset($_POST['sessionopen']))
          }
     </style>
   </head>
-  <body style="font-family: 'Arial';" onload="setTimeout('connect()',4000)">
+<!--  <body style="font-family: 'Arial';" onload="setTimeout('connect()',4000)">-->
+  <body style="font-family: 'Arial';">
 	
   <div name="menutop" id="menutop">
     <table width="100%">
@@ -471,14 +480,14 @@ if (isset($_POST['sessionopen']))
     <td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "NOKIA"; ?></td>
     <td>
       <form name="byebye" id="byebye" method="post" 
-          action="https://192.168.2.1/master.php?action=D&name=<?php if (isset($name)) echo $name?>">
+          action="https://yona-misterx22.c9users.io/master.php?action=D&name=<?php if (isset($name)) echo $name?>">
         <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect" style="font-size: 50%;"
             onClick="document.getElementById("name").value='';">
       </form>
     </td>
     <td>
       <form name="shutdown" id="shutdown" method="post" 
-          action="https://192.168.2.1/master.php?action=S&name=<?php if (isset($name)) echo $name?>">
+          action="https://yona-misterx22.c9users.io/master.php?action=S&name=<?php if (isset($name)) echo $name?>">
         <input name="unsubmitname" id="unsubmitname" type="submit" value="Shutdown" style="font-size: 50%;"
             onClick="document.getElementById("name").value='';">
       </form>
@@ -489,7 +498,7 @@ if (isset($_POST['sessionopen']))
   
   <div id="main">
     <!-- Main Content -->
-    <form name="conf" id="conf" method="post" action="https://192.168.2.1/master.php"/>
+    <form name="conf" id="conf" method="post" action="https://yona-misterx22.c9users.io/master.php"/>
       <table>
       <tr>
       <td><big><strong>Existing Conference : </strong></big></td>
@@ -512,7 +521,7 @@ if (isset($_POST['sessionopen']))
       </tr>
       <tr>
       <td><big><strong>Conference Name:</strong></big></td>
-      <!--<td><form name="createconf" id="createconf" method="post" action="https://192.168.2.1/master.php" style="font-size: 150%"/>!-->
+      <!--<td><form name="createconf" id="createconf" method="post" action="https://yona-misterx22.c9users.io/master.php" style="font-size: 150%"/>!-->
       <td><input type="text" name="name" id="name" value="<?php if (isset($name)) echo $name;?>"></td>
       <td><input name="submitname" id="submitname" type="submit" value="Create"></td>
       <!--</form></td>!-->
@@ -525,7 +534,7 @@ if (isset($_POST['sessionopen']))
     <!--show-->
     <div id="demoContainer">
       <br>
-      <form name="openMicro" id ="openMicro" method="post" action="https://192.168.2.1/master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
+      <form name="openMicro" id ="openMicro" method="post" action="https://yona-misterx22.c9users.io/master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         Microphone sessions : 
         <select name="sessionopen" id="sessionopen" onChange="this.form.submit()">
             <option value='No' <?php if ($sessionopen == "No") echo "selected='selected';" ?> >No</option>
@@ -539,7 +548,7 @@ if (isset($_POST['sessionopen']))
           <i>Rules: <ul style="margin-top: 0px;"><li>Users requesting for the micro will appear</li><li>Give micro access by clicking on name</li><li>Access can be removed at any time by clicking on "Release it"</li></ul></i>
         </div>
 
-        <center><button id="hangupButton" disabled="disabled" onclick="hangup()">Release it</button></center>
+        <center><button id="hangupButton" onclick="connect()">Release it</button></center>
         <center><div id="iam">Not yet connected...</div></center>
         <br>
         <strong> <u>Waiting for Mic : </u></strong>
@@ -567,21 +576,21 @@ if (isset($_POST['sessionopen']))
 	
    <div id="connectedUsers">
         <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
-            src="https://192.168.2.1/connected_master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
+            src="https://yona-misterx22.c9users.io/connected_master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 	
    <div id="questionList">
         <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
             onload="javascript:ResizeIframe(this);"
-            src="https://192.168.2.1/questions_master.php?conflist=<?php if (isset($name)) echo $name?>">
+            src="https://yona-misterx22.c9users.io/questions_master.php?conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 
    <div id="database">
         <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
             onload="javascript:ResizeIframe(this);"
-            src="https://192.168.2.1/database.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
+            src="https://yona-misterx22.c9users.io/database.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 	

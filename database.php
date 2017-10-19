@@ -28,7 +28,7 @@
 <body style="font-family: 'Arial';">
    <div id="databasePrint">
      <br>
-     <form name="refresh" id="refresh" method="post" action="https://192.168.2.1/database.php?conflist=<?php if (isset($conflist)) echo 
+     <form name="refresh" id="refresh" method="post" action="https://yona-misterx22.c9users.io/database.php?conflist=<?php if (isset($conflist)) echo 
 $conflist?>">
        <table><tr><td><input type='button' value='Refresh' onclick='this.form.submit()'></td></tr></table>
      </form>

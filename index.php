@@ -1,14 +1,17 @@
 <?php 
 
 // Retrieving required inputs
-$ipclient=$_SERVER['REMOTE_ADDR'];
+$ipclient=$_SERVER['HTTP_X_FORWARDED_FOR'];
 $macAddr=false;
 $arp=`arp -a $ipclient`;
 $lines=explode(" ", $arp);
-$macAddr=$lines[3];
+//$macAddr=$lines[3];
+$macAddr=$ipclient;
 $numquestion = 0;
 $remaining = 3 - $numquestion ;
-$hostname=$lines[0] ;
+//$hostname=$lines[0] ;
+$hostname="cloud9" ;
+$listimage[]="";
 
 // What action ?
 if(isset($_GET['action']))
@@ -38,7 +41,7 @@ else
       $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
       mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
       $sql = "SELECT name FROM ".$conflist." WHERE macAddr = '$macAddr'";
-      $req = mysqli_query($db,$sql) or header("Refresh:0; url=https://192.168.2.1/index.php");
+      $req = mysqli_query($db,$sql) or header("Refresh:0; url=https://yona-misterx22.c9users.io/index.php");
       while($madata = mysqli_fetch_assoc($req))
         {
           $name = $madata['name'] ;
@@ -94,7 +97,7 @@ if(isset($_POST['submitquestion']))
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
         mysqli_close($db); 
         // we want to avoid double post on reload
-        header('Location: https://192.168.2.1/index.php?conflist='.$conflist.'&name='.$name);
+        header('Location: https://yona-misterx22.c9users.io/index.php?conflist='.$conflist.'&name='.$name);
         exit;
       }
   }
@@ -205,13 +208,13 @@ else
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> <!--skip-->
     <title>Audio Demo</title>
-    <link rel="stylesheet" type="text/css" href="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8443/easyrtc/easyrtc.css" />
+    <link rel="stylesheet" type="text/css" href="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/easyrtc/easyrtc.css" />
     <meta name="viewport" content="width=device-width"/>
 
     <!--show-->
     <!-- Assumes global locations for socket.io.js and easyrtc.js -->
-    <script src="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8443/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8443/easyrtc/easyrtc.js"></script>
+    <script src="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/easyrtc/easyrtc.js"></script>
     <script type="text/javascript" src="js/client.js"></script>
 
     <script type="text/javascript">
@@ -687,7 +690,7 @@ else
         <td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "Welcome"; ?></td>
         <td>
           <form name="byebye" id="byebye" method="post" 
-            action="https://192.168.2.1/index.php?action=D&conflist=<?php if (isset($conflist)) echo $conflist?>">
+            action="https://yona-misterx22.c9users.io/index.php?action=D&conflist=<?php if (isset($conflist)) echo $conflist?>">
              <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect" style="font-size: 50%;"
                            onClick="document.getElementById("name").value='';">
           </form>
@@ -697,7 +700,7 @@ else
   </div>
 
   <div name="main" id="main">
-    <form name="whoami" id="whoami" method="post" action="https://192.168.2.1/index.php?conflist=<?php if (isset($conflist)) echo $conflist?>"/>
+    <form name="whoami" id="whoami" method="post" action="https://yona-misterx22.c9users.io/index.php?conflist=<?php if (isset($conflist)) echo $conflist?>"/>
     <center>
       <table>
       <tr>
@@ -746,7 +749,7 @@ else
           <strong>Send your question by filling this form</strong><br>
           <i>Rules: <ul style="margin-top: 0px;"><li>Only three questions per user</li><li>Owned question can be removed (see Q&A tab)</li></ul></i>
           <form name="question" id="question" method="post"  
-            action="https://192.168.2.1/index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />
+            action="https://yona-misterx22.c9users.io/index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />
             <textarea style="width: 100%;height: auto;font-size: 100%;" maxlength="255" rows="5" 
                    placeholder="<?php echo $remaining." questions remaining" ?>"
                    name="yourquestion" id="yourquestion"></textarea><br>
@@ -788,14 +791,14 @@ else
         <div id="connectedUsers">
           <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
              onload="javascript:ResizeIframe(this);"
-             src="https://192.168.2.1/connected.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+             src="https://yona-misterx22.c9users.io/connected.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
         <div id ="camera">
           <strong>Capture & post your images </strong><br>
           <i>Rules: <ul style="margin-top: 0px;"><li>Share your visuals !</li></ul></i>
           <?php echo $uploadtext ; ?>
-          <form action="https://192.168.2.1/index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&P=1"  method="post" enctype="multipart/form-data"/>
+          <form action="https://yona-misterx22.c9users.io/index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&P=1"  method="post" enctype="multipart/form-data"/>
             <input type="hidden" name="MAX_FILE_SIZE" value="41943004">
             <table style="width: 100%">
             <tr>
@@ -811,7 +814,7 @@ else
           </form>
           <br><hr><br>
           <form name="refresh" id="refresh" method="post" 
-                 action="https://192.168.2.1/index.php?conflist=<?php if (isset($conflist)) echo $conflist?>&P=1">
+                 action="https://yona-misterx22.c9users.io/index.php?conflist=<?php if (isset($conflist)) echo $conflist?>&P=1">
             <table>
             <tr><td>No automatic refresh<br>Please use button to refresh</td></tr>
             <tr><td><input type='button' value='Refresh' onclick='this.form.submit()'></td></tr>
@@ -860,7 +863,7 @@ else
         <div id="questionList">
           <iframe style="border: none; overflow: visible; width: 100%; height: 100%;" SCROLLING=auto 
              onload="javascript:ResizeIframe(this);"
-             src="https://192.168.2.1/questions.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+             src="https://yona-misterx22.c9users.io/questions.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
     </div>

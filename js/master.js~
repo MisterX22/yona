@@ -36,7 +36,7 @@ function enable(domId) {
 
 
 function connect() {
-    easyrtc.setSocketUrl(":8443");
+    easyrtc.setSocketUrl(":8081");
     console.log("Initializing.");
     easyrtc.enableVideo(false);
     easyrtc.enableVideoReceive(false);
