@@ -216,6 +216,7 @@ function convertListToButtons (roomName, occupants, isPrimary) {
                       sendStuffWS(theoccupants[i], lemessage ) ;
 		  }
                 }
+                return false;
             };
         }(easyrtcid);
 

@@ -548,7 +548,8 @@ if (isset($_POST['sessionopen']))
           <i>Rules: <ul style="margin-top: 0px;"><li>Users requesting for the micro will appear</li><li>Give micro access by clicking on name</li><li>Access can be removed at any time by clicking on "Release it"</li></ul></i>
         </div>
 
-        <center><button id="hangupButton" onclick="connect()">Release it</button></center>
+        <center><button id="hangupButton" onclick="hangup()">Release it</button></center>
+        <center><a href="" id="connect" onclick="connect(); return false;">Connect</a></center>
         <center><div id="iam">Not yet connected...</div></center>
         <br>
         <strong> <u>Waiting for Mic : </u></strong>
