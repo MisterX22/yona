@@ -4,8 +4,8 @@
   if(isset($_GET['questove']))
   {
     $questove=$_GET['questove'];
-    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
     $sql = "UPDATE ".$conflist." SET questove = NOT(questove) WHERE id='$questove'";
     mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
      // remove all votes
@@ -21,8 +21,8 @@
   if(isset($_GET['trash']))
   {
     $trashid=$_GET['trash'];
-    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
     $sql = "DELETE from ".$conflist." WHERE id='$trashid'";
     mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
      // remove all votes
@@ -40,7 +40,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="refresh" content="10, URL='https://yona-misterx22.c9users.io/questions_master.php?conflist=<?php if (isset($conflist)) echo $conflist?>'" />
+    <meta http-equiv="refresh" content="10, URL='./questions_master.php?conflist=<?php if (isset($conflist)) echo $conflist?>'" />
     <title>Connected users</title>
     <style type="text/css">
        #questions {
@@ -70,10 +70,10 @@
 <body style="font-family: 'Arial';">
    <div id="questions">
      <strong><u> Questions :</u></strong><br>
-     <i>Rules: <ul style="margin-top: 0px;"><li>Questions are sorted by number of votes</li><li>When a question is done, strike it by clicking on the <img src="check.png" height=10px> button</li></ul></i>
+     <i>Rules: <ul style="margin-top: 0px;"><li>Questions are sorted by number of votes</li><li>When a question is done, strike it by clicking on the <img src="images/check.png" height=10px> button</li></ul></i>
      <?php
-      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
       $sql = "SELECT id, question , name, macAddr, questime, questove FROM ".$conflist." WHERE question !='' ORDER BY questove ASC, votenum DESC";
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       while($data = mysqli_fetch_assoc($req))
@@ -86,7 +86,7 @@
         {
           echo "<strike>" ;
         }
-        $buttontext="check.png";
+        $buttontext="images/check.png";
         echo $data['question']."(" ;
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE votefor = '".$id."'";
         $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
@@ -107,8 +107,8 @@
         }
         echo "<br>" ;
         echo "<table><tr>";
-        echo "<td><input type='image' src=".$buttontext."  style=\"height: 20px;\" onclick=\"window.location.href='https://yona-misterx22.c9users.io/questions_master.php?conflist=".$conflist."&questove=".$id."'\"></td>";
-        echo "<td><input type='image' src=\"trash.png\"  style=\"height: 20px;\" onclick=\"window.location.href='https://yona-misterx22.c9users.io/questions_master.php?conflist=".$conflist."&trash=".$id."'\"></td>";
+        echo "<td><input type='image' src=".$buttontext."  style=\"height: 20px;\" onclick=\"window.location.href='./questions_master.php?conflist=".$conflist."&questove=".$id."'\"></td>";
+        echo "<td><input type='image' src=\"images/trash.png\"  style=\"height: 20px;\" onclick=\"window.location.href='./questions_master.php?conflist=".$conflist."&trash=".$id."'\"></td>";
         echo "</tr></table>";
         echo "<br><br>";
       }

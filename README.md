@@ -1,7 +1,14 @@
-<<<<<<< HEAD
 # Projet-Yona
 
 
-=======
-# yona
->>>>>>> d65bb91c74b4c6a6fe9c9e32ce8104c272df63c5
+## Configuration
+A few environment variables are needed to run the app :
+* **EASYRTC_SERVER**: the url to the webrtc server
+* **MYSQL_DB**: The mysql databse name
+* **MYSQL_HOST**: The mysql hostname
+* **MYSQL_PASSWORD**: The mysql password for the user defined in `MYSQL_USER`
+* **MYSQL_USER**: The mysql user
+
+Also, you need to update `.htaccess` file:
+on the line `AuthUserFile /app/.htpasswd`, replace `/app` by the absolute path to the folder
+where you deployed the application

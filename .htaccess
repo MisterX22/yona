@@ -1,4 +1,4 @@
-AuthUserFile /home/ubuntu/Project-X/.htpasswd
+AuthUserFile /app/.htpasswd
 AuthName "Authorization Required"
 AuthType Basic
 

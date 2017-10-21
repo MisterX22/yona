@@ -134,7 +134,7 @@ function enable(domId) {
 
 function connect() {
     //easyrtc.setSocketUrl(":8443");
-    easyrtc.setSocketUrl("https://yona-misterx22.c9users.io:8081");
+    easyrtc.setSocketUrl(rtcServer());
     console.log("Initializing.");
     easyrtc.enableVideo(false);
     easyrtc.enableVideoReceive(false);
