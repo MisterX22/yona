@@ -22,7 +22,7 @@ else
 if(isset($_GET['action']))
 {
     $action=$_GET['action'];
-    $controller->update_user_status($conflist, $macAddr, $action == "D")
+    $controller->update_user_status($conflist, $macAddr, $action == "D");
 }
 
 ?>

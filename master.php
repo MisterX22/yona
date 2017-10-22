@@ -66,19 +66,13 @@ else
     }
   }
 
-$sessionopen="";
+$sessionopen=false;
 if ( $name != "" )
-  {
-    $config_path = "configuration/".$name."/" ;
-    $file = $config_path."configuration.txt" ;
-    $sessionopen=file_get_contents($file);
-  }
+  $sessionopen=$controller->is_session_open($name);
 if (isset($_POST['sessionopen']))
   {
-    $sessionopen=$_POST['sessionopen'];
-    $path="configuration/".$name."/" ;
-    $file = $path."configuration.txt" ;
-    file_put_contents($file, $sessionopen);
+    $sessionopen = $_POST['sessionopen'] == "Yes";
+    $controller->set_session($name, $sessionopen);
   }
 
 ?>
@@ -325,8 +319,8 @@ if (isset($_POST['sessionopen']))
       <form name="openMicro" id ="openMicro" method="post" action="./master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         Microphone sessions : 
         <select name="sessionopen" id="sessionopen" onChange="this.form.submit()">
-            <option value='No' <?php if ($sessionopen == "No") echo "selected='selected';" ?> >No</option>
-            <option value='Yes' <?php if ($sessionopen == "Yes") echo "selected='selected';" ?> >Yes</option>
+            <option value='No' <?php if ($sessionopen) echo "selected='selected';" ?> >No</option>
+            <option value='Yes' <?php if ($sessionopen) echo "selected='selected';" ?> >Yes</option>
         </select>
       <form>
       <br><br>
@@ -364,20 +358,20 @@ if (isset($_POST['sessionopen']))
    </div>
 	
    <div id="connectedUsers">
-        <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
+        <iframe style="border: none; height: 100%; width: 100%;" SCROLLING="auto" 
             src="./connected_master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 	
    <div id="questionList">
-        <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
+        <iframe style="border: none; height: 100%; width: 100%;" SCROLLING="auto" 
             onload="javascript:ResizeIframe(this);"
             src="./questions_master.php?conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 
    <div id="database">
-        <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
+        <iframe style="border: none; height: 100%; width: 100%;" SCROLLING="auto" 
             onload="javascript:ResizeIframe(this);"
             src="./database.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
