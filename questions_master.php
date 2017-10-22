@@ -1,38 +1,35 @@
 <?php
+  include('includes/controller.php');
+  $controller = new Controller();
+  $database = $controller->database();
   $conflist=$_GET['conflist'];
 
   if(isset($_GET['questove']))
   {
     $questove=$_GET['questove'];
-    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
     $sql = "UPDATE ".$conflist." SET questove = NOT(questove) WHERE id='$questove'";
-    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+    $database->query($sql);
      // remove all votes
     $sql2 = "UPDATE ".$conflist." SET votefor = '' WHERE votefor='$questove'";
-    mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+    $database->query($sql2);
     $sql2 = "UPDATE ".$conflist." SET votefo1 = '' WHERE votefo1='$questove'";
-    mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+    $database->query($sql2);
     $sql2 = "UPDATE ".$conflist." SET votefo2 = '' WHERE votefo2='$questove'";
-    mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-    mysqli_close($db);
+    $database->query($sql2);
   }
 
   if(isset($_GET['trash']))
   {
     $trashid=$_GET['trash'];
-    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
     $sql = "DELETE from ".$conflist." WHERE id='$trashid'";
-    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+    $database->query($sql);
      // remove all votes
     $sql2 = "UPDATE ".$conflist." SET votefor = '' WHERE votefor='$trashid'";
-    mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+    $database->query($sql2);
     $sql2 = "UPDATE ".$conflist." SET votefo1 = '' WHERE votefo1='$trashid'";
-    mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+    $database->query($sql2);
     $sql2 = "UPDATE ".$conflist." SET votefo2 = '' WHERE votefo2='$trashid'";
-    mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-    mysqli_close($db);
+    $database->query($sql2);
   }
 ?>
 
@@ -72,11 +69,8 @@
      <strong><u> Questions :</u></strong><br>
      <i>Rules: <ul style="margin-top: 0px;"><li>Questions are sorted by number of votes</li><li>When a question is done, strike it by clicking on the <img src="images/check.png" height=10px> button</li></ul></i>
      <?php
-      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
       $sql = "SELECT id, question , name, macAddr, questime, questove FROM ".$conflist." WHERE question !='' ORDER BY questove ASC, votenum DESC";
-      $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-      while($data = mysqli_fetch_assoc($req))
+      foreach($database->query_assocs($sql) as $data)
       {
         $macAddr2 = $data['macAddr'];
         $id = $data['id'];
@@ -89,16 +83,12 @@
         $buttontext="images/check.png";
         echo $data['question']."(" ;
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE votefor = '".$id."'";
-        $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-        $row = mysqli_fetch_array($req2);
-        $count = $row[0];
+        $count = $database->query_arrays($sql2)[0][0];
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE (votefo1 = '".$id."')" ;
-        $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-        $row = mysqli_fetch_array($req2);
+        $row = $database->query_arrays($sql2)[0];
         $count = $count + $row[0];
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE (votefo2 = '".$id."')";
-        $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-        $row = mysqli_fetch_array($req2);
+        $row = $database->query_arrays($sql2)[0];
         $count = $count + $row[0];
         echo "".$count." votes)";
         if ($data['questove'] == '1')
@@ -112,7 +102,6 @@
         echo "</tr></table>";
         echo "<br><br>";
       }
-      mysqli_close($db);
      ?>
    </div>
 </body>

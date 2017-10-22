@@ -1,4 +1,7 @@
 <?php
+  include('includes/controller.php');
+  $controller = new Controller();
+
   $conflist=$_GET['conflist'];
   $load[0]=0;
   if (strncasecmp(PHP_OS, 'WIN', 3) != 0) {
@@ -33,32 +36,18 @@
    <div id="users">
      <strong><u>Connected Users :</u></strong><br>
      <?php
-      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT name , hostname FROM ".$conflist." WHERE isconnected > 0 AND firstreg = '1'";
-      $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-      while($data = mysqli_fetch_assoc($req))
-        {
+      foreach($controller->get_connected_users($conflist) as $data) {
           echo $data['name']." (".$data['hostname'].")<br>" ;
-          $name3=$data['name'] ;
-          $sql3 = "UPDATE ".$conflist." SET isconnected = isconnected - 1 WHERE name='$name3'";
-          mysqli_query($db,$sql3) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error());
         }
-      mysqli_close($db);
+        $controller->decrement_connected_users_status($conflist);
      ?>
 
      <br><br>
      <strong><u>Registered Users :</u></strong><br>
-     <?php
-      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT name, hostname FROM ".$conflist." WHERE isconnected <= 0 AND firstreg = '1'";   
-      $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-      while($data = mysqli_fetch_assoc($req)) 
-        { 
-          echo $data['name']." (".$data['hostname'].")<br>" ; 
-        } 
-      mysqli_close($db);
+     <?php 
+      foreach($controller->get_registered_users($conflist) as $data) { 
+        echo $data['name']." (".$data['hostname'].")<br>" ; 
+      } 
      ?>
 
    </div>

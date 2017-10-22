@@ -1,4 +1,6 @@
 <?php 
+include('includes/controller.php');
+$controller = new Controller();
 
 // Retrieving all required inputs
 //if(isset($_GET['name']))
@@ -44,85 +46,25 @@ if(empty($name))
   }
 else
   {
-    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-    $req = "SHOW TABLES LIKE '$name'" ;
-    $res = mysqli_query($db,$req) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-    if(mysqli_num_rows($res) == 1)
+    if($controller->conference_exists($name))
       {
+        if(isset($_POST['conflist']))
+          $conflist=$_POST['conflist'];
         if (isset($_POST['resetconf']))
-          {
-            if(isset($_POST['conflist']))
-              $conflist=$_POST['conflist'];
-            $imagetable=$conflist."_images" ;
-            $sql = "DELETE FROM `$conflist`";   
-            mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-            $sql2 = "DELETE FROM `$imagetable`";   
-            mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-          }
+        {
+          $controller->reset_conference($conflist);
+        }
         if (isset($_POST['deleteconf']))
-          {
-            if(isset($_POST['conflist']))
-               $conflist=$_POST['conflist'];
-            $imagetable=$conflist."_images" ;
-            $sql = "DROP TABLE `$conflist`";   
-            mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-            $sql2 = "DROP TABLE `$imagetable`";   
-            mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-            $path="upload/".$name."/" ;
-            $trash="trash/";
-            rename($path,$trash) ;
-            $name = "";
-          } 
+        {
+          $controller->delete_conference($conflist);
+          $name = "";
+        } 
       }
     else
-      {
-        $sql = "CREATE TABLE $name ( 
-                  id INT NOT NULL AUTO_INCREMENT, 
-                  name VARCHAR(30),
-                  firstreg BOOLEAN,
-                  isconnected INT,
-                  rtcid VARCHAR(30),
-                  macAddr VARCHAR(30),
-                  hostname VARCHAR(255),
-                  waitformic BOOLEAN,
-                  question VARCHAR(255),
-                  questime TIME,
-                  questove BOOLEAN,
-                  votefor  VARCHAR(30),
-                  votefo1  VARCHAR(30),
-                  votefo2  VARCHAR(30),
-                  votenum INT,
-                  login DATETIME,
-                  logout DATETIME,
-                  PRIMARY KEY (id)
-              )";   
-        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-        // creating directory for multimedia
-        $path="upload/".$name."/" ;
-        mkdir($path , 0755, true) ;
-        $imagetable=$name."_images" ;
-        $sql2 = "CREATE TABLE $imagetable ( 
-                  id INT NOT NULL AUTO_INCREMENT, 
-                  name VARCHAR(30),
-                  path VARCHAR(255),
-                  macAddr VARCHAR(30),
-                  date DATETIME,
-                  PRIMARY KEY (id)
-              )";   
-        mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-        // creating directory for configuration
-        $path="configuration/".$name."/" ;
-        mkdir($path , 0755, true) ;
-        $sessionopen="No" ;
-        $file = $path."configuration.txt" ;
-        file_put_contents($file, $sessionopen);
-        // creating directory for trash
-        $path="trash/".$name."/" ;
-        mkdir($path , 0755, true) ;
-      }
-      mysqli_close($db);  
+    {
+      $controller->create_conference($name);
     }
+  }
 
 $sessionopen="";
 if ( $name != "" )
@@ -356,14 +298,9 @@ if (isset($_POST['sessionopen']))
       <td><select name="conflist" id="conflist" style="font-size: 150%">
         <?php
           // list conference
-          $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-          mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-          $sql = "show tables" ;
-          $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-          while($table = mysqli_fetch_array($req)) {
+          foreach($controller->list_conferences() as $table) {
               echo "<option value='".$table[0]."'>".$table[0]."</option> " ;
-          }
-          mysqli_close($db);        
+          }   
         ?>
       </select></td> 
       <td><input name="connectconf" id="connectconf" type="submit" value="ConnectConf"></td> 

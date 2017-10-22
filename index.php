@@ -1,5 +1,6 @@
 <?php 
-
+include('includes/controller.php');
+$controller = new Controller();
 // Retrieving required inputs
 $ipclient=$_SERVER['HTTP_X_FORWARDED_FOR'];
 $macAddr=false;
@@ -38,15 +39,10 @@ else
   {
     if ( isset($conflist)and ($conflist != "") ) {
       // trying to recover name
-      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT name FROM ".$conflist." WHERE macAddr = '$macAddr'";
-      $req = mysqli_query($db,$sql) or header("Refresh:0; url=./index.php");
-      while($madata = mysqli_fetch_assoc($req))
-        {
-          $name = $madata['name'] ;
-        }
-      mysqli_close($db);
+      $name = $controller->get_username_from_macAddr($conflist, $macAddr);
+      if(!$name) {
+        header("Refresh:0; url=./index.php");
+      }
     }
   }
 
@@ -55,87 +51,35 @@ if ( isset($name) )
   {
     if ( isset($conflist) ) {
       // trying to recover name
-      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-      $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE macAddr = '$macAddr' AND question != ''";
-      $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-      $row = mysqli_fetch_array($req2);
-      $numquestion = $row[0];
-      $remaining = 3 - $numquestion ;
-      mysqli_close($db);
+      $remaining = $controller->remaining_questions($conflist, $macAddr);
     }
   }
 
 // Do we need to register or read a question ?
 if(isset($_POST['submitquestion']))    
   {
-    if ( $remaining <= 0 )
-      {
-         // Do nothing
-      }
-    else
-      {
-        $yourquestion=$_POST['yourquestion'];
-        $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-        mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-        $thequestion=mysqli_real_escape_string($db,$yourquestion) ;
-
-        $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE macAddr = '".$macAddr."' AND question = ''";
-        $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-        $row2 = mysqli_fetch_array($req2);
-        $count = $row2[0];
-        if ( $count == 0 ) 
-           {
-             $sql = "INSERT INTO ".$conflist."(name,question, votenum, questime, macAddr, questove) 
-                                   VALUES('$name','$thequestion','0',curtime(),'$macAddr','0')" ; 
-           }
-        else
-           {
-             $sql = "UPDATE ".$conflist." SET question='$thequestion', votenum = '0', questime=curtime(), questove = '0' WHERE macAddr='$macAddr' AND question=''";
-           }
-        $remaining = $remaining - 1 ;
-        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-        mysqli_close($db); 
-        // we want to avoid double post on reload
-        header('Location: ./index.php?conflist='.$conflist.'&name='.$name);
-        exit;
-      }
+    $yourquestion=$_POST['yourquestion'];
+    $thequestion=$controller->escape($yourquestion);
+    if($controller->post_question($conflist, $macAddr, $thequestion)) {
+      $remaining = $remaining - 1 ;
+    }
+    // we want to avoid double post on reload
+    header('Location: ./index.php?conflist='.$conflist.'&name='.$name);
+    exit;
   }
 
 // Do we want to disconnect ? 
 if ($action=="D")
   {
-    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-    $sql = "UPDATE ".$conflist." SET isconnected = 0 , logout=now() WHERE macAddr='$macAddr'";   
-    mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-    mysqli_close($db);
+    $controller->logout_user($conflist, $macAddr);
     $name="";
   }
 
 // Connection
 if(isset($_POST['name']))
   {
-    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-     $thename= addcslashes(mysqli_real_escape_string($db,$name), '%_#') ;
-
-     $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE macAddr = '".$macAddr."'";
-     $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-     $row = mysqli_fetch_array($req2);
-     $count = $row[0];
-     if ( $count == 0 ) 
-       {
-         $sql = "INSERT INTO ".$conflist."(name, hostname, firstreg, isconnected, rtcid, macAddr,waitformic, question,login, logout) 
-                                   VALUES('$thename', '$hostname', '1', '2','','$macAddr','','',now(),'')" ; 
-       }
-     else
-       {
-          $sql = "UPDATE ".$conflist." SET hostname = '$hostname', name = '$thename' , isconnected = '2', login = now() WHERE macAddr='$macAddr'";   
-       }
-
-     mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-     mysqli_close($db); 
+    $thename= addcslashes($controller->escape($name), '%_#') ;
+    $controller->register_user($conflist, $thename, $hostname, $macAddr);
   }
  
 if ( isset($conflist) )
@@ -166,13 +110,7 @@ if (isset($_FILES['uploadedimagefile']))
             //imagejpeg($img,$target_path,50) ;
 
             $uploadtext="The file has been uploaded" ;
-            $imagetable=$conflist."_images" ;
-            $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-            mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-            $sql = "INSERT INTO ".$imagetable."(name,path,macAddr,date) 
-                                   VALUES('$name', '$target_path', '$macAddr',now())" ; 
-            mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-            mysqli_close($db); 
+            $controller->save_image_path($conflist, $name, $macAddr, $target_path);
             $listimage[]=$target_path;
           }
       }
@@ -553,15 +491,9 @@ else
       <td><select name="conflist" id="conflist" style="background-color:white;width:200px;font-size: 100%;">
       <?php
          // list conference
-         $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-         mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-         $sql = "show tables" ;
-         $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-         while($table = mysqli_fetch_array($req))
-           {
-             echo "<option value='".$table[0]."'>".$table[0]."</option> " ;
-           }
-         mysqli_close($db);        
+        foreach($controller->list_conferences() as $table) {
+            echo "<option value='".$table[0]."'>".$table[0]."</option> " ;
+        }        
       ?>
       </select></td>
       </tr>
@@ -662,13 +594,8 @@ else
             if ( isset($conflist) )
             {
             $nb_fichier = 0;
-            $imagetable=$conflist."_images" ;
-            $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-            mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-            $sql = "SELECT name, path FROM ".$imagetable ;
-            $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
             $index_image=0;
-            while($data = mysqli_fetch_assoc($req))
+            foreach($controller->list_images($conflist) as $data)
               {
                 $name=$data['name'] ;
                 $path=$data['path'] ;
@@ -682,7 +609,6 @@ else
                 $index_image++;
               }
             echo '<br><strong>' . $nb_fichier .'</strong> files available';
-            mysqli_close($db);
             }
           ?>
         </div>
