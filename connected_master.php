@@ -33,8 +33,8 @@
    <div id="users">
      <strong><u>Connected Users :</u></strong><br>
      <?php
-      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
       $sql = "SELECT name , hostname FROM ".$conflist." WHERE isconnected > 0 AND firstreg = '1'";
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       while($data = mysqli_fetch_assoc($req))
@@ -50,9 +50,9 @@
      <br><br>
      <strong><u>Registered Users :</u></strong><br>
      <?php
-      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error()) ;
-      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT name , hostname FROM ".$conflist." WHERE isconnected <= 0  AND firstreg = '1'";   
+      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
+      $sql = "SELECT name, hostname FROM ".$conflist." WHERE isconnected <= 0 AND firstreg = '1'";   
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       while($data = mysqli_fetch_assoc($req)) 
         { 

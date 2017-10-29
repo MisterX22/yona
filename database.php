@@ -28,7 +28,7 @@
 <body style="font-family: 'Arial';">
    <div id="databasePrint">
      <br>
-     <form name="refresh" id="refresh" method="post" action="https://yona-misterx22.c9users.io/database.php?conflist=<?php if (isset($conflist)) echo 
+     <form name="refresh" id="refresh" method="post" action="./database.php?conflist=<?php if (isset($conflist)) echo 
 $conflist?>">
        <table><tr><td><input type='button' value='Refresh' onclick='this.form.submit()'></td></tr></table>
      </form>
@@ -36,8 +36,8 @@ $conflist?>">
      <?php
       if ( isset($conflist) && ($conflist != "") ) 
       {
-      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
       $sql = "SELECT * FROM ".$conflist ;
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       echo "<br><table border='2px'>" ;
@@ -109,8 +109,8 @@ $conflist?>">
       if ( isset($conflist) && ($conflist != "") ) 
       {
       $imagetable=$conflist."_images" ;
-      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
       $sql = "SELECT * FROM ".$imagetable ;
       $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
       echo "<br><table border='2px'>" ;

@@ -38,10 +38,10 @@ else
   {
     if ( isset($conflist)and ($conflist != "") ) {
       // trying to recover name
-      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
       $sql = "SELECT name FROM ".$conflist." WHERE macAddr = '$macAddr'";
-      $req = mysqli_query($db,$sql) or header("Refresh:0; url=https://yona-misterx22.c9users.io/index.php");
+      $req = mysqli_query($db,$sql) or header("Refresh:0; url=./index.php");
       while($madata = mysqli_fetch_assoc($req))
         {
           $name = $madata['name'] ;
@@ -55,8 +55,8 @@ if ( isset($name) )
   {
     if ( isset($conflist) ) {
       // trying to recover name
-      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
       $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE macAddr = '$macAddr' AND question != ''";
       $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
       $row = mysqli_fetch_array($req2);
@@ -76,8 +76,8 @@ if(isset($_POST['submitquestion']))
     else
       {
         $yourquestion=$_POST['yourquestion'];
-        $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-        mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+        $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+        mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
         $thequestion=mysqli_real_escape_string($db,$yourquestion) ;
 
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE macAddr = '".$macAddr."' AND question = ''";
@@ -97,7 +97,7 @@ if(isset($_POST['submitquestion']))
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
         mysqli_close($db); 
         // we want to avoid double post on reload
-        header('Location: https://yona-misterx22.c9users.io/index.php?conflist='.$conflist.'&name='.$name);
+        header('Location: ./index.php?conflist='.$conflist.'&name='.$name);
         exit;
       }
   }
@@ -105,8 +105,8 @@ if(isset($_POST['submitquestion']))
 // Do we want to disconnect ? 
 if ($action=="D")
   {
-    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
     $sql = "UPDATE ".$conflist." SET isconnected = 0 , logout=now() WHERE macAddr='$macAddr'";   
     mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
     mysqli_close($db);
@@ -116,8 +116,8 @@ if ($action=="D")
 // Connection
 if(isset($_POST['name']))
   {
-     $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-     mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
      $thename= addcslashes(mysqli_real_escape_string($db,$name), '%_#') ;
 
      $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE macAddr = '".$macAddr."'";
@@ -158,6 +158,7 @@ if (isset($_FILES['uploadedimagefile']))
         $imagename=basename($_FILES['uploadedimagefile']['name']);
         $imageext=pathinfo($imagename, PATHINFO_EXTENSION);
         $imagename="image_".$nbfile.".".$imageext ;
+        mkdir($target_path, 0777, true);
         $target_path = $target_path.$name."_".$imagename ;
         if (move_uploaded_file($_FILES["uploadedimagefile"]["tmp_name"], $target_path))
           {
@@ -166,8 +167,8 @@ if (isset($_FILES['uploadedimagefile']))
 
             $uploadtext="The file has been uploaded" ;
             $imagetable=$conflist."_images" ;
-            $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-            mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+            $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+            mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
             $sql = "INSERT INTO ".$imagetable."(name,path,macAddr,date) 
                                    VALUES('$name', '$target_path', '$macAddr',now())" ; 
             mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
@@ -208,13 +209,18 @@ else
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> <!--skip-->
     <title>Audio Demo</title>
-    <link rel="stylesheet" type="text/css" href="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/easyrtc/easyrtc.css" />
+    <link rel="stylesheet" type="text/css" href="<?php print getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.css" />
     <meta name="viewport" content="width=device-width"/>
 
     <!--show-->
     <!-- Assumes global locations for socket.io.js and easyrtc.js -->
-    <script src="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="//<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/easyrtc/easyrtc.js"></script>
+    <script src="<?php print getenv("EASYRTC_SERVER"); ?>/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="<?php print getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.js"></script>
+    <script type="text/javascript">
+      function rtcServer() {
+        return "<?php echo getenv("EASYRTC_SERVER") ?>";
+      }
+    </script>
     <script type="text/javascript" src="js/client.js"></script>
 
     <script type="text/javascript">
@@ -508,176 +514,7 @@ else
     </script>
         
     <!-- Styles used within the demo -->
-    <style type="text/css">
-          #demoContainer {
-            position:relative;
-            width: 100%;
-            height: 100%;
-          }
-          #connectControls {
-            /*float:left;*/
-            /*width:400px;*/
-            text-align:center;
-            /*border: 2px solid black;*/
-          }
-          #connectButton, #disconnectButton {
-            /*width:400px;*/
-            text-align:center;
-            font-size: 150%;
-	    /*border-radius: 10px;
-	    background-color:#e7e7e7;*/
-          }
-          #otherClients {
-             height:200px;
-             overflow-y:scroll;
-          }
-          #callerAudio {
-             display:none; 
-             height:10em;
-             width:10em;
-             position:absolute;
-             top:140px;
-             text-align:center;
-             /*margin-left:10px;*/
-          }
-          #easyrtcErrorDialog {
-             z-index:2;
-             position:absolute;
-             top:40px;
-             margin: 0 auto ;
-             width: 300px  ;
-             border:red solid 2px;
-             background-color:pink;
-             padding:15px;
-             font-size: 100%;
-          }
-          #acceptCallBox {
-             display:none;
-             z-index:2;
-             /*position:absolute;*/
-             /*top:140px;*/
-             margin: 0 auto ;
-             width: 300px  ;
-             border:red solid 2px;
-             background-color:pink;
-             padding:15px;
-             font-size: 100%;
-          }
-          #callAcceptButton {
-              text-align:center;
-              font-size: 100%;
-              border: 2px solid black;
-          }
-          #callRejectButton {
-              text-align:center;
-              font-size: 100%;
-              border: 2px solid black;
-          }
-
-         #menutop {
-              position: absolute;
-              top: 0px;
-              left: 0px;
-              right: 0px;
-              /*width: 100%;*/
-              height: 30px;
-              background-color : #183693;
-              border-top: solid black 1px;
-              /*padding: 5px;*/
-              padding-left: 0px;
-              padding-right: 0px;
-              padding-top: 0px;
-              padding-bottom: 10px;
-              margin-left: 0px;
-              margin-right: 0px;
-              margin-top: 0px;
-              margin-bottom: 0px;
-              color: white;
-              font-size: 150%;
-              z-index:3;
-         }
-         #menutop td {
-              padding-left: 10px;
-              padding-top: 0px;
-              text-align: center;
-         }
-         body>#menutop {position:fixed}
-
-         #menubottom {
-              position: absolute;
-              bottom: 0px;
-              left: 0px;
-              right: 0px;
-              width: 100%;
-              height: 30px;
-              background-color : #F2F2F2;
-              border-top: solid black 1px;
-              padding: 5px;
-              padding-left: 5px;
-              padding-top: 0px;
-              color: white;
-              z-index:3;
-         }
-         #menubottom td {
-              padding-left: 10px;
-              padding-top: 0px;
-              text-align: center;
-         }
-         body>#menubottom {position:fixed}
-
-         #whoami { 
-              visibility: hidden;
-              position: absolute;
-              top: 40px;
-              left: 0px;
-              width: 400px%;
-              height: 100%;
-         }
- 
-         #sendQuestions, #connectedUsers, #camera, #connectControls, #questionList, #sessionnotopen, #imageView {
-              visibility: hidden;
-              position: absolute;
-              top: 40px;
-              left: 0px;
-              width: 100%;
-              height: 100%;
-         }
- 
-         #rules {
-              font-style : italic ;
-              //position: absolute;
-              //top: 200px;
-              //left: 5px;
-              margin-top: 0px;
-              margin-bottom: 0px;
-              padding-top: 0px;
-              padding-bottom: 0px;
-         }
-
-         input[type=button], input[type=submit], input[type=reset], button {
-              -webkit-appearance: none;
-              background-color : #183693 ;
-              color : white ;
-              border-radius : 5px;
-              font-size: 100%;
-         }
-         textarea {
-              background-color : white ;
-              color : black ;
-              border-radius : 5px;
-              font-family: "Arial";
-              font-size: 150%;
-         }
-         body {
-             /*margin: 0 0 5px 5px;
-             padding: 0 0 5px 5px;*/
-         }
-         table {
-             width: 100% ;
-         }
-
-    </style>
-
+    <link rel="stylesheet" type="text/css" href="css/index.css">
 </head>
 
 <body style="font-family: 'Arial';">
@@ -686,13 +523,13 @@ else
     <table>
       <tr>
         <!--<td>Yona</td>-->
-        <td><img src="yona.png" height="40px"></td>
+        <td><img src="images/yona.png" height="40px"></td>
         <td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "Welcome"; ?></td>
         <td>
           <form name="byebye" id="byebye" method="post" 
-            action="https://yona-misterx22.c9users.io/index.php?action=D&conflist=<?php if (isset($conflist)) echo $conflist?>">
+            action="./index.php?action=D&conflist=<?php if (isset($conflist)) echo $conflist?>">
              <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect" style="font-size: 50%;"
-                           onClick="document.getElementById("name").value='';">
+                           onClick="document.getElementById('name').value='';">
           </form>
         </td>
       </tr>
@@ -700,7 +537,7 @@ else
   </div>
 
   <div name="main" id="main">
-    <form name="whoami" id="whoami" method="post" action="https://yona-misterx22.c9users.io/index.php?conflist=<?php if (isset($conflist)) echo $conflist?>"/>
+    <form name="whoami" id="whoami" method="post" action="./index.php?conflist=<?php if (isset($conflist)) echo $conflist?>"/>
     <center>
       <table>
       <tr>
@@ -716,8 +553,8 @@ else
       <td><select name="conflist" id="conflist" style="background-color:white;width:200px;font-size: 100%;">
       <?php
          // list conference
-         $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-         mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+         $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+         mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
          $sql = "show tables" ;
          $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
          while($table = mysqli_fetch_array($req))
@@ -749,7 +586,7 @@ else
           <strong>Send your question by filling this form</strong><br>
           <i>Rules: <ul style="margin-top: 0px;"><li>Only three questions per user</li><li>Owned question can be removed (see Q&A tab)</li></ul></i>
           <form name="question" id="question" method="post"  
-            action="https://yona-misterx22.c9users.io/index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />
+            action="./index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>" />
             <textarea style="width: 100%;height: auto;font-size: 100%;" maxlength="255" rows="5" 
                    placeholder="<?php echo $remaining." questions remaining" ?>"
                    name="yourquestion" id="yourquestion"></textarea><br>
@@ -789,16 +626,16 @@ else
            </div>
         </div>
         <div id="connectedUsers">
-          <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
+          <iframe style="border: none; height: 100%; width: 100%;" SCROLLING="auto" 
              onload="javascript:ResizeIframe(this);"
-             src="https://yona-misterx22.c9users.io/connected.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+             src="./connected.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
         <div id ="camera">
           <strong>Capture & post your images </strong><br>
           <i>Rules: <ul style="margin-top: 0px;"><li>Share your visuals !</li></ul></i>
           <?php echo $uploadtext ; ?>
-          <form action="https://yona-misterx22.c9users.io/index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&P=1"  method="post" enctype="multipart/form-data"/>
+          <form action="./index.php?name=<?php if (isset($name)) echo $name?>&conflist=<?php if (isset($conflist)) echo $conflist?>&P=1"  method="post" enctype="multipart/form-data"/>
             <input type="hidden" name="MAX_FILE_SIZE" value="41943004">
             <table style="width: 100%">
             <tr>
@@ -814,7 +651,7 @@ else
           </form>
           <br><hr><br>
           <form name="refresh" id="refresh" method="post" 
-                 action="https://yona-misterx22.c9users.io/index.php?conflist=<?php if (isset($conflist)) echo $conflist?>&P=1">
+                 action="./index.php?conflist=<?php if (isset($conflist)) echo $conflist?>&P=1">
             <table>
             <tr><td>No automatic refresh<br>Please use button to refresh</td></tr>
             <tr><td><input type='button' value='Refresh' onclick='this.form.submit()'></td></tr>
@@ -826,8 +663,8 @@ else
             {
             $nb_fichier = 0;
             $imagetable=$conflist."_images" ;
-            $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-            mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+            $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+            mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
             $sql = "SELECT name, path FROM ".$imagetable ;
             $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
             $index_image=0;
@@ -863,7 +700,7 @@ else
         <div id="questionList">
           <iframe style="border: none; overflow: visible; width: 100%; height: 100%;" SCROLLING=auto 
              onload="javascript:ResizeIframe(this);"
-             src="https://yona-misterx22.c9users.io/questions.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
+             src="./questions.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
         </div>
     </div>
@@ -872,11 +709,11 @@ else
   <div name="menubottom" id="menubottom">
     <table width="100%">
       <tr>
-        <!--<td id="connectedUsers_button" name="connectedUsers_button"><img src="group.png" height="30px"   onclick="showUsers()"></td>-->
-        <td id="camera_button" name="camera_button"><img src="camera.png" height="30px"   onclick="showCamera()"></td>
-        <td id="sendQuestions_button" name="sendQuestions_button"><img src="plumier.png" height="30px" onclick="showSendQuestion()"></td>
-        <td id="connectControls_button" name="connectControls_button"><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
-        <td id="questionList_button" name="questionList_button"><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>
+        <!--<td id="connectedUsers_button" name="connectedUsers_button"><img src="images/group.png" height="30px"   onclick="showUsers()"></td>-->
+        <td id="camera_button" name="camera_button"><img src="images/camera.png" height="30px"   onclick="showCamera()"></td>
+        <td id="sendQuestions_button" name="sendQuestions_button"><img src="images/plumier.png" height="30px" onclick="showSendQuestion()"></td>
+        <td id="connectControls_button" name="connectControls_button"><img src="images/micro.png" height="30px"   onclick="showConnectControls()"></td>
+        <td id="questionList_button" name="questionList_button"><img src="images/QandA.png" height="30px"   onclick="showQuestions()"></td>
       </tr>
     </table>
   </div>

@@ -44,8 +44,8 @@ if(empty($name))
   }
 else
   {
-    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
     $req = "SHOW TABLES LIKE '$name'" ;
     $res = mysqli_query($db,$req) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
     if(mysqli_num_rows($res) == 1)
@@ -69,8 +69,8 @@ else
             mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
             $sql2 = "DROP TABLE `$imagetable`";   
             mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-            $path="/home/ubuntu/Project-X/upload/".$name."/" ;
-            $trash="/home/ubuntu/Project-X/trash/";
+            $path="upload/".$name."/" ;
+            $trash="trash/";
             rename($path,$trash) ;
             $name = "";
           } 
@@ -99,7 +99,7 @@ else
               )";   
         mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
         // creating directory for multimedia
-        $path="/home/ubuntu/Project-X/upload/".$name."/" ;
+        $path="upload/".$name."/" ;
         mkdir($path , 0755, true) ;
         $imagetable=$name."_images" ;
         $sql2 = "CREATE TABLE $imagetable ( 
@@ -112,13 +112,13 @@ else
               )";   
         mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
         // creating directory for configuration
-        $path="/home/ubuntu/Project-X/configuration/".$name."/" ;
+        $path="configuration/".$name."/" ;
         mkdir($path , 0755, true) ;
         $sessionopen="No" ;
         $file = $path."configuration.txt" ;
         file_put_contents($file, $sessionopen);
         // creating directory for trash
-        $path="/home/ubuntu/Project-X/trash/".$name."/" ;
+        $path="trash/".$name."/" ;
         mkdir($path , 0755, true) ;
       }
       mysqli_close($db);  
@@ -127,14 +127,14 @@ else
 $sessionopen="";
 if ( $name != "" )
   {
-    $config_path = "/home/ubuntu/Project-X/configuration/".$name."/" ;
+    $config_path = "configuration/".$name."/" ;
     $file = $config_path."configuration.txt" ;
     $sessionopen=file_get_contents($file);
   }
 if (isset($_POST['sessionopen']))
   {
     $sessionopen=$_POST['sessionopen'];
-    $path="/home/ubuntu/Project-X/configuration/".$name."/" ;
+    $path="configuration/".$name."/" ;
     $file = $path."configuration.txt" ;
     file_put_contents($file, $sessionopen);
   }
@@ -146,13 +146,17 @@ if (isset($_POST['sessionopen']))
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> <!--skip-->
         <title>Audio Demo</title>
-        <link rel="stylesheet" type="text/css" href="https://<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/easyrtc/easyrtc.css" />
-
+        <link rel="stylesheet" type="text/css" href="<?php print getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.css" />
 
         <!--show-->
         <!-- Assumes global locations for socket.io.js and easyrtc.js -->
-        <script src="https://<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/socket.io/socket.io.js"></script>
-        <script type="text/javascript" src="https://<?php print $_SERVER{'SERVER_NAME'}; ?>:8081/easyrtc/easyrtc.js"></script>
+        <script src="<?php print getenv("EASYRTC_SERVER"); ?>/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="<?php print getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.js"></script>
+        <script type="text/javascript">
+          function rtcServer() {
+            return "<?php echo getenv("EASYRTC_SERVER") ?>";
+          }
+        </script>
         <script type="text/javascript" src="js/master.js"></script>
 
     <script type="text/javascript">
@@ -315,160 +319,7 @@ if (isset($_POST['sessionopen']))
           toggleValue();
       };
     </script>
-
-    <style type="text/css">
-          #demoContainer {
-            position:relative;
-            width: 100%;
-            height: 100%;
-          }
-          #connectControls {
-            /*float:left;*/
-            /*width:400px;*/
-            text-align:center;
-            font-size: 100%;
-            /*border: 2px solid black;*/
-          }
-          #connectButton, #disconnectButton {
-            /*width:400px;*/
-            text-align:center;
-            font-size: 100%;
-	        /*border-radius: 10px;
-	        background-color:#e7e7e7;*/
-          }
-          #otherClients {
-             height:200px;
-             overflow-y:scroll;
-          }
-          #otherClients button {
-             background-color:grey;
-             font-size: 100%;
-          }
-          #otherClients button:active {
-             background-color:pink;
-             font-size: 150%;
-          }
-          #callerAudio {
-             display:none; 
-             height:10em;
-             width:10em;
-             position:absolute;
-             top:140px;
-             text-align:center;
-             /*margin-left:10px;*/
-          }
-          #acceptCallBox {
-             display:none;
-             z-index:2;
-             /*position:absolute;*/
-             /*top:140px;*/
-             margin: 0 auto ;
-             width: 300px  ;
-             border:red solid 2px;
-             background-color:pink;
-             padding:15px;
-             font-size: 100%;
-          }
-          #callAcceptButton {
-              text-align:center;
-              font-size: 100%;
-              border: 2px solid black;
-          }
-          #callRejectButton {
-              text-align:center;
-              font-size: 100%;
-              border: 2px solid black;
-          }
-
-         #menutop {
-              position: absolute;
-              top: 0px;
-              left: 0px;
-              right: 0px;
-              /*width: 100%;*/
-              height: 30px;
-              background-color : #183693;
-              border-top: solid black 1px;
-              /*padding: 5px;*/
-              padding-left: 0px;
-              padding-right: 0px;
-              padding-top: 0px;
-              padding-bottom: 10px;
-              margin-left: 0px;
-              margin-right: 0px;
-              margin-top: 0px;
-              margin-bottom: 0px;
-              color: white;
-              font-size: 150%;
-              z-index:3;
-         }
-
-         #menutop td {
-              padding-left: 10px;
-              padding-top: 0px;
-              text-align: center;
-         }
-         body>#menutop {position:fixed}
-
-         #menubottom {
-              position: absolute;
-              bottom: 0px;
-              left: 0px;
-              right: 0px;
-              width: 100%;
-              height: 30px;
-              background-color : #F2F2F2;
-              border-top: solid black 1px;
-              padding: 5px;
-              padding-left: 5px;
-              padding-top: 0px;
-              color: white;
-              z-index:3;
-         }
-         #menubottom td {
-              padding-left: 0px;
-              padding-top: 0px;
-              text-align: center;
-         }
-         body>#menubottom {position:fixed}
-
-         #conf, #connectedUsers, #demoContainer, #questionList, #database {
-              visibility: hidden;
-              position: absolute;
-              top: 40px;
-              left: 0px;
-              width: 100%;
-              height: 100%;
-         }
-
-         input[type=button], input[type=submit], input[type=reset], button {
-              -webkit-appearance: none;
-              background-color : #183693 ;
-              color : white ;
-              border-radius : 5px;
-              font-size: 100%;
-         }
-         input[type=textarea] {
-              background-color : white ;
-              color : black ;
-              border-radius : 5px;
-              font-size: 100%;
-         }
-         textarea {
-              background-color : white ;
-              color : black ;
-              border-radius : 5px;
-              font-family: "Times New Roman";
-              font-size: 100%;
-         }
-         body {
-             /*margin: 0 0 5px 5px;
-             padding: 0 0 5px 5px;*/
-         }
-         table {
-             width: 100% ;
-         }
-    </style>
+    <link rel="stylesheet" type="text/css" href="css/master.css">
   </head>
 <!--  <body style="font-family: 'Arial';" onload="setTimeout('connect()',4000)">-->
   <body style="font-family: 'Arial';">
@@ -480,14 +331,14 @@ if (isset($_POST['sessionopen']))
     <td><?php if ((isset($name)) AND ($name != "")) echo "$name" ; else echo "NOKIA"; ?></td>
     <td>
       <form name="byebye" id="byebye" method="post" 
-          action="https://yona-misterx22.c9users.io/master.php?action=D&name=<?php if (isset($name)) echo $name?>">
+          action="./master.php?action=D&name=<?php if (isset($name)) echo $name?>">
         <input name="unsubmitname" id="unsubmitname" type="submit" value="Disconnect" style="font-size: 50%;"
             onClick="document.getElementById("name").value='';">
       </form>
     </td>
     <td>
       <form name="shutdown" id="shutdown" method="post" 
-          action="https://yona-misterx22.c9users.io/master.php?action=S&name=<?php if (isset($name)) echo $name?>">
+          action="./master.php?action=S&name=<?php if (isset($name)) echo $name?>">
         <input name="unsubmitname" id="unsubmitname" type="submit" value="Shutdown" style="font-size: 50%;"
             onClick="document.getElementById("name").value='';">
       </form>
@@ -498,15 +349,15 @@ if (isset($_POST['sessionopen']))
   
   <div id="main">
     <!-- Main Content -->
-    <form name="conf" id="conf" method="post" action="https://yona-misterx22.c9users.io/master.php"/>
+    <form name="conf" id="conf" method="post" action="./master.php"/>
       <table>
       <tr>
       <td><big><strong>Existing Conference : </strong></big></td>
       <td><select name="conflist" id="conflist" style="font-size: 150%">
         <?php
           // list conference
-          $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-          mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+          $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+          mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
           $sql = "show tables" ;
           $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
           while($table = mysqli_fetch_array($req)) {
@@ -521,7 +372,7 @@ if (isset($_POST['sessionopen']))
       </tr>
       <tr>
       <td><big><strong>Conference Name:</strong></big></td>
-      <!--<td><form name="createconf" id="createconf" method="post" action="https://yona-misterx22.c9users.io/master.php" style="font-size: 150%"/>!-->
+      <!--<td><form name="createconf" id="createconf" method="post" action="./master.php" style="font-size: 150%"/>!-->
       <td><input type="text" name="name" id="name" value="<?php if (isset($name)) echo $name;?>"></td>
       <td><input name="submitname" id="submitname" type="submit" value="Create"></td>
       <!--</form></td>!-->
@@ -534,7 +385,7 @@ if (isset($_POST['sessionopen']))
     <!--show-->
     <div id="demoContainer">
       <br>
-      <form name="openMicro" id ="openMicro" method="post" action="https://yona-misterx22.c9users.io/master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
+      <form name="openMicro" id ="openMicro" method="post" action="./master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         Microphone sessions : 
         <select name="sessionopen" id="sessionopen" onChange="this.form.submit()">
             <option value='No' <?php if ($sessionopen == "No") echo "selected='selected';" ?> >No</option>
@@ -577,21 +428,21 @@ if (isset($_POST['sessionopen']))
 	
    <div id="connectedUsers">
         <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
-            src="https://yona-misterx22.c9users.io/connected_master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
+            src="./connected_master.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 	
    <div id="questionList">
         <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
             onload="javascript:ResizeIframe(this);"
-            src="https://yona-misterx22.c9users.io/questions_master.php?conflist=<?php if (isset($name)) echo $name?>">
+            src="./questions_master.php?conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 
    <div id="database">
         <iframe style="border: none; height: 100%; width: 100%;" SCROLLING=auto 
             onload="javascript:ResizeIframe(this);"
-            src="https://yona-misterx22.c9users.io/database.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
+            src="./database.php?name=Yona&conflist=<?php if (isset($name)) echo $name?>">
         </iframe>
    </div>
 	
@@ -599,10 +450,10 @@ if (isset($_POST['sessionopen']))
    <div name="menubottom" id="menubottom">
       <table width="100%">
         <tr>
-          <td id="connectedUsers_button" name="connectedUsers_button"><img src="group.png" height="30px"   onclick="showUsers()"></td>
-          <td id="database_button" name="database_button"><img src="db.png" height="30px"   onclick="showDatabase()"></td>
-          <td id="connectControls_button" name="connectControls_button"><img src="micro.png" height="30px"   onclick="showConnectControls()"></td>
-          <td id="questionList_button" name="questionList_button"><img src="QandA.png" height="30px"   onclick="showQuestions()"></td>
+          <td id="connectedUsers_button" name="connectedUsers_button"><img src="images/group.png" height="30px"   onclick="showUsers()"></td>
+          <td id="database_button" name="database_button"><img src="images/db.png" height="30px"   onclick="showDatabase()"></td>
+          <td id="connectControls_button" name="connectControls_button"><img src="images/micro.png" height="30px"   onclick="showConnectControls()"></td>
+          <td id="questionList_button" name="questionList_button"><img src="images/QandA.png" height="30px"   onclick="showQuestions()"></td>
         </tr>
       </table>
   </div>

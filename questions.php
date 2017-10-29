@@ -67,8 +67,8 @@ if (isset($refresh_choice))
   }
 
 // retrieving myvote
-$db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+$db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
 $sql = "SELECT votefor, votefo1, votefo2, macAddr FROM ".$conflist." WHERE macAddr = '$macAddr' AND firstreg = '1' ";   
 $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
 while($madata = mysqli_fetch_assoc($req)) 
@@ -107,8 +107,8 @@ if(isset($_GET['votefor']))
   {
     $votefor=$_GET['votefor'];
     $action=$_GET['action'];
-    $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
 
     $sql2 = "SELECT macAddr, firstreg ,name, question FROM ".$conflist." WHERE id = '$votefor'";
     $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
@@ -203,7 +203,7 @@ if(isset($_GET['votefor']))
         }
     }
     // we want to avoid double post on reload
-    header('Location:  https://yona-misterx22.c9users.io/questions.php?conflist='.$conflist.'&choice='.$allquestions.'&refresh='.$refresh_choice);
+    header('Location:  ./questions.php?conflist='.$conflist.'&choice='.$allquestions.'&refresh='.$refresh_choice);
     exit;
  
     mysqli_close($db);
@@ -216,7 +216,7 @@ if(isset($_GET['votefor']))
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <?php
     if ( $auto == 1 )
-      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"https://yona-misterx22.c9users.io/questions.php?conflist=".$conflist."&choice=".$allquestions."&refresh=".$refresh_choice."\" />" ;
+      echo "<meta http-equiv='refresh' content='".$refreshTime."' URL=\"./questions.php?conflist=".$conflist."&choice=".$allquestions."&refresh=".$refresh_choice."\" />" ;
     ?>
     <title>Questions</title>
     <style type="text/css">
@@ -237,7 +237,7 @@ if(isset($_GET['votefor']))
     </style>
     <script>
        //window.onload = alert(window.location.href) ;
-       //no more working <?php // if ($reloadtopframe == "1") echo "top.frames.location.href='https://yona-misterx22.c9users.io/index.php?conflist=".$conflist."'" ; ?>
+       //no more working <?php // if ($reloadtopframe == "1") echo "top.frames.location.href='./index.php?conflist=".$conflist."'" ; ?>
     </script>
 
 </head>
@@ -246,7 +246,7 @@ if(isset($_GET['votefor']))
 
    <div id="questions">
      <strong><u> Questions :</u></strong>
-     <form name="choice" id="choice" method="post" action="https://yona-misterx22.c9users.io/questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
+     <form name="choice" id="choice" method="post" action="./questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
        <table><tr>
        <!--<td><strong><u> Questions :</u></strong></td>-->
        <td><input type="radio" id="allquestions" name="allquestions" value="all" onclick="this.form.submit()" <?php if ( isset($checkall) ) echo "checked" ;?> >All</td>
@@ -255,7 +255,7 @@ if(isset($_GET['votefor']))
        </tr></table>
      </form>
      <i>Rules: <ul style="margin-top: 0px;"><li>you have <?php echo $remaining ; ?> point(s) left,</li><li><?php echo $text ; ?></li><li>Auto page refresh <?php echo $refreshTime ; ?> seconds</li></ul></i>
-     <form name="refresh" id="refresh" method="post" action="https://yona-misterx22.c9users.io/questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
+     <form name="refresh" id="refresh" method="post" action="./questions.php?conflist=<?php if (isset($conflist)) echo $conflist?>">
        <table><tr>
        <td style="text-align: center;">Refresh mode :</td>
        <td><input type="radio" id="refresh_choice" name="refresh_choice" value="auto" onclick="this.form.submit()" <?php if ( isset($auto) ) echo "checked" ;?> >Auto</td>
@@ -266,8 +266,8 @@ if(isset($_GET['votefor']))
        </tr></table>
      </form><br>
      <?php
-      $db = mysqli_connect('localhost', 'root', 'jojo0108')  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,'projectX')  or die('Erreur de selection '.mysqli_error($db));
+      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
+      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
       if ( isset($checkonly) ) 
         $sql = "SELECT id, question , name, macAddr, questime, questove FROM ".$conflist." WHERE question !='' AND macAddr='$macAddr' ORDER BY questove ASC, votenum DESC";   
       else if ( isset($checkvoted) )
@@ -296,18 +296,18 @@ if(isset($_GET['votefor']))
           }
         if ( $macAddr2 == $macAddr )
           {
-          $actionimage="trash.png";
+          $actionimage="images/trash.png";
           $confirmtext="Want to delete :".$data['question'] ;
           echo "<font color='grey'><i>";
           }
         else {
-          $actionimage="like.png";
+          $actionimage="images/like.png";
           $confirmtext=$confirmtext.$data['question'] ;
         }
         echo "".$data['name']." at ".$data['questime']."";
-        if ( $nbvote >= 1 ) echo "<img src='star.png' height='30px'></img>" ;
-        if ( $nbvote >= 2 ) echo "<img src='star.png' height='30px'></img>" ;
-        if ( $nbvote >= 3 ) echo "<img src='star.png' height='30px'></img>" ;
+        if ( $nbvote >= 1 ) echo "<img src='images/star.png' height='30px'></img>" ;
+        if ( $nbvote >= 2 ) echo "<img src='images/star.png' height='30px'></img>" ;
+        if ( $nbvote >= 3 ) echo "<img src='images/star.png' height='30px'></img>" ;
         echo "<br>";
         echo "".$data['question']."(" ; 
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE (votefor = '".$id."')" ;
@@ -329,14 +329,14 @@ if(isset($_GET['votefor']))
           if  ( $macAddr2 == $macAddr )
           {
             // this is my question, want to remove it  ?
-            echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='https://yona-misterx22.c9users.io/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=D';\">";
+            echo "<input type='image' src=".$actionimage."  onclick=\"window.location.href='./questions.php?conflist=".$conflist."&votefor=".$monvote."&action=D';\">";
           }
           else
           {
             if ($remaining > 0) 
-             echo "<input type='image' src=plus1.png  onclick=\"window.location.href='https://yona-misterx22.c9users.io/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=P'; \">";
+             echo "<input type='image' src=images/plus1.png  onclick=\"window.location.href='./questions.php?conflist=".$conflist."&votefor=".$monvote."&action=P'; \">";
             if ($thisismyvote == 1)
-             echo "<input type='image' src=moins1.png  onclick=\"window.location.href='https://yona-misterx22.c9users.io/questions.php?conflist=".$conflist."&votefor=".$monvote."&action=M'; \">";
+             echo "<input type='image' src=images/moins1.png  onclick=\"window.location.href='./questions.php?conflist=".$conflist."&votefor=".$monvote."&action=M'; \">";
           }
         }
         echo "<br><br>";
