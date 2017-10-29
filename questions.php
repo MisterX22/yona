@@ -1,4 +1,7 @@
 <?php 
+include('includes/controller.php');
+$controller = new Controller();
+$database = $controller->database();
 
 // Retrieving required inputs
 $conflist=$_GET['conflist'];
@@ -67,17 +70,12 @@ if (isset($refresh_choice))
   }
 
 // retrieving myvote
-$db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
 $sql = "SELECT votefor, votefo1, votefo2, macAddr FROM ".$conflist." WHERE macAddr = '$macAddr' AND firstreg = '1' ";   
-$req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-while($madata = mysqli_fetch_assoc($req)) 
-  { 
+foreach($database->query_assocs($sql) as $madata) { 
     $myvote = $madata['votefor'] ;
     $myvot1 = $madata['votefo1'] ;
     $myvot2 = $madata['votefo2'] ;
-  } 
-mysqli_close($db);
+} 
 
 // How many vote remaining ?
 $nbvote = 0 ;
@@ -107,19 +105,13 @@ if(isset($_GET['votefor']))
   {
     $votefor=$_GET['votefor'];
     $action=$_GET['action'];
-    $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-    mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-
     $sql2 = "SELECT macAddr, firstreg ,name, question FROM ".$conflist." WHERE id = '$votefor'";
-    $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-    while($madata2 = mysqli_fetch_assoc($req2))
-      {
+    foreach($database->query_assocs($sql2) as $madata2) {
         $macSearch = $madata2['macAddr'] ;
         $firstreg = $madata2['firstreg'] ;
         $name = $madata2['name'] ;
         $question = $madata2['question'] ;
-      }
-
+    }
 
     if ( $macSearch == $macAddr )
     {
@@ -130,20 +122,20 @@ if(isset($_GET['votefor']))
       if ($firstreg == '1') 
         {
           $sql = "UPDATE ".$conflist." SET question='', votenum = '0', questime=curtime(), questove = '0' WHERE id='$votefor'";
-          mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+          $database->query($sql);
         }
       else 
         {
           $sql = "DELETE FROM `$conflist` WHERE id='$votefor'";
-          mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+          $database->query($sql);
         }
       // remove all votes
       $sql2 = "UPDATE ".$conflist." SET votefor = '' WHERE votefor='$votefor'";
-      mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+      $database->query($sql2);
       $sql2 = "UPDATE ".$conflist." SET votefo1 = '' WHERE votefo1='$votefor'";
-      mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+      $database->query($sql2);
       $sql2 = "UPDATE ".$conflist." SET votefo2 = '' WHERE votefo2='$votefor'";
-      mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
+      $database->query($sql2);
       $myvote = '' ;
       $myvot1 = '' ;
       $myvot2 = '' ;
@@ -157,21 +149,21 @@ if(isset($_GET['votefor']))
           if ( $myvote == $votefor )
             {
               $sql = "UPDATE ".$conflist." SET votefor='' WHERE macAddr='$macAddr' AND firstreg='1'";
-              mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $database->query($sql);
               $myvote = '' ;
               $remaining = $remaining + 1 ;
             }
           elseif ( $myvot1 == $votefor )
             {
               $sql = "UPDATE ".$conflist." SET votefo1='' WHERE macAddr='$macAddr' AND firstreg='1'";
-              mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $database->query($sql);
               $myvot1 = '' ;
               $remaining = $remaining + 1 ;
             }
           elseif ( $myvot2 == $votefor )
             {
               $sql = "UPDATE ".$conflist." SET votefo2='' WHERE macAddr='$macAddr' AND firstreg='1'";
-              mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $database->query($sql);
               $myvot2 = '' ;
               $remaining = $remaining + 1 ;
             }
@@ -182,21 +174,21 @@ if(isset($_GET['votefor']))
           if ( $myvote == "" )
             {
               $sql = "UPDATE ".$conflist." SET votefor='$votefor' WHERE macAddr='$macAddr' AND firstreg='1'";
-              mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $database->query($sql);
               $myvote = $votefor ;
               $remaining = $remaining - 1 ;
             }
           elseif ( $myvot1 == "" )
             {
               $sql = "UPDATE ".$conflist." SET votefo1='$votefor' WHERE macAddr='$macAddr' AND firstreg='1'";
-              mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $database->query($sql);
               $myvot1 = $votefor ;
               $remaining = $remaining - 1 ;
             }
           elseif ( $myvot2 == "" )
             {
               $sql = "UPDATE ".$conflist." SET votefo2='$votefor' WHERE macAddr='$macAddr' AND firstreg='1'";
-              mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
+              $database->query($sql);
               $myvot2 = $votefor ;
               $remaining = $remaining - 1 ;
             }
@@ -205,8 +197,6 @@ if(isset($_GET['votefor']))
     // we want to avoid double post on reload
     header('Location:  ./questions.php?conflist='.$conflist.'&choice='.$allquestions.'&refresh='.$refresh_choice);
     exit;
- 
-    mysqli_close($db);
   }
 ?>
 
@@ -266,16 +256,13 @@ if(isset($_GET['votefor']))
        </tr></table>
      </form><br>
      <?php
-      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
       if ( isset($checkonly) ) 
         $sql = "SELECT id, question , name, macAddr, questime, questove FROM ".$conflist." WHERE question !='' AND macAddr='$macAddr' ORDER BY questove ASC, votenum DESC";   
       else if ( isset($checkvoted) )
         $sql = "SELECT id, question , name, macAddr, questime, questove FROM ".$conflist." WHERE question !='' AND ( (id = '$myvote') OR (id = '$myvot1') OR (id = '$myvot2') ) ORDER BY questove ASC, votenum DESC";   
       else
         $sql = "SELECT id, question , name, macAddr, questime, questove FROM ".$conflist." WHERE question !='' ORDER BY questove ASC, votenum DESC";   
-      $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-      while($data = mysqli_fetch_assoc($req)) 
+      foreach($database->query_assocs($sql) as $data) 
       { 
         $macAddr2 = $data['macAddr'];
         $id = $data['id'];
@@ -311,16 +298,12 @@ if(isset($_GET['votefor']))
         echo "<br>";
         echo "".$data['question']."(" ; 
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE (votefor = '".$id."')" ;
-        $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-        $row = mysqli_fetch_array($req2);
-        $count = $row[0];
+        $count = $database->query_arrays($sql2)[0][0];
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE (votefo1 = '".$id."')" ;
-        $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-        $row = mysqli_fetch_array($req2);
+        $row = $database->query_arrays($sql2)[0];
         $count = $count + $row[0];
         $sql2 = "SELECT COUNT(*) FROM ".$conflist." WHERE (votefo2 = '".$id."')";
-        $req2 = mysqli_query($db,$sql2) or die('Erreur SQL !'.$sql2.'<br>'.mysqli_error($db));
-        $row = mysqli_fetch_array($req2);
+        $row = $database->query_arrays($sql2)[0];
         $count = $count + $row[0];
         echo "".$count." points)<br>";
         if ($data['questove'] != '1' )
@@ -341,7 +324,7 @@ if(isset($_GET['votefor']))
         }
         echo "<br><br>";
         $sql3 = "UPDATE ".$conflist." SET votenum='$count' WHERE id='$id'";
-        mysqli_query($db,$sql3) or die('Erreur SQL !'.$sql3.'<br>'.mysqli_error($db));
+        $database->query($sql3);
         if ( $macAddr2 == $macAddr )
           {
             echo "</i></font>";
@@ -355,7 +338,6 @@ if(isset($_GET['votefor']))
             echo "</strike>" ;
           }
       } 
-      mysqli_close($db);
       ?>
    </div>
 </body>

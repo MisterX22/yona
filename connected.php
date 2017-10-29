@@ -1,4 +1,6 @@
 <?php 
+include('includes/controller.php');
+$controller = new Controller();
 
 // Retrieving required inputs
 $conflist=$_GET['conflist'];
@@ -18,29 +20,9 @@ else
 
 // Updating connection status list
 if(isset($_GET['action']))
-  {
+{
     $action=$_GET['action'];
-    //if(isset($_GET['name']))  $name=$_GET['name'];
-    if ( $action == "D")
-      {
-        $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-        mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-        $sql = "UPDATE ".$conflist." SET isconnected = 0 WHERE macAddr='$macAddr'";
-        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-        mysqli_close($db);
-      }
-    else
-    {
-      //if(isset($_GET['name']))
-      //{
-        //$name=$_GET['name'];
-        $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-        mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-        $sql = "UPDATE ".$conflist." SET isconnected = 10 WHERE macAddr='$macAddr'";
-        mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-        mysqli_close($db);
-      //}
-  }
+    $controller->update_user_status($conflist, $macAddr, $action == "D")
 }
 
 ?>
@@ -75,29 +57,17 @@ if(isset($_GET['action']))
 
      <strong><u>Connected Users :</u></strong><br>
      <?php
-      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT name FROM ".$conflist." WHERE isconnected > 0 AND firstreg = '1'";   
-      $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-      while($data = mysqli_fetch_assoc($req)) 
-        { 
-          echo $data['name']."<br>" ; 
-        } 
-      mysqli_close($db);
+      foreach($controller->get_connected_users($conflist) as $data) { 
+        echo $data['name']."<br>" ; 
+      } 
       ?>
 
      <br><br>
      <strong><u>Registered Users :</u></strong><br>
-     <?php
-      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT name FROM ".$conflist." WHERE isconnected <= 0 AND firstreg = '1'";   
-      $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-      while($data = mysqli_fetch_assoc($req)) 
-        { 
-          echo $data['name']."<br>" ; 
-        } 
-      mysqli_close($db);
+     <?php 
+      foreach($controller->get_registered_users($conflist) as $data) { 
+        echo $data['name']."<br>" ; 
+      } 
       ?>
 
    </div>

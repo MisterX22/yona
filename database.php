@@ -1,4 +1,8 @@
 <?php
+  include('includes/controller.php');
+  $controller = new Controller();
+  $database = $controller->database();
+
   $conflist=$_GET['conflist'];
 
   $load= sys_getloadavg() ;
@@ -6,7 +10,6 @@
     $refreshTime=120 ;
   else
     $refreshTime=60 ;
-
 ?>
 
 <!DOCTYPE html>
@@ -36,110 +39,49 @@ $conflist?>">
      <?php
       if ( isset($conflist) && ($conflist != "") ) 
       {
-      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT * FROM ".$conflist ;
-      $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-      echo "<br><table border='2px'>" ;
-      echo "<tr>" ;
-      echo "<th>id</th>";
-      echo "<th>name</th>";
-      echo "<th>macAddr</th>";
-      echo "<th>isconnected</th>";
-      echo "<th>firstreg</th>";
-      //echo "<th>rtcid</th>";
-      //echo "<th>waitformic</th>";
-      echo "<th>question</th>";
-      echo "<th>questime</th>";
-      echo "<th>questove</th>";
-      echo "<th>votefor</th>";
-      echo "<th>votefo1</th>";
-      echo "<th>votefo2</th>";
-      echo "<th>votenum</th>";
-      echo "<th>login</th>";
-      echo "<th>logout</th>";
-      echo "<th>hostname</th>";
-      echo "</tr>" ;
-      while($data = mysqli_fetch_assoc($req))
-        {
-           $name=$data['name'] ;
-           $firstreg=$data['firstreg'] ;
-           $isconnected=$data['isconnected'] ;
-           //$rtcid=$data['rtcid'] ;
-           $macAddr=$data['macAddr'] ;
-           $hostname=$data['hostname'] ;
-           //$waitformic=$data['waitformic'] ;
-           $question=$data['question'] ;
-           $questime=$data['questime'] ;
-           $questove=$data['questove'] ;
-           $votefor=$data['votefor'] ;
-           $votefo1=$data['votefo1'] ;
-           $votefo2=$data['votefo2'] ;
-           $votenum=$data['votenum'] ;
-           $login=$data['login'] ;
-           $logout=$data['logout'] ;
-           $id=$data['id'] ;
-
-           echo "<tr>" ;
-           echo "<td>".$id."</td>";
-           echo "<td>".$name."</td>";
-           echo "<td>".$macAddr."</td>";
-           echo "<td>".$isconnected."</td>";
-           echo "<td>".$firstreg."</td>";
-           //echo "<td>".$rtcid."</td>";
-           //echo "<td>".$waitformic."</td>";
-           echo "<td>".$question."</td>";
-           echo "<td>".$questime."</td>";
-           echo "<td>".$questove."</td>";
-           echo "<td>".$votefor."</td>";
-           echo "<td>".$votefo1."</td>";
-           echo "<td>".$votefo2."</td>";
-           echo "<td>".$votenum."</td>";
-           echo "<td>".$login."</td>";
-           echo "<td>".$logout."</td>";
-           echo "<td>".$hostname."</td>";
-           echo "</tr>" ;
-
+        //TODO: Discover fields dynamically
+        $fields = [ 'id', 'name', 'macAddr', 'isconnected', 'firstreg', 'rtcid',
+                    'waitformic', 'question', 'questime',
+                    'questove', 'votefor', 'votefo1', 'votefo2', 'votenum', 'login',
+                    'logout', 'hostname'];
+        echo "<br><table border='2px'>" ;
+        echo "<tr>" ;
+        foreach($fields as $field) {
+          echo "<th>`$field`</th>";
         }
-      echo "</table>" ;
-      mysqli_close($db);
+        echo "</tr>" ;
+        foreach($database->query_assocs("SELECT * FROM ".$conflist) as $data)
+        {
+          echo "<tr>" ;
+          foreach($fields as $field) {
+            echo "<td>`$data[$field]`</td>";
+          }
+          echo "</tr>" ;
+        }
+        echo "</table>" ;
       }
      ?>
      <?php
       if ( isset($conflist) && ($conflist != "") ) 
       {
-      $imagetable=$conflist."_images" ;
-      $db = new mysqli(getenv('MYSQL_HOST'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'))  or die('Erreur de connexion '.mysqli_connect_error());
-      mysqli_select_db($db,getenv('MYSQL_DB'))  or die('Erreur de selection '.mysqli_error($db));
-      $sql = "SELECT * FROM ".$imagetable ;
-      $req = mysqli_query($db,$sql) or die('Erreur SQL !'.$sql.'<br>'.mysqli_error($db));
-      echo "<br><table border='2px'>" ;
-      echo "<tr>" ;
-      echo "<th>id</th>";
-      echo "<th>name</th>";
-      echo "<th>path</th>";
-      echo "<th>macAddr</th>";
-      echo "<th>date</th>";
-      echo "</tr>" ;
-      while($data = mysqli_fetch_assoc($req))
-        {
-           $name=$data['name'] ;
-           $path=$data['path'] ;
-           $macAddr=$data['macAddr'] ;
-           $date=$data['date'] ;
-           $id=$data['id'] ;
-
-           echo "<tr>" ;
-           echo "<td>".$id."</td>";
-           echo "<td>".$name."</td>";
-           echo "<td>".$path."</td>";
-           echo "<td>".$macAddr."</td>";
-           echo "<td>".$date."</td>";
-           echo "</tr>" ;
-
+        $imagetable=$conflist."_images" ;
+        //TODO: Discover fields dynamically
+        $fields = ['id', 'name', 'path', 'macAddr', 'date'];
+        echo "<br><table border='2px'>" ;
+        echo "<tr>" ;
+        foreach($fields as $field) {
+          echo "<th>`$field`</th>";
         }
-      echo "</table>" ;
-      mysqli_close($db);
+        echo "</tr>" ;
+        foreach($database->query_assocs("SELECT * FROM ".$imagetable) as $data)
+        {
+          echo "<tr>" ;
+          foreach($fields as $field) {
+            echo "<td>`$data[$field]`</td>";
+          }
+          echo "</tr>" ;
+        }
+        echo "</table>" ;
       }
      ?>
 
