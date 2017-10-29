@@ -1,5 +1,5 @@
 # Projet-Yona
-
+![Yona Logo](./images/yona-with-background.png)
 
 ## Configuration
 A few environment variables are needed to run the app :

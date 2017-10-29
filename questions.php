@@ -126,7 +126,7 @@ if(isset($_GET['votefor']))
         }
       else 
         {
-          $sql = "DELETE FROM `$conflist` WHERE id='$votefor'";
+          $sql = "DELETE FROM $conflist WHERE id='$votefor'";
           $database->query($sql);
         }
       // remove all votes

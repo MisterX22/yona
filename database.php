@@ -47,14 +47,14 @@ $conflist?>">
         echo "<br><table border='2px'>" ;
         echo "<tr>" ;
         foreach($fields as $field) {
-          echo "<th>`$field`</th>";
+          echo "<th>$field</th>";
         }
         echo "</tr>" ;
         foreach($database->query_assocs("SELECT * FROM ".$conflist) as $data)
         {
           echo "<tr>" ;
           foreach($fields as $field) {
-            echo "<td>`$data[$field]`</td>";
+            echo "<td>$data[$field]</td>";
           }
           echo "</tr>" ;
         }
@@ -66,18 +66,18 @@ $conflist?>">
       {
         $imagetable=$conflist."_images" ;
         //TODO: Discover fields dynamically
-        $fields = ['id', 'name', 'path', 'macAddr', 'date'];
+        $fields = ['id', 'name', 'path', 'macAddr', 'date', 'mime'];
         echo "<br><table border='2px'>" ;
         echo "<tr>" ;
         foreach($fields as $field) {
-          echo "<th>`$field`</th>";
+          echo "<th>$field</th>";
         }
         echo "</tr>" ;
         foreach($database->query_assocs("SELECT * FROM ".$imagetable) as $data)
         {
           echo "<tr>" ;
           foreach($fields as $field) {
-            echo "<td>`$data[$field]`</td>";
+            echo "<td>$data[$field]</td>";
           }
           echo "</tr>" ;
         }

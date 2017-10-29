@@ -12,7 +12,6 @@ $numquestion = 0;
 $remaining = 3 - $numquestion ;
 //$hostname=$lines[0] ;
 $hostname="cloud9" ;
-$listimage[]="";
 
 // What action ?
 if(isset($_GET['action']))
@@ -82,63 +81,26 @@ if(isset($_POST['name']))
     $controller->register_user($conflist, $thename, $hostname, $macAddr);
   }
  
-if ( isset($conflist) )
-  $target_path = "upload/".$conflist."/" ;
 $uploadtext="Wants to try ? please dare !<br><br>" ;
-if (isset($_FILES['uploadedimagefile']))
+if (isset($_FILES['uploadedimagefile']) && is_uploaded_file($_FILES["uploadedimagefile"]["tmp_name"]))
   {
-    $files=scandir($target_path,0) ;
-    $nbfile=1;
-    foreach($files as $n)
-      {
-        if(!is_dir($n)) 
-          {
-            $listimage[]=$target_path.$n;
-            $nbfile++ ;
-          }
-      }
-    if(is_uploaded_file($_FILES["uploadedimagefile"]["tmp_name"]))
-      {
-        $imagename=basename($_FILES['uploadedimagefile']['name']);
-        $imageext=pathinfo($imagename, PATHINFO_EXTENSION);
-        $imagename="image_".$nbfile.".".$imageext ;
-        mkdir($target_path, 0777, true);
-        $target_path = $target_path.$name."_".$imagename ;
-        if (move_uploaded_file($_FILES["uploadedimagefile"]["tmp_name"], $target_path))
-          {
-            //$img = imagecreatefromjpeg($target_path) ;
-            //imagejpeg($img,$target_path,50) ;
+    // get image data
+    $binary = file_get_contents($_FILES['uploadedimagefile']['tmp_name']);
 
-            $uploadtext="The file has been uploaded" ;
-            $controller->save_image_path($conflist, $name, $macAddr, $target_path);
-            $listimage[]=$target_path;
-          }
-      }
-  }
-else
-  {
-    if ( isset($conflist) )
-      {
-        $files=scandir($target_path,0) ;
-        foreach($files as $n)
-          {
-            if(!is_dir($n)) 
-              {
-                $listimage[]=$target_path.$n;
-              }
-          }
-      }
-  }
+    // get mime type
+    $finfo = new finfo(FILEINFO_MIME);
+    $type = $finfo->file($_FILES['uploadedimagefile']['tmp_name']);
+    $mime = substr($type, 0, strpos($type, ';'));
 
+    $imagename=basename($_FILES['uploadedimagefile']['name']);
+    $uploadtext="The file has been uploaded" ;
+    $controller->save_image($conflist, $name, $macAddr, $imagename, $mime, $binary);
+  }
 
 if ( isset($conflist) )
-  {
-    $config_path = "configuration/".$conflist."/" ;
-    $file = $config_path."configuration.txt" ;
-    $sessionopen=file_get_contents($file);
-  }
+  $sessionopen = $controller->is_session_open($conflist);
 else
-  $sessionopen="No" ;
+  $sessionopen = false ;
 
 ?>
    
@@ -342,7 +304,7 @@ else
                Hide("camera");
                Hide("sendQuestions");
                <?php 
-                 if ( $sessionopen == "Yes" )
+                 if ( $sessionopen )
                    {
                       echo "Show('connectControls');" ;
                       echo "Hide('sessionnotopen');" ;
@@ -394,11 +356,11 @@ else
                ChangeStyle("questionList_button") ;
            }
       }
-      function afficheImage(addr) {
+      function afficheImage(id, conference) {
         Hide("camera");
         Show("imageView");
         document.getElementById("imageView").style.zIndex = "5";
-        document.getElementById("imageView").style.backgroundImage = "url('"+addr+"')";
+        document.getElementById("imageView").style.backgroundImage = "url('image.php?id="+id+"&conflist="+conference+"')";
         document.getElementById("imageView").style.backgroundSize = "100%";
         document.getElementById("imageView").style.backgroundRepeat = "no-repeat";
         document.getElementById("imageView").style.backgroundPosition = "center";
@@ -431,9 +393,9 @@ else
   if (isset($conflist))
     {
       $a=0 ;
-      foreach($listimage as $n)
+      foreach($controller->list_images($conflist) as $n)
         {
-          echo "tab_java[$a] = '$n';\n" ; 
+          echo "tab_java[$a] = '".$n['id']."';\n" ; 
           $a++ ;
         }
     }
@@ -594,19 +556,12 @@ else
             if ( isset($conflist) )
             {
             $nb_fichier = 0;
-            $index_image=0;
             foreach($controller->list_images($conflist) as $data)
               {
-                $name=$data['name'] ;
-                $path=$data['path'] ;
-                if (file_exists($path))
-                  {
-                    $lepath = $listimage[$nb_fichier]; 
-                    //echo '<img height="50px" onClick="afficheImage(\''.$lepath.'\');" src="'.$lepath.'" alt="'.$nb_fichier.'" />&nbsp' ;
-                    echo '<img height="50px" onClick="afficheImage(\''.$lepath.'\');" src="" alt="'.$nb_fichier.'" />&nbsp' ;
-                    $nb_fichier++;
-                  }
-                $index_image++;
+                $id=$data['id'] ;
+                //echo '<img height="50px" onClick="afficheImage(\''.$lepath.'\');" src="'.$lepath.'" alt="'.$nb_fichier.'" />&nbsp' ;
+                echo '<img height="50px" onClick="afficheImage('.$id.', \''.$conflist.'\');" src="" alt="'.$nb_fichier.'" />&nbsp' ;
+                $nb_fichier++;
               }
             echo '<br><strong>' . $nb_fichier .'</strong> files available';
             }
@@ -624,7 +579,7 @@ else
         </div>
           
         <div id="questionList">
-          <iframe style="border: none; overflow: visible; width: 100%; height: 100%;" SCROLLING=auto 
+          <iframe style="border: none; overflow: visible; width: 100%; height: 100%;" SCROLLING="auto" 
              onload="javascript:ResizeIframe(this);"
              src="./questions.php?name=<?php if (isset($name)) echo '$name'?>&conflist=<?php if (isset($conflist)) echo $conflist?>&action=<?php if (isset($action)) echo $action ?>">
           </iframe>
