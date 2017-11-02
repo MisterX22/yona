@@ -153,6 +153,7 @@ function connect() {
 //            easyrtc.showError(errorCode, errmesg);
 //        }  // failure callback
 //        );
+    return false;
 }
 
 function terminatePage() {
