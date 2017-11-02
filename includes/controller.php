@@ -226,7 +226,7 @@
         }
 
         public function get_registered_users($conference) {
-            $sql = "SELECT name FROM ".$conference." WHERE isconnected <= 0 AND firstreg = '1'";   
+            $sql = "SELECT name, hostname FROM ".$conference." WHERE isconnected <= 0 AND firstreg = '1'";   
             return $this->database->query_assocs($sql);
         }
 
