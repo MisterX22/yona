@@ -322,7 +322,7 @@ if (isset($_POST['sessionopen']))
             <option value='No' <?php if ($sessionopen) echo "selected='selected';" ?> >No</option>
             <option value='Yes' <?php if ($sessionopen) echo "selected='selected';" ?> >Yes</option>
         </select>
-      <form>
+      </form>
       <br><br>
       <div id="connectControls">
         <div style="text-align: left;">
@@ -331,7 +331,7 @@ if (isset($_POST['sessionopen']))
         </div>
 
         <center><button id="hangupButton" onclick="hangup()">Release it</button></center>
-        <center><a href="" id="connect" onclick="connect(); return false;">Connect</a></center>
+        <center><a href="javascript:void(0);" id="connect" onclick="return connect();">Connect</a></center>
         <center><div id="iam">Not yet connected...</div></center>
         <br>
         <strong> <u>Waiting for Mic : </u></strong>
