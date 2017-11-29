@@ -339,20 +339,22 @@ if (isset($_POST['sessionopen']))
         <div id="ConnectedClients"></div><div id="otherClients"></div>
         <hr>
         <div style="text-align: left;" id="Traduction">
-          <strong>Traduction On</strong>
-          <label><input type="checkbox" id="traduction_enable" value="traduction_enabled"> enable traduction</label>
-          From :
+          <table><tr>
+          <td><strong>Traduction On</strong></td>
+          <td><label><input type="checkbox" id="traduction_enable" value="traduction_enabled"> enable traduction</label></td>
+          <td>From :
           <select id="langfrom" name="langfrom">
             <option value="en-US">en-US</option>
             <option value="fr-FR">fr-FR</option>
             <option value="de-DE">de-DE</option>
-          </select>
-          To :
+          </select></td>
+          <td>To :
           <select id="langto" name="langto">
             <option value="en-US">en-US</option>
             <option value="fr-FR">fr-FR</option>
             <option value="de-DE">de-DE</option>
-          </select>
+          </select></td>
+          </tr></table>
         </div>
         <hr>
         <div style="text-align: left;" id="echo Cancellation">

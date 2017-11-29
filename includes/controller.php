@@ -161,7 +161,7 @@
             return 3 - $this->count_questions($conference, $macAddr);
         }
 
-        public function post_question($conference, $macAddr, $thequestion) {
+        public function post_question($conference, $macAddr, $name, $thequestion) {
             if($this->remaining_questions($conference, $macAddr) <= 0) {
                 return false;
             }

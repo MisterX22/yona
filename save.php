@@ -23,8 +23,7 @@ foreach(array('video', 'audio') as $type) {
             echo("problem moving uploaded file");
         }
 
-        //exec('/home/ubuntu/.nvm/versions/node/v6.11.2/bin/node /home/ubuntu/NodeJs-Example/translate.js ' . $fileName . ' ' . $langfrom . ' ' . $langto . ' > log.txt');
-        exec('/home/ubuntu/.nvm/versions/node/v6.11.2/bin/node /home/ubuntu/Project-X/translate.js ' . $fileName . ' ' . $langfrom . ' ' . $langto . ' > log.txt');
+        exec('/home/ubuntu/.nvm/versions/node/v6.11.2/bin/node /home/ubuntu/Project-X/translate.js ' . $fileName . ' ' . $langfrom . ' ' . $langto . ' >> log.txt');
 
        echo "?play=" . $fileName ;
 

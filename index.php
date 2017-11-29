@@ -59,7 +59,7 @@ if(isset($_POST['submitquestion']))
   {
     $yourquestion=$_POST['yourquestion'];
     $thequestion=$controller->escape($yourquestion);
-    if($controller->post_question($conflist, $macAddr, $thequestion)) {
+    if($controller->post_question($conflist, $macAddr, $name, $thequestion)) {
       $remaining = $remaining - 1 ;
     }
     // we want to avoid double post on reload

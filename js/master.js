@@ -303,6 +303,8 @@ easyrtc.setStreamAcceptor( function(easyrtcid, stream) {
 });
 
 easyrtc.setOnStreamClosed( function (easyrtcid) {
+    translation = document.getElementById('traduction_enable').checked;
+    if (translation == true) {
     recordRTC.stopRecording(function() {  
       var monblob = recordRTC.getBlob() ;
       console.log("Stop recording");
@@ -317,15 +319,15 @@ easyrtc.setOnStreamClosed( function (easyrtcid) {
 
       langfrom=document.getElementById('langfrom').value;
       langto=document.getElementById('langto').value;
-      save_url='https://yona-misterx22.c9users.io/save.php?langfrom='.concat(langfrom,"&langto=",langto) ;
-      //xhr('https://yona-misterx22.c9users.io/save.php', formData, function (fileURL) {
-      xhr(save_url, formData, function (fileURL) {
-        window.open(fileURL,"Play traduction", "toolbar=no,scrollbars=yes,resizable=yes,top=500,left=500,width=850,height=500");
-      });
+      translation = document.getElementById('traduction_enable').checked;
+        save_url='https://yona-misterx22.c9users.io/save.php?langfrom='.concat(langfrom,"&langto=",langto) ;
+        xhr(save_url, formData, function (fileURL) {
+          window.open(fileURL,"Play traduction", "toolbar=no,scrollbars=yes,resizable=yes,top=500,left=500,width=850,height=500");
+        });
 
     });
+    }
 
-    translation = document.getElementById('traduction_enable').checked;
     if (translation == false) {
       easyrtc.setVideoObjectSrc(document.getElementById('callerAudio'), "");
     }
