@@ -43,6 +43,8 @@ var speaking=false;
 
 var speakingDiv=null;
 
+var fileNumber=0 ;
+
 //------------------------------------------------------------------------------
 //----------------- ECHO CANCELLATION ------------------------------------------
 //------------------------------------------------------------------------------
@@ -112,28 +114,15 @@ function enableEchoCancellation(event) {
 //-----------------  END ECHO CANCELLATION -------------------------------------
 //------------------------------------------------------------------------------
 
-
-
-
-
-
-
-
-
-
-
 function disable(domId) {
     document.getElementById(domId).disabled = "disabled";
 }
-
 
 function enable(domId) {
     document.getElementById(domId).disabled = "";
 }
 
-
 function connect() {
-    //easyrtc.setSocketUrl(":8443");
     easyrtc.setSocketUrl(rtcServer());
     console.log("Initializing.");
     easyrtc.enableVideo(false);
@@ -145,21 +134,12 @@ function connect() {
     easyrtc.setPeerListener(addToConversation);
     easyrtc.setUsername("Yona");
     easyrtc.connect("easyrtc.audioOnly", loginSuccess, loginFailure);
-//    easyrtc.initMediaSource(
-//        function(){        // success callback
-//            easyrtc.connect("easyrtc.audioOnly", loginSuccess, loginFailure);
-//        },
-//        function(errorCode, errmesg){
-//            easyrtc.showError(errorCode, errmesg);
-//        }  // failure callback
-//        );
     return false;
 }
 
 function terminatePage() {
     easyrtc.disconnect();
 }
-
 
 function hangup() {
     easyrtc.hangupAll();
@@ -233,7 +213,6 @@ function sendStuffWS(otherEasyrtcid, message) {
     return;
   }
   easyrtc.sendDataWS(otherEasyrtcid, "message", message);
-  //addToConversation("Me", "message", message);
 }
 
 function performCall(otherEasyrtcid) {
@@ -251,8 +230,6 @@ function performCall(otherEasyrtcid) {
         enable('otherClients');
     };
     easyrtc.call(otherEasyrtcid, successCB, failureCB, acceptedCB);
-    //sendtoAll("is speaking") ;
-    //sendStuffWS(otherEasyrtcid, "ben alors !") ;
 }
 
 function loginSuccess(easyrtcid) {
@@ -261,11 +238,9 @@ function loginSuccess(easyrtcid) {
     document.getElementById("iam").innerHTML = "I am " + easyrtc.idToName(easyrtcid);
 }
 
-
 function loginFailure(errorCode, message) {
     easyrtc.showError(errorCode, message);
 }
-
 
 function disconnect() {
     document.getElementById("iam").innerHTML = "logged out";
@@ -276,17 +251,44 @@ function disconnect() {
     clearConnectList();
 }
 
+var recordRTC ;
+
+function xhr(url, data, callback) {
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (request.readyState == 4 && request.status == 200) {
+            //callback(location.href + request.responseText);
+            callback("play.php" + request.responseText);
+        }
+    };
+    request.open('POST', url);
+    request.send(data);
+}
+
 easyrtc.setStreamAcceptor( function(easyrtcid, stream) {
 
     audio = document.getElementById('callerAudio');
+    translation = document.getElementById('traduction_enable').checked;
     speakingDiv= document.getElementById('speaking');
 
     voiceBegLevel=parseFloat(document.getElementById('echo_cancellation_begin_threshold').value);
     voiceEndLevel=parseFloat(document.getElementById('echo_cancellation_end_threshold').value);
 
-    easyrtc.setVideoObjectSrc(audio,stream);
+    if (translation == false) easyrtc.setVideoObjectSrc(audio,stream);
     enable("hangupButton");
-    
+
+    var options = {
+      autoWriteToDisk: true,
+      timeSlice: 1000,
+      recorderType: StereoAudioRecorder,
+      numberOfAudioChannels: 1 ,
+      desiredSampRate: 16000,
+      mimeType: 'audio/wav'
+    };
+    recordRTC = RecordRTC(stream, options);
+    console.log("starting to record");
+    recordRTC.startRecording();
+ 
     if (echoCancellationEnabled){
         audio.muted = true;
         speaking=false;
@@ -300,16 +302,40 @@ easyrtc.setStreamAcceptor( function(easyrtcid, stream) {
     }
 });
 
-
 easyrtc.setOnStreamClosed( function (easyrtcid) {
-    easyrtc.setVideoObjectSrc(document.getElementById('callerAudio'), "");
+    recordRTC.stopRecording(function() {  
+      var monblob = recordRTC.getBlob() ;
+      console.log("Stop recording");
+
+      var fileType = 'audio'; // or "audio"
+      var fileName = easyrtc.idToName(easyrtcid).concat(fileNumber,'.wav');  // or "wav"
+      fileNumber=fileNumber+1 ;
+
+      var formData = new FormData();
+      formData.append(fileType + '-filename', fileName);
+      formData.append(fileType + '-blob', monblob);
+
+      langfrom=document.getElementById('langfrom').value;
+      langto=document.getElementById('langto').value;
+      save_url='https://yona-misterx22.c9users.io/save.php?langfrom='.concat(langfrom,"&langto=",langto) ;
+      //xhr('https://yona-misterx22.c9users.io/save.php', formData, function (fileURL) {
+      xhr(save_url, formData, function (fileURL) {
+        window.open(fileURL);
+      });
+
+    });
+
+    translation = document.getElementById('traduction_enable').checked;
+    if (translation == false) {
+      easyrtc.setVideoObjectSrc(document.getElementById('callerAudio'), "");
+    }
+
     disable("hangupButton");
     if (source != null){
         source.disconnect(scriptNode);
         scriptNode.disconnect(audioCtx.destination);
         }
     speakingDiv.innerHTML="Voice status : unknown";
-
 
 });
 

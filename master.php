@@ -88,6 +88,7 @@ if (isset($_POST['sessionopen']))
         <!-- Assumes global locations for socket.io.js and easyrtc.js -->
         <script src="<?php print getenv("EASYRTC_SERVER"); ?>/socket.io/socket.io.js"></script>
         <script type="text/javascript" src="<?php print getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.js"></script>
+<script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
         <script type="text/javascript">
           function rtcServer() {
             return "<?php echo getenv("EASYRTC_SERVER") ?>";
@@ -335,15 +336,32 @@ if (isset($_POST['sessionopen']))
         <center><div id="iam">Not yet connected...</div></center>
         <br>
         <strong> <u>Waiting for Mic : </u></strong>
-        <div id="ConnectedClients"></div>           
-        <div id="otherClients"></div>
+        <div id="ConnectedClients"></div><div id="otherClients"></div>
+        <hr>
+        <div style="text-align: left;" id="Traduction">
+          <strong>Traduction On</strong>
+          <label><input type="checkbox" id="traduction_enable" value="traduction_enabled"> enable traduction</label>
+          From :
+          <select id="langfrom" name="langfrom">
+            <option value="en-US">en-US</option>
+            <option value="fr-FR">fr-FR</option>
+            <option value="de-DE">de-DE</option>
+          </select>
+          To :
+          <select id="langto" name="langto">
+            <option value="en-US">en-US</option>
+            <option value="fr-FR">fr-FR</option>
+            <option value="de-DE">de-DE</option>
+          </select>
+        </div>
+        <hr>
         <div style="text-align: left;" id="echo Cancellation">
-          <h1>Echo Cancellation (voice detection)</h1>
+          <strong>Echo Cancellation (voice detection)</strong>
           <div id="speaking">Voice status : unknown</div>
           <label><input type="checkbox" id="echo_cancellation_enable" value="echo_enabled" onclick="enableEchoCancellation(this.checked);"> enable echo cancellation</label>
           <br>begin Threshold : <input type="number" name="nombre" value="0.5" step="0.05" id="echo_cancellation_begin_threshold">
           <br>end Threshold : <input type="number" name="nombre" value="0.1" step="0.01"id="echo_cancellation_end_threshold">
-       </div>
+        </div>
 		
         <!-- Note... this demo should be updated to remove video references -->
         <div id="videos">
