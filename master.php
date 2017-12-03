@@ -341,7 +341,7 @@ if (isset($_POST['sessionopen']))
         <div style="text-align: left;" id="Traduction">
           <table><tr>
           <td><strong>Traduction On</strong></td>
-          <td><label><input type="checkbox" id="traduction_enable" value="traduction_enabled"> enable traduction</label></td>
+          <td><label><input type="checkbox" id="traduction_enable" value="traduction_enabled"> translation</label></td>
           <td>From :
           <select id="langfrom" name="langfrom">
             <option value="en-US">en-US</option>

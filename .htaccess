@@ -1,7 +1,8 @@
-AuthUserFile /app/.htpasswd
+AuthUserFile /home/ubuntu/Project-X/.htpasswd
 AuthName "Authorization Required"
 AuthType Basic
 
 <Files "master.php">
  Require valid-user
 </Files>
+

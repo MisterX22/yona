@@ -41,79 +41,12 @@ var SoundPlayer = require('soundplayer')
   
 var player=new SoundPlayer();
 
-var azureClientSecret = 'a1767942ef144c58928410fd9a5485d9';
-//var speechTranslateUrlFr = 'wss://dev.microsofttranslator.com/speech/translate?api-version=1.0&from=en&to=fr&features=TimingInfo,texttospeech&voice=fr-FR-Julie';
-//var speechTranslateUrlEn = 'wss://dev.microsofttranslator.com/speech/translate?api-version=1.0&from=fr-FR&to=en-US&features=texttospeech';
+//var azureClientSecret = process.env.azureKey ;
+var azureClientSecret = "5e918015f003445b89db4f5865064a10" ;
 var speechTranslateUrl = 'wss://dev.microsofttranslator.com/speech/translate?api-version=1.0&from='.concat(langfrom,'&to=',langto,'&features=texttospeech');
 
 // input wav file is in PCM 16bit, 16kHz, mono with proper WAV header
 var outputAudioFile = 'translated/'.concat(filename) ;
-
-// get all the supported languages for speech/text/text to speech
-/*
-request.get({
-    url: 'https://dev.microsofttranslator.com/languages?api-version=1.0&scope=text,tts,speech',
-    headers: {
-        'Accept-Language': 'fr' // the language names will be localized to the 'Accept-Language'
-    }
-},
-function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-        
-        // helper functions for sorting and getting voices given a language code
-        var nameSortFunc = function (x, y) { return x.name.localeCompare(y.name); };
-        var getVoices = function (code) { return ttsDict[code] == null ? null : ttsDict[code].sort(nameSortFunc).map(function (item) { return item.name; }) };
-        
-        var jsonBody = JSON.parse(body);
-        
-		// list of languages that support speech input (the 'from' language in speech/translate)
-        var speechDict = {};
-        var speechLang = jsonBody.speech;
-        for (var speechCode in speechLang) {
-            speechDict[speechLang[speechCode].language] = { name : speechLang[speechCode].name, code: speechCode };
-        }
-
-		// list of text to speech output voices
-        var ttsDict = {};
-        var ttsLang = jsonBody.tts;
-        for (var voiceName in ttsLang) {
-            var langCode = ttsLang[voiceName].language;
-            if (ttsDict[langCode] == null)
-                ttsDict[langCode] = [];
-            ttsDict[langCode].push({ name: ttsLang[voiceName].regionName + ' (' + ttsLang[voiceName].displayName + ' ' + ttsLang[voiceName].gender + ')', code: voiceName });
-        }
-        
-		// list of languages that we can use for text translation (the 'to' language in speech/translate)
-        var langArr = [];
-        var textLang = jsonBody.text;
-        for (var langCode in textLang) {
-            var item = {
-                name : textLang[langCode].name, 
-                code : langCode
-            };
-            
-			// get the list of voices for this language code
-            var voices = getVoices(langCode);
-            if (voices != null)
-                item.voices = voices;
-            
-			// does the language support speech input
-            if (speechDict[langCode] != null)
-                item.speech = speechDict[langCode];
-
-            langArr.push(item);
-        }
-        
-        // sort the list based on name
-        langArr.sort(nameSortFunc);
-        
-        // print out to console
-        console.log(langArr);
-    }
-});
-*/
-
-// speech translalate api
 
 // get Azure Cognitive Services Access Token for Translator APIs
 request.post(
@@ -161,16 +94,6 @@ request.post(
    			});
 
 			// connect to the service
-                        //if (lang == 'fr') {
-			//  ws.connect(speechTranslateUrlEn, null, null, { 'Authorization' : 'Bearer ' + accessToken });
-                        //  console.log("Traduction FR --> EN") ;
-                        //  console.log(speechTranslateUrlEn) ;
-                        //}
-                        //else {
-			//  ws.connect(speechTranslateUrlFr, null, null, { 'Authorization' : 'Bearer ' + accessToken });
-                        //  console.log("Traduction EN --> FR") ;
-                        //  console.log(speechTranslateUrlFr) ;
-                        //}
 			ws.connect(speechTranslateUrl, null, null, { 'Authorization' : 'Bearer ' + accessToken });
                         console.log(speechTranslateUrl) ;
 
@@ -186,16 +109,13 @@ function processMessage(message) {
                 fs.appendFile('translated/'.concat(filename,'.txt'), result.translation );
                 fs.appendFile('translated/'.concat(filename,'.recog'), result.recognition );
 		console.log('type:%s recognition:%s translation:%s', result.type, result.recognition, result.translation);
-                //console.log('audioStreamPosition:%s audioSizeBytes:%s audioTimeOffset:%s audioTimeSize:%s', 
-                //        result.audioStreamPosition, result.audioSizeBytes, result.audioTimeOffset, result.audioTimeSize) ;
+                console.log("azureKey: %s", process.env.azureKey) ;
 	}
 	else {
 		// text to speech binary audio data if features=texttospeech is passed in the url
 		// the format will be PCM 16bit 16kHz mono
 		console.log("Receiving Data in %s", message.type);
                 getAudioData(message);
-//player.sound(outputAudioFile, function(){
-//  });
 	}
 }
 

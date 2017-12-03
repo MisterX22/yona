@@ -11,7 +11,7 @@
 <body>
 
 <?php
-  echo "<audio src='https://yona-misterx22.c9users.io/translated/" . $fileName ."' autoplay>" ;
+  echo "<audio src='translated/" . $fileName ."' autoplay>" ;
   echo "Votre navigateur ne supporte pas <code>audio</code>";
   echo "</audio>" ;
 

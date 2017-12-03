@@ -320,7 +320,7 @@ easyrtc.setOnStreamClosed( function (easyrtcid) {
       langfrom=document.getElementById('langfrom').value;
       langto=document.getElementById('langto').value;
       translation = document.getElementById('traduction_enable').checked;
-        save_url='https://yona-misterx22.c9users.io/save.php?langfrom='.concat(langfrom,"&langto=",langto) ;
+        save_url='save.php?langfrom='.concat(langfrom,"&langto=",langto) ;
         xhr(save_url, formData, function (fileURL) {
           window.open(fileURL,"Play traduction", "toolbar=no,scrollbars=yes,resizable=yes,top=500,left=500,width=850,height=500");
         });
