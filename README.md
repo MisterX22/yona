@@ -22,3 +22,6 @@ A few environment variables are needed to run the app :
 Also, you need to update `.htaccess` file:
 on the line `AuthUserFile /app/.htpasswd`, replace `/app` by the absolute path to the folder
 where you deployed the application
+
+## New
+Will Yona Is Yona going to reborn during Hacktoberfest ?
