@@ -1,6 +1,7 @@
 <?php 
 include('includes/controller.php');
 $controller = new Controller();
+echo "Je suis la";
 // Retrieving required inputs
 $ipclient=$_SERVER['HTTP_X_FORWARDED_FOR'];
 $macAddr=false;
