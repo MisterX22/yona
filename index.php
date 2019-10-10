@@ -1,9 +1,11 @@
 <?php 
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 include('includes/controller.php');
 $controller = new Controller();
-echo "Je suis la";
 // Retrieving required inputs
-$ipclient=$_SERVER['HTTP_X_FORWARDED_FOR'];
+//$ipclient=$_SERVER['HTTP_X_FORWARDED_FOR'];
+$ipclient=$_SERVER['REMOTE_ADDR'];
 $macAddr=false;
 $arp=`arp -a $ipclient`;
 $lines=explode(" ", $arp);

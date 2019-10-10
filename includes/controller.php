@@ -185,7 +185,7 @@
             if ( $count == 0 ) 
             {
                 $sql = "INSERT INTO ".$conference."(name, hostname, firstreg, isconnected, rtcid, macAddr,waitformic, question,login, logout) 
-                                        VALUES('$name', '$hostname', '1', '2','','$macAddr','','',now(),'')" ; 
+                                        VALUES('$name', '$hostname', '1', '2','0','$macAddr','0','',now(),now())" ; 
             }
             else
             {
