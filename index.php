@@ -1,6 +1,10 @@
 <?php 
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+
+$HTTP_HOST=$_SERVER['HTTP_HOST'];
+
 include('includes/controller.php');
 $controller = new Controller();
 // Retrieving required inputs
@@ -112,16 +116,16 @@ else
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> <!--skip-->
     <title>Audio Demo</title>
-    <link rel="stylesheet" type="text/css" href="<?php print getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.css" />
+    <link rel="stylesheet" type="text/css" href="<?php print  "https://" . $HTTP_HOST . getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.css" />
     <meta name="viewport" content="width=device-width"/>
 
     <!--show-->
     <!-- Assumes global locations for socket.io.js and easyrtc.js -->
-    <script src="<?php print getenv("EASYRTC_SERVER"); ?>/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="<?php print getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.js"></script>
+    <script src="<?php print  "https://" . $HTTP_HOST . getenv("EASYRTC_SERVER"); ?>/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="<?php print  "https://" . $HTTP_HOST . getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.js"></script>
     <script type="text/javascript">
       function rtcServer() {
-        return "<?php echo getenv("EASYRTC_SERVER") ?>";
+        return "<?php echo  "https://" . $HTTP_HOST . getenv("EASYRTC_SERVER") ?>";
       }
     </script>
     <script type="text/javascript" src="js/client.js"></script>
