@@ -2,6 +2,8 @@
 include('includes/controller.php');
 $controller = new Controller();
 
+$HTTP_HOST=$_SERVER['HTTP_HOST'];
+
 // Retrieving all required inputs
 //if(isset($_GET['name']))
 //  $name = $_GET['name'] ;
@@ -82,16 +84,16 @@ if (isset($_POST['sessionopen']))
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> <!--skip-->
         <title>Audio Demo</title>
-        <link rel="stylesheet" type="text/css" href="<?php print getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.css" />
+        <link rel="stylesheet" type="text/css" href="<?php print  "https://" . $HTTP_HOST . getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.css" />
 
         <!--show-->
         <!-- Assumes global locations for socket.io.js and easyrtc.js -->
-        <script src="<?php print getenv("EASYRTC_SERVER"); ?>/socket.io/socket.io.js"></script>
-        <script type="text/javascript" src="<?php print getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.js"></script>
+        <script src="<?php print  "https://" . $HTTP_HOST . getenv("EASYRTC_SERVER"); ?>/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="<?php print  "https://" . $HTTP_HOST . getenv("EASYRTC_SERVER"); ?>/easyrtc/easyrtc.js"></script>
 <script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
         <script type="text/javascript">
           function rtcServer() {
-            return "<?php echo getenv("EASYRTC_SERVER") ?>";
+            return "<?php echo  "https://" . $HTTP_HOST . getenv("EASYRTC_SERVER") ?>";
           }
         </script>
         <script type="text/javascript" src="js/master.js"></script>
