@@ -1,1 +1,2 @@
-Creation of contributing.md
+# YONA Project
+Please feel ** FREE ** to contributes to our Project
