@@ -25,3 +25,4 @@ where you deployed the application
 
 ## New
 Will Yona Is Yona going to reborn during Hacktoberfest ?
+Was not in 2019 ! But who knows in 2020 ?
