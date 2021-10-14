@@ -40,8 +40,6 @@ var streamBuffers = require('stream-buffers');
 var SoundPlayer = require('soundplayer')
   
 var player=new SoundPlayer();
-
-//var azureClientSecret = process.env.azureKey ;
 var azureClientSecret = "5e918015f003445b89db4f5865064a10" ;
 var speechTranslateUrl = 'wss://dev.microsofttranslator.com/speech/translate?api-version=1.0&from='.concat(langfrom,'&to=',langto,'&features=texttospeech');
 
