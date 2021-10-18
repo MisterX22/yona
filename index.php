@@ -516,7 +516,6 @@ else
            <div id="iam">Not yet connected...</div><div id="rtcid"></div>
            <div id="nbClients"></div>
            <div id="conversation"></div>
-           <!-- Note... this demo should be updated to remove video references -->
            <div id="videos">
                <video id="callerAudio"></video>
                <div id="acceptCallBox">
