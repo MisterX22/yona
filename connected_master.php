@@ -8,7 +8,7 @@
     $load= sys_getloadavg() ;
   }
   if ( $load[0] > 60 )
-    $refreshTime=20 ;
+    $refreshTime=30 ;
   else
     $refreshTime=10 ;
 
