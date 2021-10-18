@@ -50,7 +50,7 @@ if(isset($_GET['action']))
 
      <form name="refresh" id="refresh" method="post" action="./connected.php?conflist=<?php if (isset($conflist)) echo $conflist?>&action='C'">
        <table><tr>
-       <td style="text-align: center;">Auto page refresh <?php echo $refreshTime ; ?> seconds</td>
+       <td style="text-align: center;">Auto page refresh <?php echo $refreshTime ; ?> seconds (please wait)</td>
        <td><input type='button' value='Manual Refresh' onclick='this.form.submit()'></td>
        </tr></table>
      </form><br>
